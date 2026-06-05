@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>우주 초스피드 학습 타이머</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts (Jua Font for Gamified look) -->
+  <link href="https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic:wght@400;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { 
+      font-family: 'Nanum Gothic', sans-serif; 
+    }
+    .game-font { 
+      font-family: 'Jua', sans-serif; 
+    }
+    
+    /* 우주 배경 아스팔트 그라데이션 */
+    .bg-space {
+      background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+      position: relative;
+    }
+    .bg-space::before {
+      content: ""; 
+      position: absolute; 
+      inset: 0;
+      background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0IiBoZWlnaHQ9IjQiIHZpZXdCb3g9IjAgMCA0IDQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4yIj48Y2lyY2xlIGN4PSIxIiBjeT0iMSIgcj0iMSIvPjxjYXJkIGN4PSUzIiBjeT0iMyIgcj0iLjUiLz48L2c+PC9zdmc+');
+      opacity: 0.4;
+      pointer-events: none;
+    }
+
+    /* 부스터 화염 애니메이션 */
+    @keyframes flame { 
+      0%, 100% { transform: scaleY(1) translateY(0); opacity: 0.9; } 
+      50% { transform: scaleY(1.3) translateY(-2px); opacity: 1; } 
+    }
+    .flame-effect { animation: flame 0.08s infinite; }
+
+    /* 대기권 돌파 Nitro 부스터 (무지개 화염) */
+    @keyframes nitro { 
+      0% { box-shadow: 0 0 10px 2px #ef4444, 0 0 20px 4px #ff9f43; filter: hue-rotate(0deg); transform: scale(1); }
+      50% { box-shadow: 0 0 40px 10px #3b82f6, 0 0 60px 15px #a855f7; filter: hue-rotate(180deg); transform: scale(1.1); }
+      100% { box-shadow: 0 0 10px 2px #ef4444, 0 0 20px 4px #ff9f43; filter: hue-rotate(360deg); transform: scale(1); }
+    }
+    .nitro-boost { animation: nitro 0.2s infinite linear; border-radius: 50px; }
+
+    /* 화면 흔들림 효과 */
+    @keyframes shake { 
+      0% { transform: translate(2px, 2px); } 
+      50% { transform: translate(-2px, -2px); } 
+      100% { transform: translate(2px, -2px); } 
+    }
+    .shake-view { animation: shake 0.1s infinite; animation-iteration-count: 8; }
+
+    /* 우주 파티클 먼지 애니메이션 */
+    @keyframes particle-drift { 
+      from { transform: translateX(0px); opacity: 0.8; } 
+      to { transform: translateX(-150px); opacity: 0; } 
+    }
+    .particle { 
+      position: absolute; 
+      width: 4px; 
+      height: 2px; 
+      background: white; 
+      border-radius: 50%; 
+      animation: particle-drift 0.8s infinite linear; 
+    }
+
+    /* 말풍선 팝업 애니메이션 */
+    @keyframes pop-bubble {
+      0% { transform: scale(0) translateY(20px); opacity: 0; }
+      15% { transform: scale(1.1) translateY(0); opacity: 1; }
+      80% { transform: scale(1) translateY(0); opacity: 1; }
+      100% { transform: scale(0.8) translateY(-30px); opacity: 0; }
+    }
+    .voice-bubble {
+      animation: pop-bubble 1.8s forwards ease-out;
+    }
+  </style>
+</head>
+<body class="bg-space text-white min-h-screen flex flex-col justify-between select-none overflow-y-auto">
+
+  <!-- ==================== 오디오 합성 엔진 (Retro Sound Synth) ==================== -->
+  <script>
+    let audioCtx = null;
+    function initAudio() { 
+      if (!audioCtx) { 
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)(); 
+      } 
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+    function playTone(freq, type, duration, delay = 0, gainVal = 0.1) {
+      try { 
+        initAudio(); 
+        const osc = audioCtx.createOscillator(); 
+        const gain = audioCtx.createGain(); 
+        osc.type = type; 
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime + delay); 
+        gain.gain.setValueAtTime(gainVal, audioCtx.currentTime + delay); 
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + delay + duration); 
+        osc.connect(gain); 
+        gain.connect(audioCtx.destination); 
+        osc.start(audioCtx.currentTime + delay); 
+        osc.stop(audioCtx.currentTime + delay + duration); 
+      } catch (e) {}
+    }
+    // 사운드 이펙트 함수들
+    const sndBeepLow = () => playTone(523.25, 'square', 0.15);
+    const sndBeepHigh = () => playTone(1046.50, 'square', 0.4);
+    const sndNitro = () => { 
+      try { 
+        initAudio(); 
+        const osc = audioCtx.createOscillator(); 
+        const gain = audioCtx.createGain(); 
+        osc.type = 'sawtooth'; 
+        osc.frequency.setValueAtTime(100, audioCtx.currentTime); 
+        osc.frequency.exponentialRampToValueAtTime(1600, audioCtx.currentTime + 0.6); 
+        gain.gain.setValueAtTime(0.25, audioCtx.currentTime); 
+        gain.gain.linearRampToValueAtTime(0.01, audioCtx.currentTime + 0.6); 
+        osc.connect(gain); 
+        gain.connect(audioCtx.destination); 
+        osc.start(); 
+        osc.stop(audioCtx.currentTime + 0.6); 
+      } catch(e){} 
+    }
+    const sndSuccess = () => { 
+      playTone(523.25, 'sine', 0.1, 0); 
+      playTone(659.25, 'sine', 0.1, 0.08); 
+      playTone(783.99, 'sine', 0.1, 0.16); 
+      playTone(1046.50, 'sine', 0.3, 0.24); 
+    }
+    const sndFanfare = () => { 
+      const t = 0.12; 
+      [523, 523, 523, 523, 415, 466, 523].forEach((f, i) => playTone(f, 'triangle', i==3?0.4:0.15, t*i + (i>3?t:0))); 
+    }
+    const sndClick = () => playTone(600, 'sine', 0.08, 0, 0.15);
+  </script>
+
+  <!-- ==================== 헤더 영역 ==================== -->
+  <header class="bg-slate-900/90 border-b-4 border-indigo-500 p-4 shadow-lg flex justify-between items-center z-10">
+    <div class="flex items-center gap-3">
+      <div class="text-3xl animate-bounce">🚀</div>
+      <div>
+        <h1 class="game-font text-xl md:text-2xl tracking-wider text-indigo-300">우주 초스피드 레이서</h1>
+        <p class="text-xs text-slate-400">지정 음성 입력 및 터치 인터랙션 타이머</p>
+      </div>
+    </div>
+    <!-- 상태 표시기 -->
+    <div class="flex items-center gap-2 bg-slate-800 px-3 py-1 rounded-full border border-slate-700 text-xs">
+      <div class="w-2.5 h-2.5 rounded-full bg-red-500 transition-all duration-300" id="status-dot"></div>
+      <span class="text-slate-300 game-font text-[10px] md:text-xs" id="status-text">음성 인식 꺼짐</span>
+    </div>
+  </header>
+
+  <!-- ==================== 메인 콘텐츠 ==================== -->
+  <main id="main-container" class="flex-1 flex flex-col items-center justify-center p-4 max-w-5xl w-full mx-auto transition-all duration-300 relative my-2">
+    
+    <!-- 말풍선 피드백 레이어 -->
+    <div id="bubble-container" class="absolute top-10 left-1/2 -translate-x-1/2 z-40 pointer-events-none"></div>
+
+    <!-- [1] 준비 & 세팅 화면 -->
+    <div id="screen-setup" class="w-full max-w-xl bg-slate-800/90 border-4 border-slate-700 rounded-3xl p-6 md:p-8 shadow-2xl text-center space-y-6 md:space-y-8">
+      <h2 class="game-font text-3xl md:text-4xl text-yellow-300">오늘의 미션 세팅!</h2>
+      
+      <!-- Laps 설정 (10단위 증감 추가) -->
+      <div class="flex items-center justify-center gap-2 md:gap-3 py-4 md:py-5 bg-slate-950/50 rounded-2xl border border-slate-700 shadow-inner px-2">
+        <button onclick="changeLaps(-10)" class="w-12 h-12 bg-slate-800 hover:bg-slate-700 rounded-xl flex items-center justify-center text-sm md:text-base font-extrabold shadow-md border-b-4 border-slate-900 active:transform active:translate-y-0.5 text-slate-400">-10</button>
+        <button onclick="changeLaps(-1)" class="w-12 h-12 bg-slate-700 hover:bg-slate-600 rounded-xl flex items-center justify-center text-xl md:text-2xl font-extrabold shadow-md border-b-4 border-slate-900 active:transform active:translate-y-0.5">-1</button>
+        <div class="min-w-[90px] md:min-w-[120px]">
+          <span id="setup-lap-count" class="game-font text-4xl md:text-6xl text-white">3</span>
+          <span class="game-font text-lg md:text-xl text-yellow-400 ml-0.5">장</span>
+        </div>
+        <button onclick="changeLaps(1)" class="w-12 h-12 bg-slate-700 hover:bg-slate-600 rounded-xl flex items-center justify-center text-xl md:text-2xl font-extrabold shadow-md border-b-4 border-slate-900 active:transform active:translate-y-0.5">+1</button>
+        <button onclick="changeLaps(10)" class="w-12 h-12 bg-slate-800 hover:bg-slate-700 rounded-xl flex items-center justify-center text-sm md:text-base font-extrabold shadow-md border-b-4 border-slate-900 active:transform active:translate-y-0.5 text-slate-400">+10</button>
+      </div>
+
+      <!-- 로켓 선택 -->
+      <div class="grid grid-cols-3 gap-3 md:gap-4">
+        <div onclick="selectCar('red')" id="car-select-red" class="car-card cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-red-500 rounded-2xl p-3 md:p-4 transition-all transform hover:-translate-y-1 text-center">
+          <span class="text-4xl md:text-5xl block mb-1 md:mb-2">🚀</span>
+          <span class="game-font text-[10px] md:text-xs text-red-400">레드 호크</span>
+        </div>
+        <div onclick="selectCar('blue')" id="car-select-blue" class="car-card cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-3 md:p-4 transition-all transform hover:-translate-y-1 text-center">
+          <span class="text-4xl md:text-5xl block mb-1 md:mb-2">☄️</span>
+          <span class="game-font text-[10px] md:text-xs text-blue-400">블루 코멧</span>
+        </div>
+        <div onclick="selectCar('gold')" id="car-select-gold" class="car-card cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-3 md:p-4 transition-all transform hover:-translate-y-1 text-center">
+          <span class="text-4xl md:text-5xl block mb-1 md:mb-2">🛸</span>
+          <span class="game-font text-[10px] md:text-xs text-yellow-400">골드 UFO</span>
+        </div>
+      </div>
+
+      <!-- 음성 인식 제어 스위치 추가 (실습형 기능) -->
+      <div class="bg-slate-900 border border-indigo-500/30 rounded-2xl p-4 text-left flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <div class="text-3xl">🎙️</div>
+          <div>
+            <h4 class="game-font text-base text-indigo-300">실제 마이크 음성 인식 활성화</h4>
+            <p class="text-[11px] text-slate-400">"시작", "끝"을 마이크로 외쳐 기기를 제어합니다.</p>
+          </div>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input type="checkbox" id="mic-toggle-input" class="sr-only peer" onchange="toggleSpeechRecognition()">
+          <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+        </label>
+      </div>
+      <div id="mic-support-alert" class="text-xs text-slate-400 hidden"></div>
+
+      <!-- 즉시 시작하기 큰 버튼 -->
+      <button onclick="startCountdown()" class="w-full game-font text-2xl md:text-3xl py-4 md:py-5 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-slate-950 rounded-2xl border-b-8 border-amber-700 shadow-xl transition-all active:transform active:translate-y-1 transform hover:scale-[1.01]">
+        🏁 경기 시작하기 (터치!)
+      </button>
+    </div>
+
+    <!-- [2] 신호등 카운트다운 -->
+    <div id="screen-countdown" class="hidden w-full max-w-md bg-slate-800 border-4 border-slate-700 rounded-3xl p-8 md:p-10 text-center space-y-8 md:space-y-10 shadow-2xl">
+      <h3 class="game-font text-2xl md:text-3xl text-slate-300">엔진 가동 준비...</h3>
+      <div class="flex justify-center gap-6 md:gap-8 bg-slate-950 p-6 md:p-8 rounded-3xl border border-slate-800">
+        <div id="light-red" class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-red-950 border-4 border-slate-700 transition-all duration-300"></div>
+        <div id="light-yellow" class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-yellow-950 border-4 border-slate-700 transition-all duration-300"></div>
+        <div id="light-green" class="w-16 h-16 md:w-20 md:h-20 rounded-full bg-emerald-950 border-4 border-slate-700 transition-all duration-300"></div>
+      </div>
+      <div id="countdown-text" class="game-font text-8xl md:text-[110px] text-yellow-400 animate-ping">3</div>
+    </div>
+
+    <!-- [3] 실제 타이머 & 초화려 레이싱 -->
+    <div id="screen-running" class="hidden w-full space-y-6 relative">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- 왼쪽: 메인 타이머 및 트랙 (2/3 너비) -->
+        <div class="lg:col-span-2 bg-slate-800/90 border-4 border-slate-700 rounded-3xl p-5 md:p-6 flex flex-col justify-between space-y-6 md:space-y-8 shadow-xl relative overflow-hidden">
+          
+          <div class="flex justify-between items-center border-b border-slate-700 pb-4">
+            <div class="bg-indigo-900 border border-indigo-500 px-3 py-1.5 rounded-xl">
+              <span id="running-lap-indicator" class="game-font text-lg md:text-xl text-white">MISSION 1 / 3</span>
+            </div>
+            <div class="text-right">
+              <span class="text-[10px] text-slate-400 block font-bold">누적 시간</span>
+              <span id="running-total-time" class="game-font text-lg text-slate-200">00:00</span>
+            </div>
+          </div>
+
+          <!-- 고급 타이머 계기판 -->
+          <div class="text-center py-4 md:py-6 bg-slate-950 rounded-2xl border border-slate-800 shadow-inner">
+            <span class="text-[10px] md:text-xs text-emerald-400 block font-bold tracking-wider mb-1 md:mb-2">⏱️ 현재 장 비행 속도 ⏱️</span>
+            <div class="inline-flex items-end justify-center">
+              <span id="timer-display" class="game-font text-6xl md:text-8xl text-emerald-300 tracking-wider">00:00</span>
+              <span id="timer-ms" class="game-font text-2xl md:text-4xl text-emerald-500/60 ml-1.5 w-12 md:w-16 text-left pb-1">.0</span>
+            </div>
+          </div>
+
+          <!-- === 초화려 우주 트랙 영역 === -->
+          <div class="bg-black border-4 border-slate-900 rounded-2xl p-4 relative overflow-hidden h-32 md:h-36 flex items-center shadow-inner">
+            <!-- 배경 우주 먼지 파티클 컨테이너 -->
+            <div id="particle-container" class="absolute inset-0"></div>
+            
+            <!-- 중심 은하수 라인 -->
+            <div class="absolute left-0 right-0 h-2 bg-indigo-950 top-1/2 -translate-y-1/2"></div>
+            <div class="absolute left-0 right-0 h-1 bg-indigo-500/50 border-dashed border-t border-indigo-400 top-1/2 -translate-y-1/2"></div>
+            
+            <div class="absolute left-4 top-2 text-[10px] font-bold text-slate-500">출발 (지구)</div>
+            <div class="absolute right-4 top-2 text-[10px] font-bold text-slate-500">도착 (달)</div>
+
+            <!-- 로켓 컨테이너 -->
+            <div id="track-car-wrapper" class="absolute left-4 transition-all duration-100 ease-out flex items-center z-10" style="transform: translateX(0%);">
+              
+              <!-- 1. 부스터 화염 (기본 엔진) -->
+              <div id="booster-flame-group" class="flex flex-col gap-0.5 mr-1.5 flame-effect">
+                <div class="w-6 h-1.5 md:w-8 md:h-2 bg-gradient-to-l from-orange-600 to-yellow-400 rounded-full opacity-90"></div>
+                <div class="w-4 h-1 md:w-6 md:h-1.5 bg-gradient-to-l from-red-600 to-orange-400 rounded-full opacity-80 ml-auto"></div>
+              </div>
+
+              <!-- 2. 로켓 본체 -->
+              <div id="track-car" class="text-5xl md:text-6xl filter drop-shadow-[0_0_8px_rgba(255,255,255,0.4)]">🚀</div>
+              
+              <!-- Nitro 부스터 이펙트용 오버레이 (숨김) -->
+              <div id="nitro-overlay" class="absolute inset-0 nitro-boost hidden opacity-80 blur-sm"></div>
+            </div>
+
+            <!-- 피니시 체커 라인 (네온 네이비) -->
+            <div class="absolute right-12 md:right-14 top-1 bottom-1 w-2 bg-slate-800 opacity-60 border-r border-l border-indigo-500 shadow-[0_0_10px_#3b82f6]"></div>
+          </div>
+
+          <!-- 터치용 거대 완료/시작 멀티 액션 버튼 (상태에 따라 가변 변경) -->
+          <button id="main-action-button" onclick="handleMainAction()" class="w-full game-font text-2xl md:text-3xl py-5 md:py-6 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-3xl border-b-8 border-red-900 active:transform active:translate-y-2 shadow-2xl transition-all relative overflow-hidden group">
+            <div class="absolute inset-0 bg-white/10 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+            ✏️ 🗣️ "끝!" 이라고 외치거나 터치하기! (다 풀었어요)
+          </button>
+        </div>
+
+        <!-- 오른쪽: 실시간 랩타임 대시보드 (1/3 너비, 스크롤 추가) -->
+        <div class="bg-slate-800/90 border-4 border-slate-700 rounded-3xl p-5 md:p-6 shadow-xl space-y-4 flex flex-col justify-between">
+          <div>
+            <h3 class="game-font text-lg md:text-xl text-indigo-300 border-b border-slate-700 pb-2 mb-3 flex items-center gap-2">
+              📋 오늘의 비행 일지
+            </h3>
+            <!-- 최대 100장이 들어가도 망가지지 않게 max-height 및 스크롤바 추가 -->
+            <div id="lap-records-list" class="space-y-2.5 min-h-[180px] lg:min-h-[260px] max-h-[350px] overflow-y-auto pr-1"></div>
+          </div>
+          <div class="bg-slate-900 rounded-xl p-3 md:p-4 border border-slate-700">
+            <span class="text-[10px] md:text-xs text-yellow-400 block font-bold">💡 완주 비법!</span>
+            <p class="text-[10px] md:text-xs text-slate-300 leading-relaxed mt-1">"빨리 가는 것보다 틀리지 않게 똑바로 주행하는 것이 우주 명예의 전당 지름길이야!"</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- [4] 최종 완료 및 시상대 화면 -->
+    <div id="screen-result" class="hidden w-full max-w-3xl bg-slate-800 border-4 border-yellow-400 rounded-3xl p-6 md:p-10 text-center space-y-8 md:space-y-10 shadow-2xl relative overflow-hidden">
+      <canvas id="confetti-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-0"></canvas>
+      <div class="relative z-10 space-y-6 md:space-y-8">
+        <div>
+          <h2 class="game-font text-4xl md:text-6xl text-yellow-400 animate-bounce">🏆 우주 완주 성공! 🏆</h2>
+          <p class="text-slate-300 mt-2 text-sm md:text-lg">무사히 임무를 마쳤습니다. 명예의 전당 등극!</p>
+        </div>
+
+        <!-- 시상대 포디움 -->
+        <div class="flex grid grid-cols-3 gap-2 md:gap-3 max-w-lg mx-auto items-end pt-8 md:pt-12">
+          <div class="bg-slate-700/60 rounded-t-2xl p-3 md:p-5 border-t-4 border-slate-400 h-28 md:h-36 flex flex-col justify-between">
+            <div class="text-2xl md:text-4xl">🥈</div>
+            <div>
+              <span class="text-[9px] md:text-xs text-slate-300 block font-bold">평균 랩타임</span>
+              <span id="result-avg-lap" class="game-font text-xs md:text-base text-slate-100">-</span>
+            </div>
+          </div>
+          <div class="bg-gradient-to-b from-yellow-500/30 to-slate-700 rounded-t-2xl p-3 md:p-5 border-t-8 border-yellow-400 h-36 md:h-50 flex flex-col justify-between shadow-lg relative -translate-y-2">
+            <div class="absolute -top-10 left-1/2 -translate-x-1/2 text-4xl md:text-6xl">🥇</div>
+            <div id="result-car-emoji" class="text-4xl md:text-6xl">🚀</div>
+            <div>
+              <span class="text-[9px] md:text-xs text-yellow-300 block font-bold">총 주행시간</span>
+              <span id="result-total-time" class="game-font text-base md:text-2xl text-yellow-300">00:00</span>
+            </div>
+          </div>
+          <div class="bg-slate-700/60 rounded-t-2xl p-3 md:p-5 border-t-4 border-amber-600 h-24 md:h-32 flex flex-col justify-between">
+            <div class="text-2xl md:text-4xl">🥉</div>
+            <div>
+              <span class="text-[9px] md:text-xs text-amber-500 block font-bold">최단 랩타임</span>
+              <span id="result-best-lap" class="game-font text-xs md:text-base text-amber-200">-</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="max-w-lg mx-auto">
+          <div class="space-y-1 text-left bg-slate-950 p-3 md:p-4 rounded-xl border border-slate-800 text-xs md:text-sm max-h-[200px] overflow-y-auto" id="final-lap-details"></div>
+        </div>
+        
+        <button onclick="restartApp()" class="w-full max-w-sm mx-auto game-font text-xl md:text-2xl py-4 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-slate-950 rounded-2xl border-b-8 border-amber-700 shadow-xl transition-all active:transform active:translate-y-1">
+          ⚙️ 새로운 행성 정복하러 가기
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ==================== 음성 입력 모킹 컨트롤러 (테스트용) ==================== -->
+  <section class="bg-slate-900 border-t-4 border-slate-800 px-4 py-4 z-20">
+    <div class="max-w-xl mx-auto flex flex-col items-center gap-3">
+      <div class="text-center">
+        <span class="game-font text-xs md:text-sm text-indigo-400 font-bold">🎤 아동용 음성 인식 프리뷰 시뮬레이터</span>
+        <p class="text-[10px] text-slate-400">마이크 연동 없이 아래 테스트 버튼으로 "음성 명령"을 가상으로 작동시킵니다.</p>
+      </div>
+      
+      <div class="flex gap-3 w-full justify-center">
+        <!-- "시작!" 외치기 모킹 버튼 -->
+        <button id="mock-voice-start" onclick="simulateVoiceCommand('시작')" class="flex-1 max-w-[200px] bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl py-2 px-3 flex items-center justify-center gap-2 border-b-4 border-indigo-900 active:translate-y-0.5 active:border-b-0 transition-all text-xs md:text-sm game-font">
+          💬 "시작!" 외치기
+        </button>
+        <!-- "끝!" 외치기 모킹 버튼 -->
+        <button id="mock-voice-finish" onclick="simulateVoiceCommand('끝')" class="flex-1 max-w-[200px] bg-rose-600 hover:bg-rose-500 text-white rounded-xl py-2 px-3 flex items-center justify-center gap-2 border-b-4 border-rose-900 active:translate-y-0.5 active:border-b-0 transition-all text-xs md:text-sm game-font opacity-40 cursor-not-allowed" disabled>
+          💬 "끝!" 외치기
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==================== 푸터 영역 ==================== -->
+  <footer class="bg-slate-950 p-2 text-center border-t border-slate-900 z-10 relative">
+    <p class="text-[10px] text-slate-600">© 2026 Space Study Racer. 아이가 공부에 몰입할 수 있도록 돕습니다!</p>
+  </footer>
+
+  <!-- ==================== 앱 코어 스크립트 ==================== -->
+  <script>
+    // --- 0. 기본 상태 및 기획 변수 ---
+    let appState = "SETUP"; // SETUP, COUNTDOWN, FOCUS, LAP_WAITING, ANIMATING, RESULT
+    let targetLaps = 3;
+    let currentLap = 1;
+    let chosenCar = "red";
+    let timerInterval = null;
+    let lapStartTime = 0;
+    let totalElapsedMs = 0;
+    let currentLapElapsed = 0;
+    let lapRecords = [];
+    const CARS = { 
+      red: { emoji: "🚀" }, 
+      blue: { emoji: "☄️" }, 
+      gold: { emoji: "🛸" } 
+    };
+
+    // --- 1. 실제 마이크 음성 인식 시스템 (Web Speech API) ---
+    let recognition = null;
+    let isRealSpeechActive = false;
+
+    function toggleSpeechRecognition() {
+      const toggle = document.getElementById('mic-toggle-input');
+      isRealSpeechActive = toggle.checked;
+
+      if (isRealSpeechActive) {
+        startRealSpeechEngine();
+      } else {
+        stopRealSpeechEngine();
+      }
+    }
+
+    function startRealSpeechEngine() {
+      initAudio();
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+      if (!SpeechRecognition) {
+        // alert 사용 금지 규칙 준수: 화면 내 텍스트 엘리먼트에 안전 경고 표시
+        const warningBox = document.getElementById('mic-support-alert');
+        warningBox.innerHTML = "⚠️ 이 브라우저 또는 태블릿 기기는 실제 음성 인식 API를 지원하지 않습니다. (구글 크롬 / 애플 사파리 권장)";
+        warningBox.classList.remove('hidden');
+        document.getElementById('mic-toggle-input').checked = false;
+        isRealSpeechActive = false;
+        return;
+      }
+
+      if (!recognition) {
+        recognition = new SpeechRecognition();
+        recognition.lang = 'ko-KR';
+        recognition.continuous = true; // 대기 지속성 허용
+        recognition.interimResults = false; // 최종 결과 완료 시 반환
+
+        recognition.onresult = function(event) {
+          const resultText = event.results[event.results.length - 1][0].transcript.trim();
+          console.log("음성 감지:", resultText);
+
+          // 아이의 부정확한 발음 스펙트럼 대응 (키워드 매칭)
+          if (resultText.includes("시작") || resultText.includes("출발") || resultText.includes("가자")) {
+            simulateVoiceCommand('시작');
+          } else if (resultText.includes("끝") || resultText.includes("완료") || resultText.includes("도착") || resultText.includes("풀었")) {
+            simulateVoiceCommand('끝');
+          }
+        };
+
+        recognition.onend = function() {
+          // 음성 인식이 꺼지면 상태가 진행 중이거나 대기 중일 때 자동 리스타트하여 상시 가동
+          if (isRealSpeechActive && appState !== "RESULT") {
+            try { recognition.start(); } catch(e){}
+          }
+        };
+
+        recognition.onerror = function(event) {
+          console.error("음성 인식 오류 발생:", event.error);
+        };
+      }
+
+      try {
+        recognition.start();
+        document.getElementById('status-dot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
+        document.getElementById('status-text').textContent = "실제 마이크 작동 중";
+      } catch (e) {
+        console.error("인식 시작 차단:", e);
+      }
+    }
+
+    function stopRealSpeechEngine() {
+      if (recognition) {
+        try {
+          recognition.stop();
+        } catch(e){}
+      }
+      document.getElementById('status-dot').className = "w-2.5 h-2.5 rounded-full bg-red-500";
+      document.getElementById('status-text').textContent = "음성 인식 꺼짐";
+    }
+
+    // --- 2. 가상 음성 명령 시뮬레이션 시스템 ---
+    function simulateVoiceCommand(word) {
+      initAudio();
+      
+      // 실제 명령 로직 수행
+      if (word === '시작') {
+        if (appState === "SETUP") {
+          createVoiceBubble(word);
+          sndClick();
+          startCountdown();
+        } else if (appState === "LAP_WAITING") {
+          createVoiceBubble(word);
+          sndClick();
+          startNextLap();
+        }
+      } else if (word === '끝') {
+        if (appState === "FOCUS") {
+          createVoiceBubble(word);
+          completeLap();
+        }
+      }
+    }
+
+    // 말풍선 귀여운 연출 추가
+    function createVoiceBubble(text) {
+      const container = document.getElementById('bubble-container');
+      container.innerHTML = ''; // 단일화
+
+      const bubble = document.createElement('div');
+      bubble.className = "voice-bubble bg-indigo-500 text-slate-950 game-font text-2xl md:text-3xl px-6 py-3 rounded-2xl border-4 border-white shadow-2xl relative font-extrabold flex items-center gap-2";
+      bubble.innerHTML = `🗣️ "${text}!!!"`;
+
+      // 꼬리표 디테일
+      const arrow = document.createElement('div');
+      arrow.className = "absolute bottom-[-16px] left-1/2 -translate-x-1/2 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[16px] border-t-white";
+      bubble.appendChild(arrow);
+
+      container.appendChild(bubble);
+
+      // 일정시간 후 제거
+      setTimeout(() => {
+        bubble.remove();
+      }, 1800);
+    }
+
+    // 상태에 따른 음성 시뮬레이션 버튼 가시성 업데이트
+    function updateMockControls() {
+      const startBtn = document.getElementById('mock-voice-start');
+      const finishBtn = document.getElementById('mock-voice-finish');
+
+      if (appState === "SETUP" || appState === "LAP_WAITING") {
+        startBtn.classList.remove('opacity-40', 'cursor-not-allowed');
+        startBtn.disabled = false;
+        finishBtn.classList.add('opacity-40', 'cursor-not-allowed');
+        finishBtn.disabled = true;
+      } else if (appState === "FOCUS") {
+        startBtn.classList.add('opacity-40', 'cursor-not-allowed');
+        startBtn.disabled = true;
+        finishBtn.classList.remove('opacity-40', 'cursor-not-allowed');
+        finishBtn.disabled = false;
+      } else {
+        startBtn.classList.add('opacity-40', 'cursor-not-allowed');
+        startBtn.disabled = true;
+        finishBtn.classList.add('opacity-40', 'cursor-not-allowed');
+        finishBtn.disabled = true;
+      }
+    }
+
+    // 중앙 메인 버튼 스타일 및 가이드 텍스트 동적 업데이트
+    function updateMainActionButton() {
+      const btn = document.getElementById('main-action-button');
+      if (!btn) return;
+
+      const baseClass = "w-full game-font text-2xl md:text-3xl py-5 md:py-6 rounded-3xl border-b-8 active:transform active:translate-y-2 shadow-2xl transition-all relative overflow-hidden group ";
+
+      if (appState === "FOCUS") {
+        btn.className = baseClass + "bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white border-red-950";
+        btn.innerHTML = `
+          <div class="absolute inset-0 bg-white/10 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+          ✏️ 🗣️ "끝!" 이라고 외치거나 터치하기! (다 풀었어요)
+        `;
+      } else if (appState === "LAP_WAITING") {
+        btn.className = baseClass + "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white border-emerald-950 animate-pulse";
+        btn.innerHTML = `
+          <div class="absolute inset-0 bg-white/10 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
+          🚀 🗣️ "시작!" 이라고 외치거나 터치해서 출발!
+        `;
+      } else if (appState === "ANIMATING") {
+        btn.className = baseClass + "bg-slate-700 text-slate-400 border-slate-900 cursor-not-allowed";
+        btn.innerHTML = `✨ 초광속 우주 비행 중... ✨`;
+      }
+    }
+
+    // 중앙의 다기능 버튼 통합 이벤트 리스너
+    function handleMainAction() {
+      initAudio();
+      if (appState === "FOCUS") {
+        completeLap();
+      } else if (appState === "LAP_WAITING") {
+        sndClick();
+        startNextLap();
+      }
+    }
+
+
+    // --- 3. 기본 UI 세팅 조작 ---
+    function selectCar(color) {
+      chosenCar = color;
+      
+      // 테두리 클래스 수동 갱신 (Tailwind purge 방지 목적)
+      document.querySelectorAll('.car-card').forEach(card => {
+        card.classList.remove('border-red-500', 'border-blue-500', 'border-yellow-500');
+        card.classList.add('border-transparent');
+      });
+      
+      const targetCard = document.getElementById(`car-select-${color}`);
+      targetCard.classList.remove('border-transparent');
+      if (color === 'red') targetCard.classList.add('border-red-500');
+      if (color === 'blue') targetCard.classList.add('border-blue-500');
+      if (color === 'gold') targetCard.classList.add('border-yellow-500');
+
+      document.getElementById('track-car').innerHTML = CARS[color].emoji;
+      document.getElementById('result-car-emoji').innerHTML = CARS[color].emoji;
+      sndClick();
+    }
+
+    function changeLaps(diff) {
+      // 최대 100장까지 한도 대폭 증가
+      targetLaps = Math.max(1, Math.min(100, targetLaps + diff));
+      document.getElementById('setup-lap-count').textContent = targetLaps;
+      sndClick();
+    }
+
+
+    // --- 4. 우주선 엔진 가동 카운트다운 ---
+    function startCountdown() {
+      appState = "COUNTDOWN";
+      updateMockControls();
+
+      document.getElementById('screen-setup').classList.add('hidden');
+      document.getElementById('screen-countdown').classList.remove('hidden');
+
+      let count = 3;
+      document.getElementById('countdown-text').textContent = count;
+      resetLights();
+      setLight('red'); 
+      sndBeepLow();
+
+      const countdownInterval = setInterval(() => {
+        count--;
+        if (count === 2) { 
+          setLight('yellow'); 
+          sndBeepLow(); 
+        } else if (count === 1) { 
+          setLight('green'); 
+          sndBeepLow(); 
+        } else if (count === 0) {
+          clearInterval(countdownInterval);
+          sndBeepHigh();
+          document.getElementById('countdown-text').textContent = "GO!";
+          setTimeout(startRace, 600);
+        }
+        if (count > 0) {
+          document.getElementById('countdown-text').textContent = count;
+        }
+      }, 1000);
+    }
+
+    function resetLights() { 
+      ['red', 'yellow', 'green'].forEach(c => {
+        const bg = c === 'green' ? 'emerald' : c;
+        document.getElementById(`light-${c}`).className = `w-16 h-16 md:w-20 md:h-20 rounded-full bg-${bg}-950 border-4 border-slate-700 transition-all`;
+      }); 
+    }
+    
+    function setLight(color) { 
+      const light = document.getElementById(`light-${color}`);
+      const base = color === 'green' ? 'emerald' : color;
+      light.className = `w-16 h-16 md:w-20 md:h-20 rounded-full bg-${base}-500 border-4 border-${base}-300 shadow-[0_0_30px_#${color==='red'?'ef4444':color==='yellow'?'eab308':'34d399'}] transition-all`;
+    }
+
+
+    // --- 5. 주행 타이머 루프 및 애니메이션 ---
+    function startRace() {
+      appState = "FOCUS";
+      updateMockControls();
+      updateMainActionButton();
+
+      currentLap = 1; 
+      lapRecords = []; 
+      totalElapsedMs = 0;
+
+      document.getElementById('screen-countdown').classList.add('hidden');
+      document.getElementById('screen-running').classList.remove('hidden');
+      
+      createParticles(); // 배경 우주선 진행 먼지효과 가동
+      startLapTimer();
+    }
+
+    function startLapTimer() {
+      lapStartTime = Date.now();
+      
+      // 로켓 시작 라인 원위치 및 파란 부스터 제거
+      const carWrapper = document.getElementById('track-car-wrapper');
+      const nitro = document.getElementById('nitro-overlay');
+      carWrapper.style.transition = 'none';
+      carWrapper.style.left = '16px'; 
+      nitro.classList.add('hidden');
+      
+      updateLapDashboard();
+
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        currentLapElapsed = Date.now() - lapStartTime;
+        
+        // 타이머 및 분:초 파싱
+        const totalSecs = Math.floor(currentLapElapsed / 1000);
+        const minutes = Math.floor(totalSecs / 60);
+        const seconds = totalSecs % 60;
+        const msFraction = Math.floor((currentLapElapsed % 1000) / 100);
+
+        document.getElementById('timer-display').textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        document.getElementById('timer-ms').textContent = `.${msFraction}`;
+        document.getElementById('running-total-time').textContent = formatTime(totalElapsedMs + currentLapElapsed);
+
+        // --- 로켓 서서히 전진 주행 구현 ---
+        // 아이가 부담을 덜 가지게끔 1장 표준 해결시간을 5분(300,000ms) 목표로 설정
+        // 최대 85%선까지 천천히 나아가다가 완료 탭 시 골라인을 시원하게 격파합니다.
+        const targetStandardMs = 300000;
+        const progress = Math.min((currentLapElapsed / targetStandardMs) * 85, 85);
+        carWrapper.style.transition = 'left 0.1s linear';
+        carWrapper.style.left = `calc(${progress}% + 16px)`;
+
+      }, 100);
+    }
+
+    function startNextLap() {
+      if (appState !== "LAP_WAITING") return;
+      appState = "FOCUS";
+      updateMockControls();
+      updateMainActionButton();
+      startLapTimer();
+    }
+
+    function completeLap() {
+      if (appState !== "FOCUS") return;
+      clearInterval(timerInterval);
+      
+      appState = "ANIMATING"; // 애니메이션 중 음성/클릭 오입력 차단
+      updateMockControls();
+      updateMainActionButton();
+
+      // === 시선 집중 임무 완료 부스터 애니메이션 ===
+      sndNitro();
+      const carWrapper = document.getElementById('track-car-wrapper');
+      const nitro = document.getElementById('nitro-overlay');
+      const mainContainer = document.getElementById('main-container');
+
+      // 1. 니트로 및 흔들림(카메라 쉐이크) 적용
+      nitro.classList.remove('hidden');
+      mainContainer.classList.add('shake-view');
+
+      // 2. 피니시 라인 순간 돌진 연출
+      carWrapper.style.transition = 'left 0.6s cubic-bezier(0.15, 1, 0.3, 1)';
+      carWrapper.style.left = 'calc(100% + 100px)'; // 화면 바깥으로 로켓이 탈출
+
+      lapRecords.push(currentLapElapsed);
+      totalElapsedMs += currentLapElapsed;
+
+      setTimeout(() => {
+        mainContainer.classList.remove('shake-view');
+        sndSuccess();
+        
+        if (currentLap < targetLaps) {
+          currentLap++;
+          appState = "LAP_WAITING"; // 대기실 상태로 변경하여 자동 시작 방지
+          updateMockControls();
+          prepareNextLap();
+        } else {
+          finishRace();
+        }
+      }, 850);
+    }
+
+    // 다음 랩 주행을 대기하는 상태 리셋 작업
+    function prepareNextLap() {
+      // 타이머 디스플레이 리셋
+      document.getElementById('timer-display').textContent = "00:00";
+      document.getElementById('timer-ms').textContent = ".0";
+
+      // 로켓 원위치 및 파괴 이펙트 초기화
+      const carWrapper = document.getElementById('track-car-wrapper');
+      const nitro = document.getElementById('nitro-overlay');
+      carWrapper.style.transition = 'none';
+      carWrapper.style.left = '16px'; 
+      nitro.classList.add('hidden');
+
+      updateLapDashboard();
+      updateMainActionButton();
+    }
+
+
+    // --- 6. 최종 완주 결과 계산 및 축하 ---
+    function finishRace() {
+      appState = "RESULT";
+      updateMockControls();
+
+      // 음성 엔진 리스너 오프
+      stopRealSpeechEngine();
+
+      document.getElementById('screen-running').classList.add('hidden');
+      document.getElementById('screen-result').classList.remove('hidden');
+
+      // 성적 대시보드 주입 계산
+      const totalTime = lapRecords.reduce((acc, curr) => acc + curr, 0);
+      const minTime = Math.min(...lapRecords);
+      const avgTime = Math.floor(totalTime / lapRecords.length);
+
+      document.getElementById('result-total-time').textContent = formatTime(totalTime);
+      document.getElementById('result-avg-lap').textContent = formatTime(avgTime);
+      document.getElementById('result-best-lap').textContent = formatTime(minTime);
+
+      // 세부 미션 분석 렌더링
+      const details = document.getElementById('final-lap-details');
+      details.innerHTML = '';
+      lapRecords.forEach((time, index) => {
+        const isBest = time === minTime;
+        details.insertAdjacentHTML('beforeend', `
+          <div class="flex justify-between items-center py-2 border-b border-slate-900 text-xs md:text-sm">
+            <span class="text-slate-400 game-font">🚀 ${index + 1}장째 학습지 완주</span>
+            <div class="flex items-center gap-2">
+              ${isBest ? '<span class="text-[9px] bg-emerald-600 text-white px-1.5 py-0.5 rounded game-font animate-pulse">초광속 비행기록 ⚡</span>' : ''}
+              <span class="font-bold text-slate-100 game-font">${formatTime(time)}</span>
+            </div>
+          </div>
+        `);
+      });
+
+      sndFanfare();
+      startConfetti();
+    }
+
+    function restartApp() {
+      appState = "SETUP";
+      updateMockControls();
+      
+      // 토글 상태에 따라 마이크 상시 재가동
+      if (isRealSpeechActive) {
+        startRealSpeechEngine();
+      }
+
+      document.getElementById('screen-result').classList.add('hidden');
+      document.getElementById('screen-setup').classList.remove('hidden');
+      stopConfetti();
+    }
+
+
+    // --- 7. 유틸리티 효과 함수 ---
+    function formatTime(ms) {
+      const totalSecs = Math.floor(ms / 1000);
+      const mins = Math.floor(totalSecs / 60);
+      const secs = totalSecs % 60;
+      return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    function updateLapDashboard() {
+      document.getElementById('running-lap-indicator').textContent = `MISSION ${currentLap} / ${targetLaps}`;
+      const list = document.getElementById('lap-records-list');
+      list.innerHTML = '';
+      for (let i = 0; i < targetLaps; i++) {
+        const isRecorded = i < lapRecords.length;
+        const isCurrent = i === (currentLap - 1);
+        list.insertAdjacentHTML('beforeend', `
+          <div class="flex items-center justify-between p-3 rounded-xl border-2 ${isRecorded ? 'border-emerald-500 bg-emerald-950/30' : isCurrent ? 'border-indigo-500 bg-indigo-500/10 animate-pulse' : 'border-slate-700 bg-slate-900/40'} transition-all text-xs md:text-sm">
+            <span class="game-font ${isRecorded ? 'text-emerald-300' : isCurrent ? 'text-indigo-300' : 'text-slate-400'}">#${i + 1}번째 장</span>
+            <span class="game-font font-bold ${isRecorded ? 'text-white' : 'text-slate-500'}">${isRecorded ? formatTime(lapRecords[i]) : isCurrent ? (appState === "LAP_WAITING" ? "출발 대기 중" : "비행 중...") : '대기 중'}🏁</span>
+          </div>
+        `);
+      }
+      
+      // 자동 스크롤 하단 동기화 (현재 풀고 있는 라운드 카드가 항상 보이도록 스크롤링)
+      const currentActiveNode = list.children[currentLap - 1];
+      if (currentActiveNode) {
+        list.scrollTop = currentActiveNode.offsetTop - list.offsetTop;
+      }
+    }
+
+    // 우주 배경 스피드라인 파티클 생성
+    function createParticles() {
+      const container = document.getElementById('particle-container');
+      container.innerHTML = '';
+      for (let i = 0; i < 20; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        p.style.right = '0px';
+        p.style.top = `${Math.random() * 100}%`;
+        p.style.animationDelay = `${Math.random() * 0.8}s`;
+        container.appendChild(p);
+      }
+    }
+
+    // --- 8. 캔버스 파티클 팡파레 (Confetti) ---
+    let canvCtx = null; 
+    let confAct = false; 
+    let confList = [];
+    
+    function startConfetti() {
+      const canv = document.getElementById("confetti-canvas"); 
+      canvCtx = canv.getContext("2d");
+      canv.width = canv.parentElement.clientWidth; 
+      canv.height = canv.parentElement.clientHeight;
+      confAct = true; 
+      confList = [];
+      
+      for (let i = 0; i < 60; i++) {
+        confList.push({ 
+          x: Math.random() * canv.width, 
+          y: -20, 
+          size: Math.random() * 6 + 4, 
+          color: ['#f59e0b', '#10b981', '#3b82f6', '#ef4444', '#ec4899'][Math.floor(Math.random() * 5)], 
+          sX: Math.random() * 4 - 2, 
+          sY: Math.random() * 3 + 2, 
+          r: Math.random() * 360, 
+          rS: Math.random() * 10 - 5 
+        });
+      }
+      
+      function update() {
+        if (!confAct) return; 
+        canvCtx.clearRect(0, 0, canv.width, canv.height);
+        confList.forEach(p => { 
+          p.y += p.sY; 
+          p.x += p.sX; 
+          p.r += p.rS; 
+          if (p.y > canv.height) p.y = -20; 
+          canvCtx.save(); 
+          canvCtx.translate(p.x, p.y); 
+          canvCtx.rotate((p.r * Math.PI) / 180); 
+          canvCtx.fillStyle = p.color; 
+          canvCtx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size); 
+          canvCtx.restore(); 
+        });
+        requestAnimationFrame(update);
+      } 
+      update();
+    }
+    
+    function stopConfetti() { 
+      confAct = false; 
+      if (canvCtx) {
+        canvCtx.clearRect(0, 0, 2000, 2000); 
+      }
+    }
+
+    // 초기 로드 시 차량 기본값 바인딩
+    selectCar('red');
+  </script>
+</body>
+</html>
