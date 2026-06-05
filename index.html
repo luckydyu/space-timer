@@ -402,6 +402,22 @@
     // --- 1. 실제 마이크 음성 인식 시스템 (Web Speech API) ---
     let recognition = null;
     let isRealSpeechActive = true;
+    let isRecognitionPausedForSpeech = false;
+    let koreanVoice = null;
+
+    function loadSpeechVoices() {
+      if (!('speechSynthesis' in window)) return;
+      const voices = window.speechSynthesis.getVoices();
+      koreanVoice = voices.find(voice => voice.lang === 'ko-KR')
+        || voices.find(voice => voice.lang.startsWith('ko'))
+        || voices[0]
+        || null;
+    }
+
+    if ('speechSynthesis' in window) {
+      loadSpeechVoices();
+      window.speechSynthesis.onvoiceschanged = loadSpeechVoices;
+    }
 
     function toggleSpeechRecognition() {
       const toggle = document.getElementById('mic-toggle-input');
@@ -448,7 +464,7 @@
 
         recognition.onend = function() {
           // 음성 인식이 꺼지면 상태가 진행 중이거나 대기 중일 때 자동 리스타트하여 상시 가동
-          if (isRealSpeechActive && appState !== "RESULT") {
+          if (isRealSpeechActive && !isRecognitionPausedForSpeech && appState !== "RESULT") {
             try { recognition.start(); } catch(e){}
           }
         };
@@ -479,6 +495,7 @@
 
     function speakMissionTime(ms) {
       if (!('speechSynthesis' in window)) return;
+      loadSpeechVoices();
 
       const totalSeconds = Math.max(0, Math.round(ms / 1000));
       const minutes = Math.floor(totalSeconds / 60);
@@ -487,11 +504,29 @@
         ? `${minutes}분 ${seconds}초입니다`
         : `${seconds}초입니다`;
 
+      const shouldResumeRecognition = isRealSpeechActive && recognition && appState !== "RESULT";
+      if (shouldResumeRecognition) {
+        isRecognitionPausedForSpeech = true;
+        try { recognition.stop(); } catch(e){}
+      }
+
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(timeText);
       utterance.lang = 'ko-KR';
+      if (koreanVoice) utterance.voice = koreanVoice;
+      utterance.volume = 1;
       utterance.rate = 0.95;
       utterance.pitch = 1.05;
+      let resumeTimer = null;
+      const resumeRecognition = function() {
+        if (resumeTimer) clearTimeout(resumeTimer);
+        if (shouldResumeRecognition) {
+          isRecognitionPausedForSpeech = false;
+          startRealSpeechEngine();
+        }
+      };
+      utterance.onend = utterance.onerror = resumeRecognition;
+      resumeTimer = setTimeout(resumeRecognition, 5000);
       window.speechSynthesis.speak(utterance);
     }
 
