@@ -170,7 +170,7 @@
         <button onclick="changeLaps(-10)" class="w-12 h-12 bg-slate-800 hover:bg-slate-700 rounded-xl flex items-center justify-center text-sm md:text-base font-extrabold shadow-md border-b-4 border-slate-900 active:transform active:translate-y-0.5 text-slate-400">-10</button>
         <button onclick="changeLaps(-1)" class="w-12 h-12 bg-slate-700 hover:bg-slate-600 rounded-xl flex items-center justify-center text-xl md:text-2xl font-extrabold shadow-md border-b-4 border-slate-900 active:transform active:translate-y-0.5">-1</button>
         <div class="min-w-[90px] md:min-w-[120px]">
-          <span id="setup-lap-count" class="game-font text-4xl md:text-6xl text-white">3</span>
+          <span id="setup-lap-count" class="game-font text-4xl md:text-6xl text-white">10</span>
           <span class="game-font text-lg md:text-xl text-yellow-400 ml-0.5">장</span>
         </div>
         <button onclick="changeLaps(1)" class="w-12 h-12 bg-slate-700 hover:bg-slate-600 rounded-xl flex items-center justify-center text-xl md:text-2xl font-extrabold shadow-md border-b-4 border-slate-900 active:transform active:translate-y-0.5">+1</button>
@@ -210,7 +210,7 @@
       <div id="mic-support-alert" class="text-xs text-slate-400 hidden"></div>
 
       <!-- 즉시 시작하기 큰 버튼 -->
-      <button onclick="startCountdown()" class="w-full game-font text-2xl md:text-3xl py-4 md:py-5 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-slate-950 rounded-2xl border-b-8 border-amber-700 shadow-xl transition-all active:transform active:translate-y-1 transform hover:scale-[1.01]">
+      <button onclick="enterMissionReady()" class="w-full game-font text-2xl md:text-3xl py-4 md:py-5 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-slate-950 rounded-2xl border-b-8 border-amber-700 shadow-xl transition-all active:transform active:translate-y-1 transform hover:scale-[1.01]">
         🏁 경기 시작하기 (터치!)
       </button>
     </div>
@@ -235,7 +235,7 @@
           
           <div class="flex justify-between items-center border-b border-slate-700 pb-4">
             <div class="bg-indigo-900 border border-indigo-500 px-3 py-1.5 rounded-xl">
-              <span id="running-lap-indicator" class="game-font text-lg md:text-xl text-white">MISSION 1 / 3</span>
+              <span id="running-lap-indicator" class="game-font text-lg md:text-xl text-white">MISSION 1 / 10</span>
             </div>
             <div class="text-right">
               <span class="text-[10px] text-slate-400 block font-bold">누적 시간</span>
@@ -385,7 +385,7 @@
   <script>
     // --- 0. 기본 상태 및 기획 변수 ---
     let appState = "SETUP"; // SETUP, COUNTDOWN, FOCUS, LAP_WAITING, ANIMATING, RESULT
-    let targetLaps = 3;
+    let targetLaps = 10;
     let currentLap = 1;
     let chosenCar = "red";
     let timerInterval = null;
@@ -486,7 +486,7 @@
         if (appState === "SETUP") {
           createVoiceBubble(word);
           sndClick();
-          startCountdown();
+          enterMissionReady();
         } else if (appState === "LAP_WAITING") {
           createVoiceBubble(word);
           sndClick();
@@ -612,6 +612,26 @@
 
 
     // --- 4. 우주선 엔진 가동 카운트다운 ---
+    function enterMissionReady() {
+      appState = "LAP_WAITING";
+      updateMockControls();
+
+      currentLap = 1;
+      lapRecords = [];
+      totalElapsedMs = 0;
+      currentLapElapsed = 0;
+      if (timerInterval) clearInterval(timerInterval);
+
+      document.getElementById('screen-setup').classList.add('hidden');
+      document.getElementById('screen-countdown').classList.add('hidden');
+      document.getElementById('screen-result').classList.add('hidden');
+      document.getElementById('screen-running').classList.remove('hidden');
+      document.getElementById('running-total-time').textContent = "00:00";
+
+      createParticles();
+      prepareNextLap();
+    }
+
     function startCountdown() {
       appState = "COUNTDOWN";
       updateMockControls();
