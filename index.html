@@ -203,7 +203,7 @@
           </div>
         </div>
         <label class="relative inline-flex items-center cursor-pointer">
-          <input type="checkbox" id="mic-toggle-input" class="sr-only peer" onchange="toggleSpeechRecognition()">
+          <input type="checkbox" id="mic-toggle-input" class="sr-only peer" onchange="toggleSpeechRecognition()" checked>
           <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
         </label>
       </div>
@@ -401,7 +401,7 @@
 
     // --- 1. 실제 마이크 음성 인식 시스템 (Web Speech API) ---
     let recognition = null;
-    let isRealSpeechActive = false;
+    let isRealSpeechActive = true;
 
     function toggleSpeechRecognition() {
       const toggle = document.getElementById('mic-toggle-input');
@@ -877,10 +877,12 @@
         `);
       }
       
-      // 자동 스크롤 하단 동기화 (현재 풀고 있는 라운드 카드가 항상 보이도록 스크롤링)
+      // 현재 미션이 보이지 않을 때만, 보이는 만큼만 최소 스크롤
       const currentActiveNode = list.children[currentLap - 1];
       if (currentActiveNode) {
-        list.scrollTop = currentActiveNode.offsetTop - list.offsetTop;
+        const minScrollToShowCurrent =
+          currentActiveNode.offsetTop + currentActiveNode.offsetHeight - list.clientHeight;
+        list.scrollTop = Math.max(0, minScrollToShowCurrent);
       }
     }
 
@@ -953,6 +955,7 @@
 
     // 초기 로드 시 차량 기본값 바인딩
     selectCar('red');
+    startRealSpeechEngine();
   </script>
 </body>
 </html>
