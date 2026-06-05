@@ -477,6 +477,24 @@
       document.getElementById('status-text').textContent = "음성 인식 꺼짐";
     }
 
+    function speakMissionTime(ms) {
+      if (!('speechSynthesis' in window)) return;
+
+      const totalSeconds = Math.max(0, Math.round(ms / 1000));
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+      const timeText = minutes > 0
+        ? `${minutes}분 ${seconds}초입니다`
+        : `${seconds}초입니다`;
+
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(timeText);
+      utterance.lang = 'ko-KR';
+      utterance.rate = 0.95;
+      utterance.pitch = 1.05;
+      window.speechSynthesis.speak(utterance);
+    }
+
     // --- 2. 가상 음성 명령 시뮬레이션 시스템 ---
     function simulateVoiceCommand(word) {
       initAudio();
@@ -769,6 +787,7 @@
       setTimeout(() => {
         mainContainer.classList.remove('shake-view');
         sndSuccess();
+        speakMissionTime(currentLapElapsed);
         
         if (currentLap < targetLaps) {
           currentLap++;
