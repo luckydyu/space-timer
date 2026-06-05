@@ -403,6 +403,7 @@
     let recognition = null;
     let isRealSpeechActive = true;
     let isRecognitionPausedForSpeech = false;
+    let isSpeechSynthesisPrimed = false;
     let koreanVoice = null;
 
     function loadSpeechVoices() {
@@ -410,7 +411,6 @@
       const voices = window.speechSynthesis.getVoices();
       koreanVoice = voices.find(voice => voice.lang === 'ko-KR')
         || voices.find(voice => voice.lang.startsWith('ko'))
-        || voices[0]
         || null;
     }
 
@@ -419,7 +419,29 @@
       window.speechSynthesis.onvoiceschanged = loadSpeechVoices;
     }
 
+    function primeSpeechSynthesis() {
+      if (isSpeechSynthesisPrimed || !('speechSynthesis' in window)) return;
+      loadSpeechVoices();
+
+      try {
+        const utterance = new SpeechSynthesisUtterance(' ');
+        utterance.lang = 'ko-KR';
+        if (koreanVoice) utterance.voice = koreanVoice;
+        utterance.volume = 0;
+        utterance.rate = 1;
+        window.speechSynthesis.resume();
+        window.speechSynthesis.speak(utterance);
+        isSpeechSynthesisPrimed = true;
+      } catch(e) {}
+    }
+
+    function primeUserAudio() {
+      initAudio();
+      primeSpeechSynthesis();
+    }
+
     function toggleSpeechRecognition() {
+      primeUserAudio();
       const toggle = document.getElementById('mic-toggle-input');
       isRealSpeechActive = toggle.checked;
 
@@ -511,6 +533,7 @@
       }
 
       window.speechSynthesis.cancel();
+      window.speechSynthesis.resume();
       const utterance = new SpeechSynthesisUtterance(timeText);
       utterance.lang = 'ko-KR';
       if (koreanVoice) utterance.voice = koreanVoice;
@@ -532,7 +555,7 @@
 
     // --- 2. 가상 음성 명령 시뮬레이션 시스템 ---
     function simulateVoiceCommand(word) {
-      initAudio();
+      primeUserAudio();
       
       // 실제 명령 로직 수행
       if (word === '시작') {
@@ -625,7 +648,7 @@
 
     // 중앙의 다기능 버튼 통합 이벤트 리스너
     function handleMainAction() {
-      initAudio();
+      primeUserAudio();
       if (appState === "FOCUS") {
         completeLap();
       } else if (appState === "LAP_WAITING") {
@@ -636,7 +659,8 @@
 
 
     // --- 3. 기본 UI 세팅 조작 ---
-    function selectCar(color) {
+    function selectCar(color, shouldPrimeAudio = true) {
+      if (shouldPrimeAudio) primeUserAudio();
       chosenCar = color;
       
       // 테두리 클래스 수동 갱신 (Tailwind purge 방지 목적)
@@ -657,6 +681,7 @@
     }
 
     function changeLaps(diff) {
+      primeUserAudio();
       // 최대 100장까지 한도 대폭 증가
       targetLaps = Math.max(1, Math.min(100, targetLaps + diff));
       document.getElementById('setup-lap-count').textContent = targetLaps;
@@ -666,6 +691,7 @@
 
     // --- 4. 우주선 엔진 가동 카운트다운 ---
     function enterMissionReady() {
+      primeUserAudio();
       appState = "LAP_WAITING";
       updateMockControls();
 
@@ -1008,7 +1034,7 @@
     }
 
     // 초기 로드 시 차량 기본값 바인딩
-    selectCar('red');
+    selectCar('red', false);
     startRealSpeechEngine();
   </script>
 </body>
