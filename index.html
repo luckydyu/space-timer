@@ -189,16 +189,23 @@
         <button onclick="changeLaps(100)" class="w-12 h-12 bg-slate-900 hover:bg-slate-800 rounded-xl flex items-center justify-center text-[11px] md:text-xs font-extrabold shadow-md border-b-4 border-slate-950 active:transform active:translate-y-0.5 text-slate-500">+100</button>
       </div>
 
+      <button type="button" onclick="randomizeMissionSelection()" class="w-full game-font text-base md:text-lg py-2 bg-slate-900 hover:bg-slate-800 text-yellow-200 rounded-2xl border-2 border-yellow-500/60 shadow-md transition-all active:transform active:translate-y-0.5 flex items-center justify-center gap-2">
+        <span class="text-xl leading-none">🎲</span>
+        <span>랜덤 미션 뽑기</span>
+      </button>
+
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 text-left">
         <!-- 로켓 선택 -->
         <div>
           <h3 class="game-font text-lg text-indigo-300 mb-2">로켓 선택</h3>
+          <div id="car-category-tabs" class="flex flex-wrap gap-1.5 pb-2 mb-2"></div>
           <div id="car-selection-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-2 md:gap-3 max-h-[204px] md:max-h-[214px] overflow-y-auto pr-1 rounded-2xl"></div>
         </div>
 
         <!-- 도착지 선택 -->
         <div>
           <h3 class="game-font text-lg text-indigo-300 mb-2">도착지 선택</h3>
+          <div id="destination-category-tabs" class="flex flex-wrap gap-1.5 pb-2 mb-2"></div>
           <div id="destination-selection-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-2 md:gap-3 max-h-[204px] md:max-h-[214px] overflow-y-auto pr-1 rounded-2xl"></div>
         </div>
       </div>
@@ -302,6 +309,10 @@
             </div>
 
             <!-- 로켓 컨테이너 -->
+            <div id="track-destination-target" class="absolute right-14 md:right-16 top-1/2 -translate-y-1/2 z-10 flex items-center justify-center pointer-events-none">
+              <span id="track-destination-target-icon" class="text-5xl md:text-6xl leading-none filter drop-shadow-[0_0_8px_rgba(255,255,255,0.35)]">🌙</span>
+            </div>
+
             <div id="track-car-wrapper" class="absolute left-4 transition-all duration-100 ease-out flex items-center z-10" style="transform: translateX(0%);">
               
               <!-- 1. 부스터 화염 (기본 엔진) -->
@@ -405,6 +416,8 @@
     let currentLap = 1;
     let chosenCar = "car-1";
     let chosenDestination = "destination-1";
+    let selectedCarCategory = "전체";
+    let selectedDestinationCategory = "전체";
     let timerInterval = null;
     let lapStartTime = 0;
     let totalElapsedMs = 0;
@@ -473,13 +486,113 @@
       "Atlas V 401", "Atlas V 411", "Atlas V 421", "Atlas V 431", "Atlas V 501", "Atlas V 511", "Atlas V 521", "Atlas V 531", "Atlas V 541", "Atlas V 551",
       "Atlas V N22", "Delta II 7320", "Delta II 7420", "Delta II 7920", "Delta II 7925", "Delta II 7925H", "Delta IV M+ 4,2", "Delta IV M+ 5,2", "Delta IV M+ 5,4", "Delta IV M+ 5,6"
     ].slice(0, 300);
-    const CARS = Object.fromEntries(ROCKET_NAMES.map((name, index) => {
+    const ADVENTURE_ITEMS = [
+      { emoji: "🚀", label: "번개 로켓", category: "우주팀", sideways: true },
+      { emoji: "🛸", label: "반짝 UFO", category: "우주팀" },
+      { emoji: "🛰️", label: "정찰 위성", category: "우주팀" },
+      { emoji: "✈️", label: "하늘 제트기", category: "우주팀", sideways: true },
+      { emoji: "🛩️", label: "꼬마 비행기", category: "우주팀", sideways: true },
+      { emoji: "🚁", label: "구조 헬기", category: "우주팀" },
+      { emoji: "🧑‍🚀", label: "용감한 우주비행사", category: "우주팀" },
+      { emoji: "👽", label: "초록 외계친구", category: "우주팀" },
+      { emoji: "👾", label: "픽셀 외계몬", category: "우주팀" },
+      { emoji: "☄️", label: "슈팅 혜성", category: "우주팀", sideways: true },
+      { emoji: "🌠", label: "별똥별 라이더", category: "우주팀", sideways: true },
+      { emoji: "🔭", label: "별찾기 망원경", category: "우주팀" },
+      { emoji: "🦖", label: "번개 티라노", category: "공룡팀" },
+      { emoji: "🦕", label: "느긋한 브라키오", category: "공룡팀" },
+      { emoji: "🐊", label: "늪지 악어대장", category: "공룡팀" },
+      { emoji: "🐉", label: "불꽃 드래곤", category: "공룡팀" },
+      { emoji: "🦎", label: "초록 도마뱀 닌자", category: "공룡팀" },
+      { emoji: "🐢", label: "방패 거북이", category: "공룡팀" },
+      { emoji: "🦅", label: "하늘 랩터", category: "공룡팀" },
+      { emoji: "🦇", label: "동굴 익룡", category: "공룡팀" },
+      { emoji: "🥚", label: "비밀 공룡알", category: "공룡팀" },
+      { emoji: "🦴", label: "화석 탐험가", category: "공룡팀" },
+      { emoji: "🌋", label: "화산 파수꾼", category: "공룡팀" },
+      { emoji: "🌿", label: "정글 수호자", category: "공룡팀" },
+      { emoji: "🏎️", label: "빨간 터보카", category: "탈것팀", sideways: true },
+      { emoji: "🚓", label: "우주 경찰차", category: "탈것팀", sideways: true },
+      { emoji: "🚒", label: "불꽃 소방차", category: "탈것팀", sideways: true },
+      { emoji: "🚑", label: "번개 구급차", category: "탈것팀", sideways: true },
+      { emoji: "🚜", label: "달나라 트랙터", category: "탈것팀", sideways: true },
+      { emoji: "🚂", label: "은하 기관차", category: "탈것팀", sideways: true },
+      { emoji: "🚆", label: "초고속 우주열차", category: "탈것팀", sideways: true },
+      { emoji: "🚤", label: "별빛 보트", category: "탈것팀", sideways: true },
+      { emoji: "🛶", label: "구름 카누", category: "탈것팀", sideways: true },
+      { emoji: "🚲", label: "페달 로켓", category: "탈것팀", sideways: true },
+      { emoji: "🛴", label: "스파크 킥보드", category: "탈것팀", sideways: true },
+      { emoji: "🛹", label: "운석 스케이트", category: "탈것팀", sideways: true },
+      { emoji: "🤖", label: "계산 로봇", category: "로봇팀" },
+      { emoji: "🦾", label: "강철 팔 로봇", category: "로봇팀" },
+      { emoji: "🦿", label: "점프 다리 로봇", category: "로봇팀" },
+      { emoji: "💻", label: "코딩 노트북", category: "로봇팀" },
+      { emoji: "🎮", label: "게임패드 조종사", category: "로봇팀" },
+      { emoji: "🕹️", label: "아케이드 파일럿", category: "로봇팀" },
+      { emoji: "📡", label: "신호탑 로봇", category: "로봇팀" },
+      { emoji: "🔋", label: "풀충전 배터리", category: "로봇팀" },
+      { emoji: "💡", label: "아이디어 전구", category: "로봇팀" },
+      { emoji: "🔧", label: "수리왕 렌치", category: "로봇팀" },
+      { emoji: "🧲", label: "자석 파워봇", category: "로봇팀" },
+      { emoji: "⚙️", label: "톱니 엔진", category: "로봇팀" },
+      { emoji: "🦁", label: "사자 대장", category: "동물팀" },
+      { emoji: "🐯", label: "호랑이 번개발", category: "동물팀" },
+      { emoji: "🦍", label: "힘센 고릴라", category: "동물팀" },
+      { emoji: "🐺", label: "달빛 늑대", category: "동물팀" },
+      { emoji: "🦈", label: "상어 잠수대장", category: "동물팀" },
+      { emoji: "🐙", label: "문어 박사", category: "동물팀" },
+      { emoji: "🦑", label: "오징어 닌자", category: "동물팀" },
+      { emoji: "🐬", label: "돌고래 점프왕", category: "동물팀" },
+      { emoji: "🦆", label: "로켓 오리", category: "동물팀" },
+      { emoji: "🦉", label: "밤눈 부엉이", category: "동물팀" },
+      { emoji: "🐝", label: "붕붕 꿀벌", category: "동물팀" },
+      { emoji: "🦂", label: "사막 전갈", category: "동물팀" },
+      { emoji: "⚔️", label: "쌍검 전사", category: "히어로팀" },
+      { emoji: "🛡️", label: "방패 기사", category: "히어로팀" },
+      { emoji: "🏹", label: "별빛 궁수", category: "히어로팀" },
+      { emoji: "🥷", label: "그림자 닌자", category: "히어로팀" },
+      { emoji: "🧙", label: "번개 마법사", category: "히어로팀" },
+      { emoji: "🧛", label: "밤의 백작", category: "히어로팀" },
+      { emoji: "🧟", label: "느릿느릿 좀비", category: "히어로팀" },
+      { emoji: "🦸", label: "초능력 히어로", category: "히어로팀" },
+      { emoji: "🦹", label: "장난 악당", category: "히어로팀" },
+      { emoji: "💪", label: "근육 파워", category: "히어로팀" },
+      { emoji: "🔥", label: "불꽃 주먹", category: "히어로팀" },
+      { emoji: "⚡", label: "번개 발차기", category: "히어로팀" },
+      { emoji: "⚽", label: "축구 슈터", category: "스포츠팀" },
+      { emoji: "🏀", label: "덩크 마스터", category: "스포츠팀" },
+      { emoji: "🏈", label: "돌진 선수", category: "스포츠팀" },
+      { emoji: "⚾", label: "홈런 왕", category: "스포츠팀" },
+      { emoji: "🎾", label: "스매시 에이스", category: "스포츠팀" },
+      { emoji: "🥋", label: "태권 히어로", category: "스포츠팀" },
+      { emoji: "🥊", label: "복싱 챔피언", category: "스포츠팀" },
+      { emoji: "🏆", label: "황금 트로피", category: "스포츠팀" },
+      { emoji: "🥇", label: "1등 메달", category: "스포츠팀" },
+      { emoji: "🎯", label: "정조준 다트", category: "스포츠팀" },
+      { emoji: "🎳", label: "볼링 폭격기", category: "스포츠팀" },
+      { emoji: "🏓", label: "핑퐁 번개", category: "스포츠팀" },
+      { emoji: "💎", label: "다이아 탐험가", category: "보물팀" },
+      { emoji: "👑", label: "왕관 대장", category: "보물팀" },
+      { emoji: "🗝️", label: "비밀 열쇠", category: "보물팀" },
+      { emoji: "🧭", label: "길찾기 나침반", category: "보물팀" },
+      { emoji: "🗺️", label: "보물 지도", category: "보물팀" },
+      { emoji: "🧨", label: "팡팡 다이너마이트", category: "보물팀" },
+      { emoji: "🎲", label: "행운 주사위", category: "보물팀" },
+      { emoji: "🧩", label: "퍼즐 천재", category: "보물팀" },
+      { emoji: "🎪", label: "서커스 단장", category: "보물팀" },
+      { emoji: "🎭", label: "가면 탐정", category: "보물팀" },
+      { emoji: "🪄", label: "반짝 마술봉", category: "보물팀" },
+      { emoji: "🔮", label: "수정구 예언자", category: "보물팀" }
+    ];
+    const CAR_CATEGORIES = ["전체", ...new Set(ADVENTURE_ITEMS.map(item => item.category))];
+    const CARS = Object.fromEntries(ADVENTURE_ITEMS.map((item, index) => {
       const number = index + 1;
       return [`car-${number}`, {
-        emoji: ROCKET_ICONS[index % ROCKET_ICONS.length],
+        emoji: item.emoji,
         number,
-        label: name,
-        isSideways: SIDEWAYS_ROCKET_ICONS.has(ROCKET_ICONS[index % ROCKET_ICONS.length]),
+        label: item.label,
+        category: item.category,
+        isSideways: Boolean(item.sideways),
         borderClass: CAR_BORDER_CLASSES[index % CAR_BORDER_CLASSES.length],
         textClass: CAR_TEXT_CLASSES[index % CAR_TEXT_CLASSES.length]
       }];
@@ -504,12 +617,112 @@
       ...Array.from({ length: 110 }, (_, index) => `Messier M${index + 1}`),
       ...Array.from({ length: 120 }, (_, index) => `NGC ${index + 1}`)
     ].slice(0, 300);
-    const DESTINATIONS = Object.fromEntries(DESTINATION_NAMES.map((name, index) => {
+    const PLACE_ITEMS = [
+      { icon: "🌙", name: "달빛 기지", category: "우주장소" },
+      { icon: "🪐", name: "토성 고리 놀이터", category: "우주장소" },
+      { icon: "☀️", name: "태양 에너지 발전소", category: "우주장소" },
+      { icon: "⭐", name: "별사탕 정거장", category: "우주장소" },
+      { icon: "🌌", name: "은하수 터널", category: "우주장소" },
+      { icon: "☄️", name: "혜성 주차장", category: "우주장소" },
+      { icon: "🛰️", name: "위성 관제탑", category: "우주장소" },
+      { icon: "🛸", name: "UFO 착륙장", category: "우주장소" },
+      { icon: "👽", name: "외계인 시장", category: "우주장소" },
+      { icon: "🔭", name: "별보기 전망대", category: "우주장소" },
+      { icon: "🌠", name: "소원별 활주로", category: "우주장소" },
+      { icon: "⚫", name: "블랙홀 입구", category: "우주장소" },
+      { icon: "🦖", name: "티라노 협곡", category: "공룡랜드" },
+      { icon: "🦕", name: "브라키오 숲", category: "공룡랜드" },
+      { icon: "🥚", name: "공룡알 둥지", category: "공룡랜드" },
+      { icon: "🦴", name: "화석 박물관", category: "공룡랜드" },
+      { icon: "🌋", name: "용암 화산섬", category: "공룡랜드" },
+      { icon: "🌿", name: "고대 정글", category: "공룡랜드" },
+      { icon: "🏞️", name: "랩터 계곡", category: "공룡랜드" },
+      { icon: "🏕️", name: "탐험대 캠프", category: "공룡랜드" },
+      { icon: "🪨", name: "운석 바위산", category: "공룡랜드" },
+      { icon: "🐊", name: "악어 늪지대", category: "공룡랜드" },
+      { icon: "🦅", name: "익룡 절벽", category: "공룡랜드" },
+      { icon: "🔥", name: "불꽃 동굴", category: "공룡랜드" },
+      { icon: "🏙️", name: "메가 시티", category: "도시미션" },
+      { icon: "🌉", name: "번개 다리", category: "도시미션" },
+      { icon: "🏭", name: "로봇 공장", category: "도시미션" },
+      { icon: "🏗️", name: "초고층 공사장", category: "도시미션" },
+      { icon: "🚉", name: "은하철도역", category: "도시미션" },
+      { icon: "🛣️", name: "터보 고속도로", category: "도시미션" },
+      { icon: "🚦", name: "신호등 본부", category: "도시미션" },
+      { icon: "🏫", name: "비밀 과학학교", category: "도시미션" },
+      { icon: "🏥", name: "히어로 병원", category: "도시미션" },
+      { icon: "🏦", name: "금고 은행", category: "도시미션" },
+      { icon: "🗼", name: "반짝 타워", category: "도시미션" },
+      { icon: "🎡", name: "야간 대관람차", category: "도시미션" },
+      { icon: "🌊", name: "파도 왕국", category: "바다탐험" },
+      { icon: "🏝️", name: "비밀 무인도", category: "바다탐험" },
+      { icon: "🐠", name: "무지개 산호초", category: "바다탐험" },
+      { icon: "🐙", name: "문어 연구소", category: "바다탐험" },
+      { icon: "🦈", name: "상어 순찰구역", category: "바다탐험" },
+      { icon: "🐋", name: "고래 노래방", category: "바다탐험" },
+      { icon: "🚢", name: "거대 탐험선", category: "바다탐험" },
+      { icon: "⚓", name: "닻 모양 항구", category: "바다탐험" },
+      { icon: "🏖️", name: "조개 해변", category: "바다탐험" },
+      { icon: "🪸", name: "산호 미로", category: "바다탐험" },
+      { icon: "🧜", name: "인어 비밀기지", category: "바다탐험" },
+      { icon: "🌪️", name: "소용돌이 관문", category: "바다탐험" },
+      { icon: "🏰", name: "용사의 성", category: "던전모험" },
+      { icon: "🗡️", name: "검의 신전", category: "던전모험" },
+      { icon: "🛡️", name: "방패 요새", category: "던전모험" },
+      { icon: "🧙", name: "마법사 탑", category: "던전모험" },
+      { icon: "🐉", name: "드래곤 동굴", category: "던전모험" },
+      { icon: "🕯️", name: "촛불 지하실", category: "던전모험" },
+      { icon: "🪦", name: "유령 정원", category: "던전모험" },
+      { icon: "🧟", name: "좀비 골목", category: "던전모험" },
+      { icon: "🧛", name: "흡혈귀 저택", category: "던전모험" },
+      { icon: "🔮", name: "수정구 방", category: "던전모험" },
+      { icon: "🪄", name: "마술봉 연구실", category: "던전모험" },
+      { icon: "🚪", name: "비밀문 복도", category: "던전모험" },
+      { icon: "⚽", name: "월드컵 경기장", category: "경기장" },
+      { icon: "🏀", name: "덩크 아레나", category: "경기장" },
+      { icon: "⚾", name: "홈런 돔", category: "경기장" },
+      { icon: "🏈", name: "터치다운 필드", category: "경기장" },
+      { icon: "🎾", name: "스매시 코트", category: "경기장" },
+      { icon: "🥋", name: "태권도 도장", category: "경기장" },
+      { icon: "🥊", name: "챔피언 링", category: "경기장" },
+      { icon: "🎯", name: "명중 다트장", category: "경기장" },
+      { icon: "🎳", name: "볼링 타워", category: "경기장" },
+      { icon: "🏁", name: "결승선 서킷", category: "경기장" },
+      { icon: "🏆", name: "트로피 광장", category: "경기장" },
+      { icon: "🥇", name: "금메달 무대", category: "경기장" },
+      { icon: "💎", name: "다이아 광산", category: "보물장소" },
+      { icon: "👑", name: "왕관 보관소", category: "보물장소" },
+      { icon: "🗝️", name: "황금열쇠 방", category: "보물장소" },
+      { icon: "🧭", name: "나침반 사막", category: "보물장소" },
+      { icon: "🗺️", name: "찢어진 보물지도", category: "보물장소" },
+      { icon: "🏺", name: "고대 항아리 사원", category: "보물장소" },
+      { icon: "🪙", name: "동전 폭포", category: "보물장소" },
+      { icon: "🎁", name: "깜짝 선물창고", category: "보물장소" },
+      { icon: "🧰", name: "비밀 도구상자", category: "보물장소" },
+      { icon: "🧲", name: "자석 보물밭", category: "보물장소" },
+      { icon: "🧩", name: "퍼즐 금고", category: "보물장소" },
+      { icon: "🎲", name: "행운 주사위방", category: "보물장소" },
+      { icon: "🍕", name: "피자 행성", category: "간식별" },
+      { icon: "🍔", name: "햄버거 기지", category: "간식별" },
+      { icon: "🍟", name: "감자튀김 협곡", category: "간식별" },
+      { icon: "🌭", name: "핫도그 정거장", category: "간식별" },
+      { icon: "🍿", name: "팝콘 분화구", category: "간식별" },
+      { icon: "🍩", name: "도넛 은하", category: "간식별" },
+      { icon: "🍪", name: "쿠키 동굴", category: "간식별" },
+      { icon: "🍫", name: "초콜릿 성", category: "간식별" },
+      { icon: "🍦", name: "아이스크림 산", category: "간식별" },
+      { icon: "🍉", name: "수박 수영장", category: "간식별" },
+      { icon: "🥤", name: "탄산수 분수", category: "간식별" },
+      { icon: "🧃", name: "주스 충전소", category: "간식별" }
+    ];
+    const DESTINATION_CATEGORIES = ["전체", ...new Set(PLACE_ITEMS.map(item => item.category))];
+    const DESTINATIONS = Object.fromEntries(PLACE_ITEMS.map((item, index) => {
       const number = index + 1;
       return [`destination-${number}`, {
-        name,
+        name: item.name,
         number,
-        icon: DESTINATION_ICONS[index % DESTINATION_ICONS.length],
+        icon: item.icon,
+        category: item.category,
         borderClass: CAR_BORDER_CLASSES[index % CAR_BORDER_CLASSES.length],
         textClass: CAR_TEXT_CLASSES[index % CAR_TEXT_CLASSES.length]
       }];
@@ -802,10 +1015,109 @@
 
 
     // --- 3. 기본 UI 세팅 조작 ---
+    function getFilteredEntries(collection, category) {
+      const entries = Object.entries(collection);
+      if (category === "전체") return entries;
+      return entries.filter(([, item]) => item.category === category);
+    }
+
+    const CATEGORY_ICONS = {
+      "전체": "🌟",
+      "우주팀": "🚀",
+      "공룡팀": "🦖",
+      "탈것팀": "🏎️",
+      "로봇팀": "🤖",
+      "동물팀": "🦁",
+      "히어로팀": "⚡",
+      "스포츠팀": "🏆",
+      "보물팀": "💎",
+      "우주장소": "🪐",
+      "공룡랜드": "🌋",
+      "도시미션": "🏙️",
+      "바다탐험": "🌊",
+      "던전모험": "🏰",
+      "경기장": "⚽",
+      "보물장소": "🗝️",
+      "간식별": "🍕"
+    };
+
+    function renderCategoryTabs(containerId, categories, selectedCategory, onSelectName) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.innerHTML = categories.map(category => {
+        const icon = CATEGORY_ICONS[category] || "✨";
+        const isSelected = category === selectedCategory;
+        const selectedClass = isSelected
+          ? "bg-yellow-400 text-slate-950 border-yellow-200"
+          : "bg-slate-900 text-slate-300 border-slate-700 hover:bg-slate-800";
+        return `
+          <button type="button" onclick="${onSelectName}('${category}')" class="shrink-0 game-font text-[10px] md:text-xs px-2 py-1.5 rounded-xl border ${selectedClass} transition-colors flex items-center gap-1">
+            <span class="text-sm leading-none">${icon}</span>
+            <span>${category}</span>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function renderCarCategoryTabs() {
+      renderCategoryTabs('car-category-tabs', CAR_CATEGORIES, selectedCarCategory, 'selectCarCategory');
+    }
+
+    function renderDestinationCategoryTabs() {
+      renderCategoryTabs('destination-category-tabs', DESTINATION_CATEGORIES, selectedDestinationCategory, 'selectDestinationCategory');
+    }
+
+    function pickRandom(array) {
+      return array[Math.floor(Math.random() * array.length)];
+    }
+
+    function pickRandomCategory(categories) {
+      const selectableCategories = categories.filter(category => category !== "전체");
+      return pickRandom(selectableCategories.length ? selectableCategories : categories);
+    }
+
+    function randomizeMissionSelection(shouldPrimeAudio = true) {
+      if (shouldPrimeAudio) primeUserAudio();
+
+      selectedCarCategory = pickRandomCategory(CAR_CATEGORIES);
+      selectedDestinationCategory = pickRandomCategory(DESTINATION_CATEGORIES);
+
+      renderCarCategoryTabs();
+      renderDestinationCategoryTabs();
+      renderCarSelectionGrid();
+      renderDestinationSelectionGrid();
+
+      const randomCar = pickRandom(getFilteredEntries(CARS, selectedCarCategory));
+      const randomDestination = pickRandom(getFilteredEntries(DESTINATIONS, selectedDestinationCategory));
+
+      if (randomCar) selectCar(randomCar[0], false);
+      if (randomDestination) selectDestination(randomDestination[0], false);
+      if (shouldPrimeAudio) sndClick();
+    }
+
+    function scrollCardIntoSelectionView(card, gridId) {
+      const grid = document.getElementById(gridId);
+      if (!card || !grid) return;
+      requestAnimationFrame(() => {
+        const gridRect = grid.getBoundingClientRect();
+        const cardRect = card.getBoundingClientRect();
+        const nextScrollTop = grid.scrollTop
+          + (cardRect.top - gridRect.top)
+          - (grid.clientHeight / 2)
+          + (cardRect.height / 2);
+
+        grid.scrollTo({
+          top: Math.max(0, nextScrollTop),
+          behavior: "smooth"
+        });
+      });
+    }
+
     function renderCarSelectionGrid() {
       const grid = document.getElementById('car-selection-grid');
       if (!grid) return;
-      grid.innerHTML = Object.entries(CARS).map(([id, car]) => `
+      const visibleCars = getFilteredEntries(CARS, selectedCarCategory);
+      grid.innerHTML = visibleCars.map(([id, car]) => `
         <button type="button" onclick="selectCar('${id}')" id="car-select-${id}" class="car-card relative cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-2 transition-all transform hover:-translate-y-1 text-center min-h-[96px] flex flex-col justify-center">
           <span class="absolute left-1.5 top-1.5 min-w-5 px-1 rounded-md bg-slate-950/80 text-[9px] font-bold text-slate-300 border border-slate-600">${car.number}</span>
           <span class="${car.isSideways ? 'sideways-flight' : 'inline-block'} text-3xl md:text-4xl block mb-1">${car.emoji}</span>
@@ -817,13 +1129,38 @@
     function renderDestinationSelectionGrid() {
       const grid = document.getElementById('destination-selection-grid');
       if (!grid) return;
-      grid.innerHTML = Object.entries(DESTINATIONS).map(([id, destination]) => `
+      const visibleDestinations = getFilteredEntries(DESTINATIONS, selectedDestinationCategory);
+      grid.innerHTML = visibleDestinations.map(([id, destination]) => `
         <button type="button" onclick="selectDestination('${id}')" id="destination-select-${id}" class="destination-card relative cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-2 transition-all transform hover:-translate-y-1 text-center min-h-[96px] flex flex-col justify-center">
           <span class="absolute left-1.5 top-1.5 min-w-5 px-1 rounded-md bg-slate-950/80 text-[9px] font-bold text-slate-300 border border-slate-600">${destination.number}</span>
           <span class="text-3xl md:text-4xl block mb-1">${destination.icon}</span>
           <span class="game-font text-[9px] md:text-[10px] ${destination.textClass} leading-tight break-keep">${destination.name}</span>
         </button>
       `).join('');
+    }
+
+    function selectCarCategory(category) {
+      selectedCarCategory = category;
+      renderCarCategoryTabs();
+      renderCarSelectionGrid();
+      if (!getFilteredEntries(CARS, selectedCarCategory).some(([id]) => id === chosenCar)) {
+        const firstVisibleCar = getFilteredEntries(CARS, selectedCarCategory)[0];
+        if (firstVisibleCar) selectCar(firstVisibleCar[0]);
+      } else {
+        selectCar(chosenCar, false);
+      }
+    }
+
+    function selectDestinationCategory(category) {
+      selectedDestinationCategory = category;
+      renderDestinationCategoryTabs();
+      renderDestinationSelectionGrid();
+      if (!getFilteredEntries(DESTINATIONS, selectedDestinationCategory).some(([id]) => id === chosenDestination)) {
+        const firstVisibleDestination = getFilteredEntries(DESTINATIONS, selectedDestinationCategory)[0];
+        if (firstVisibleDestination) selectDestination(firstVisibleDestination[0]);
+      } else {
+        selectDestination(chosenDestination, false);
+      }
     }
 
     function selectCar(color, shouldPrimeAudio = true) {
@@ -840,6 +1177,7 @@
       if (!targetCard || !CARS[color]) return;
       targetCard.classList.remove('border-transparent');
       targetCard.classList.add(CARS[color].borderClass);
+      scrollCardIntoSelectionView(targetCard, 'car-selection-grid');
 
       const trackCar = document.getElementById('track-car');
       trackCar.innerHTML = CARS[color].emoji;
@@ -863,7 +1201,9 @@
       if (!targetCard) return;
       targetCard.classList.remove('border-transparent');
       targetCard.classList.add(destination.borderClass);
+      scrollCardIntoSelectionView(targetCard, 'destination-selection-grid');
       document.getElementById('track-destination-icon').textContent = destination.icon;
+      document.getElementById('track-destination-target-icon').textContent = destination.icon;
       document.getElementById('track-destination-name').textContent = `도착 (${destination.name})`;
       sndClick();
     }
@@ -1253,10 +1593,11 @@
     }
 
     // 초기 로드 시 그림 선택지와 기본값 바인딩
+    renderCarCategoryTabs();
+    renderDestinationCategoryTabs();
     renderCarSelectionGrid();
     renderDestinationSelectionGrid();
-    selectCar('car-1', false);
-    selectDestination('destination-1', false);
+    randomizeMissionSelection(false);
     startRealSpeechEngine();
   </script>
 </body>
