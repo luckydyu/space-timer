@@ -162,17 +162,17 @@
   </header>
 
   <!-- ==================== 메인 콘텐츠 ==================== -->
-  <main id="main-container" class="flex-1 flex flex-col items-center justify-center p-4 max-w-5xl w-full mx-auto transition-all duration-300 relative my-2">
+  <main id="main-container" class="flex-1 flex flex-col items-center justify-center p-3 md:p-4 max-w-7xl w-full mx-auto transition-all duration-300 relative my-2">
     
     <!-- 말풍선 피드백 레이어 -->
     <div id="bubble-container" class="absolute top-10 left-1/2 -translate-x-1/2 z-40 pointer-events-none"></div>
 
     <!-- [1] 준비 & 세팅 화면 -->
-    <div id="screen-setup" class="w-full max-w-xl bg-slate-800/90 border-4 border-slate-700 rounded-3xl p-6 md:p-8 shadow-2xl text-center space-y-6 md:space-y-8">
-      <h2 class="game-font text-3xl md:text-4xl text-yellow-300">오늘의 미션 세팅!</h2>
+    <div id="screen-setup" class="w-full max-w-6xl bg-slate-800/90 border-4 border-slate-700 rounded-3xl p-4 shadow-2xl text-center space-y-3 md:space-y-4">
+      <h2 class="game-font text-3xl text-yellow-300">오늘의 미션 세팅!</h2>
       
       <!-- Laps 설정 (10단위 증감 추가) -->
-      <div class="flex items-center justify-center gap-2 md:gap-3 py-4 md:py-5 bg-slate-950/50 rounded-2xl border border-slate-700 shadow-inner px-2">
+      <div class="flex items-center justify-center gap-2 md:gap-3 py-2 md:py-3 bg-slate-950/50 rounded-2xl border border-slate-700 shadow-inner px-2">
         <button onclick="changeLaps(-10)" class="w-12 h-12 bg-slate-800 hover:bg-slate-700 rounded-xl flex items-center justify-center text-sm md:text-base font-extrabold shadow-md border-b-4 border-slate-900 active:transform active:translate-y-0.5 text-slate-400">-10</button>
         <button onclick="changeLaps(-1)" class="w-12 h-12 bg-slate-700 hover:bg-slate-600 rounded-xl flex items-center justify-center text-xl md:text-2xl font-extrabold shadow-md border-b-4 border-slate-900 active:transform active:translate-y-0.5">-1</button>
         <div class="min-w-[90px] md:min-w-[120px]">
@@ -183,20 +183,22 @@
         <button onclick="changeLaps(10)" class="w-12 h-12 bg-slate-800 hover:bg-slate-700 rounded-xl flex items-center justify-center text-sm md:text-base font-extrabold shadow-md border-b-4 border-slate-900 active:transform active:translate-y-0.5 text-slate-400">+10</button>
       </div>
 
-      <!-- 로켓 선택 -->
-      <div class="text-left">
-        <h3 class="game-font text-lg text-indigo-300 mb-2">비행 그림 선택</h3>
-      </div>
-      <div id="car-selection-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-3 md:gap-4 max-h-[236px] md:max-h-[264px] overflow-y-auto pr-1 rounded-2xl"></div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 text-left">
+        <!-- 로켓 선택 -->
+        <div>
+          <h3 class="game-font text-lg text-indigo-300 mb-2">로켓 선택</h3>
+          <div id="car-selection-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-2 md:gap-3 max-h-[204px] md:max-h-[214px] overflow-y-auto pr-1 rounded-2xl"></div>
+        </div>
 
-      <!-- 도착지 선택 -->
-      <div class="text-left">
-        <h3 class="game-font text-lg text-indigo-300 mb-2">도착지 선택</h3>
-        <div id="destination-selection-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-3 md:gap-4 max-h-[236px] md:max-h-[264px] overflow-y-auto pr-1 rounded-2xl"></div>
+        <!-- 도착지 선택 -->
+        <div>
+          <h3 class="game-font text-lg text-indigo-300 mb-2">도착지 선택</h3>
+          <div id="destination-selection-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-2 md:gap-3 max-h-[204px] md:max-h-[214px] overflow-y-auto pr-1 rounded-2xl"></div>
+        </div>
       </div>
 
       <!-- 음성 인식 제어 스위치 추가 (실습형 기능) -->
-      <div class="bg-slate-900 border border-indigo-500/30 rounded-2xl p-4 text-left flex items-center justify-between gap-4">
+      <div class="bg-slate-900 border border-indigo-500/30 rounded-2xl p-3 text-left flex items-center justify-between gap-4">
         <div class="flex items-center gap-3">
           <div class="text-3xl">🎙️</div>
           <div>
@@ -212,7 +214,7 @@
       <div id="mic-support-alert" class="text-xs text-slate-400 hidden"></div>
 
       <!-- 즉시 시작하기 큰 버튼 -->
-      <button onclick="enterMissionReady()" class="w-full game-font text-2xl md:text-3xl py-4 md:py-5 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-slate-950 rounded-2xl border-b-8 border-amber-700 shadow-xl transition-all active:transform active:translate-y-1 transform hover:scale-[1.01]">
+      <button onclick="enterMissionReady()" class="w-full game-font text-2xl md:text-3xl py-2.5 md:py-3 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-slate-950 rounded-2xl border-b-8 border-amber-700 shadow-xl transition-all active:transform active:translate-y-1 transform hover:scale-[1.01]">
         🏁 경기 시작하기 (터치!)
       </button>
     </div>
@@ -387,29 +389,55 @@
       "text-violet-400", "text-amber-300", "text-sky-300", "text-lime-300",
       "text-orange-300", "text-pink-300"
     ];
-    const CAR_EMOJIS = [
-      "🚀","☄️","🛸","🛰️","🪐","⭐","🌠","👾","🤖","🧑‍🚀",
-      "🌙","☀️","🌎","🌍","🌏","✨","💫","🌟","🦄","🐲",
-      "🐉","🦖","🦕","🐙","🦑","🐳","🐬","🦈","🐢","🦋",
-      "🐝","🐞","🦜","🦚","🦩","🦢","🦉","🦅","🐧","🐥",
-      "🐸","🐹","🐰","🦊","🐼","🐨","🐯","🦁","🐵","🙈",
-      "🚗","🏎️","🚓","🚕","🚌","🚑","🚒","🚜","🛵","🏍️",
-      "🚲","🛴","🚁","✈️","🛩️","⛵","🚤","🛥️","🚂","🚆",
-      "🎈","🎯","🎮","🕹️","🎲","🧩","🏆","🥇","⚽","🏀",
-      "🏈","⚾","🎾","🏐","🏓","🥏","🪁","🎸","🎺","🥁",
-      "🍎","🍊","🍋","🍉","🍇","🍓","🍒","🍩","🍪","🍭"
-    ];
-    const CARS = Object.fromEntries(CAR_EMOJIS.map((emoji, index) => {
+    const ROCKET_ICONS = ["🚀", "🛰️", "🛸", "✈️", "🛩️", "🔥", "☄️", "🌠", "🧑‍🚀", "🔭"];
+    const ROCKET_NAMES = [
+      "Saturn V", "Saturn IB", "Juno I", "Juno II", "Redstone", "Mercury-Redstone", "Atlas LV-3B", "Atlas-Agena", "Atlas-Centaur", "Titan I",
+      "Titan II", "Titan IIIA", "Titan IIIB", "Titan IIIC", "Titan IIID", "Titan IIIE", "Titan 23G", "Titan IV", "Titan IVB", "Minotaur I",
+      "Minotaur II", "Minotaur III", "Minotaur IV", "Minotaur V", "Pegasus", "Pegasus XL", "Taurus", "Minotaur-C", "Athena I", "Athena II",
+      "Delta A", "Delta B", "Delta C", "Delta D", "Delta E", "Delta G", "Delta J", "Delta L", "Delta M", "Delta N",
+      "Delta II", "Delta III", "Delta IV Medium", "Delta IV Heavy", "Space Shuttle Columbia", "Space Shuttle Challenger", "Space Shuttle Discovery", "Space Shuttle Atlantis", "Space Shuttle Endeavour", "Space Launch System Block 1",
+      "Space Launch System Block 1B", "Ares I-X", "Ares I", "Falcon 1", "Falcon 9 v1.0", "Falcon 9 v1.1", "Falcon 9 Full Thrust", "Falcon 9 Block 5", "Falcon Heavy", "Starship",
+      "Super Heavy", "New Shepard", "New Glenn", "Electron", "Neutron", "Terran 1", "Terran R", "LauncherOne", "Firefly Alpha", "Antares 110",
+      "Antares 120", "Antares 130", "Antares 230", "Antares 230+", "Vulcan Centaur", "Atlas I", "Atlas II", "Atlas IIA", "Atlas IIAS", "Atlas IIIA",
+      "Atlas IIIB", "Ariane 1", "Ariane 2", "Ariane 3", "Ariane 4", "Ariane 5 G", "Ariane 5 ECA", "Ariane 5 ES", "Ariane 6 A62", "Ariane 6 A64",
+      "Vega", "Vega C", "Europa I", "Europa II", "Black Arrow", "Diamant A", "Diamant B", "Diamant BP4", "Soyuz", "Soyuz-U",
+      "Soyuz-U2", "Soyuz-FG", "Soyuz-2.1a", "Soyuz-2.1b", "Soyuz-2.1v", "Molniya-M", "Vostok-K", "Voskhod", "Proton-K", "Proton-M",
+      "N1", "Energia", "Zenit-2", "Zenit-3SL", "Zenit-3SLB", "Dnepr", "Rokot", "Strela", "Tsyklon-2", "Tsyklon-3",
+      "Angara 1.2", "Angara A3", "Angara A5", "Angara A5M", "Angara A5V", "Shtil", "Start-1", "Volna", "Kosmos-3M", "UR-100N",
+      "Long March 1", "Long March 1D", "Long March 2A", "Long March 2C", "Long March 2D", "Long March 2E", "Long March 2F", "Long March 3", "Long March 3A", "Long March 3B",
+      "Long March 3C", "Long March 4A", "Long March 4B", "Long March 4C", "Long March 5", "Long March 5B", "Long March 6", "Long March 6A", "Long March 7", "Long March 7A",
+      "Long March 8", "Long March 8A", "Long March 11", "Long March 12", "Kuaizhou-1A", "Kuaizhou-11", "Jielong-1", "Jielong-3", "Ceres-1", "Hyperbola-1",
+      "Zhuque-1", "Zhuque-2", "Tianlong-2", "Lijian-1", "H-II", "H-IIA", "H-IIB", "H3-22S", "H3-24L", "Epsilon",
+      "Epsilon S", "M-V", "N-I", "N-II", "J-I", "Lambda 4S", "KSLV-I Naro", "KSLV-II Nuri", "KSLV-III", "SLV-3",
+      "ASLV", "PSLV", "PSLV-CA", "PSLV-XL", "GSLV Mk I", "GSLV Mk II", "LVM3", "SSLV", "Vikram-S", "Safir",
+      "Simorgh", "Qased", "Qaem 100", "Shavit", "Start", "Unha", "Paektusan", "Nuri Test Vehicle", "Eridan", "Vanguard",
+      "Scout", "Scout X-1", "Scout X-2", "Scout X-3", "Scout X-4", "Scout B", "Scout D-1", "Little Joe", "Little Joe II", "Aerobee",
+      "Aerobee-Hi", "Nike Apache", "Nike Cajun", "Nike Tomahawk", "Black Brant I", "Black Brant II", "Black Brant III", "Black Brant IV", "Black Brant V", "Black Brant VI",
+      "Black Brant VII", "Black Brant VIII", "Black Brant IX", "Black Brant X", "Black Brant XI", "Black Brant XII", "Orion", "Terrier-Orion", "Taurus-Orion", "Patriot-Orion",
+      "S-520", "SS-520", "Skylark", "Rook", "Petrel", "Bumper WAC", "WAC Corporal", "V-2", "R-7 Semyorka", "Luna 8K72",
+      "Voskhod 11A57", "Vostok 8K72K", "Soyuz 11A511", "Soyuz 11A511U", "Soyuz 14A14", "Proton 8K82K", "Proton 8K82KM", "Zenit 11K77", "Energia-M", "Buran",
+      "Apollo CSM", "Apollo LM", "Gemini spacecraft", "Mercury spacecraft", "Orion spacecraft", "Dragon 1", "Dragon 2", "Crew Dragon", "Cargo Dragon", "Starliner",
+      "Dream Chaser", "Cygnus", "HTV Kounotori", "HTV-X", "ATV Jules Verne", "ATV Johannes Kepler", "ATV Edoardo Amaldi", "ATV Albert Einstein", "ATV Georges Lemaitre", "Progress",
+      "Soyuz MS", "Shenzhou", "Tianzhou", "Chang'e 1", "Chang'e 2", "Chang'e 3", "Chang'e 4", "Chang'e 5", "Chang'e 6", "Luna 1",
+      "Luna 2", "Luna 3", "Luna 9", "Luna 16", "Luna 24", "Luna 25", "Pioneer 10", "Pioneer 11", "Voyager 1", "Voyager 2",
+      "Galileo", "Cassini", "Juno", "New Horizons", "Dawn", "OSIRIS-REx", "Parker Solar Probe", "Solar Orbiter", "BepiColombo", "JUICE",
+      "Akatsuki", "Hayabusa", "Hayabusa2", "Hera", "Rosetta", "Philae", "DART", "Lucy", "Psyche", "Europa Clipper",
+      "Starship SN5", "Starship SN6", "Starship SN8", "Starship SN9", "Starship SN10", "Starship SN11", "Starship SN15", "Starship S20", "Starship S24", "Starship S25",
+      "Starship S26", "Starship S28", "Starship S29", "Starship S30", "Super Heavy B3", "Super Heavy B4", "Super Heavy B7", "Super Heavy B8", "Super Heavy B9", "Super Heavy B10",
+      "Atlas V 401", "Atlas V 411", "Atlas V 421", "Atlas V 431", "Atlas V 501", "Atlas V 511", "Atlas V 521", "Atlas V 531", "Atlas V 541", "Atlas V 551",
+      "Atlas V N22", "Delta II 7320", "Delta II 7420", "Delta II 7920", "Delta II 7925", "Delta II 7925H", "Delta IV M+ 4,2", "Delta IV M+ 5,2", "Delta IV M+ 5,4", "Delta IV M+ 5,6"
+    ].slice(0, 300);
+    const CARS = Object.fromEntries(ROCKET_NAMES.map((name, index) => {
       const number = index + 1;
       return [`car-${number}`, {
-        emoji,
-        label: `그림 ${number}`,
+        emoji: ROCKET_ICONS[index % ROCKET_ICONS.length],
+        label: name,
         borderClass: CAR_BORDER_CLASSES[index % CAR_BORDER_CLASSES.length],
         textClass: CAR_TEXT_CLASSES[index % CAR_TEXT_CLASSES.length]
       }];
     }));
     const DESTINATION_ICONS = ["🌙", "🪐", "🌕", "☄️", "⭐", "🌌", "✨", "🔭", "🕳️", "💫"];
-    const DESTINATION_NAMES = [
+    const NAMED_DESTINATIONS = [
       "달", "수성", "금성", "화성", "목성", "토성", "천왕성", "해왕성", "명왕성", "세레스",
       "에리스", "하우메아", "마케마케", "이오", "유로파", "가니메데", "칼리스토", "타이탄", "엔셀라두스", "미마스",
       "테티스", "디오네", "레아", "이아페투스", "트리톤", "네레이드", "카론", "닉스", "히드라", "케르베로스",
@@ -419,8 +447,15 @@
       "트라피스트-1", "안드로메다 은하", "삼각형자리 은하", "대마젤란 은하", "소마젤란 은하", "우리 은하", "소용돌이 은하", "솜브레로 은하", "바람개비 은하", "검은눈 은하",
       "시가 은하", "조각가 은하", "켄타우루스 A", "오리온 성운", "독수리 성운", "게 성운", "석호 성운", "삼렬 성운", "고리 성운", "헬릭스 성운",
       "말머리 성운", "장미 성운", "타란툴라 성운", "카리나 성운", "고양이눈 성운", "플레이아데스", "히아데스", "오메가 성단", "큰부리새자리 47", "헤라클레스 구상성단",
-      "궁수자리 A*", "M87*", "백조자리 X-1", "벨라 펄서", "게 펄서", "케플러-22b", "프록시마 b", "트라피스트-1e", "페가수스자리 51 b", "HD 209458 b"
+      "궁수자리 A*", "M87*", "백조자리 X-1", "벨라 펄서", "게 펄서", "케플러-22b", "프록시마 b", "트라피스트-1e", "페가수스자리 51 b", "HD 209458 b",
+      "TRAPPIST-1b", "TRAPPIST-1c", "TRAPPIST-1d", "TRAPPIST-1f", "TRAPPIST-1g", "TRAPPIST-1h", "Kepler-10b", "Kepler-16b", "Kepler-62e", "Kepler-62f",
+      "Kepler-69c", "Kepler-90i", "Kepler-186f", "Kepler-452b", "TOI-700 d", "TOI-700 e", "LHS 1140 b", "GJ 1214 b", "55 Cancri e", "Upsilon Andromedae b"
     ];
+    const DESTINATION_NAMES = [
+      ...NAMED_DESTINATIONS,
+      ...Array.from({ length: 110 }, (_, index) => `Messier M${index + 1}`),
+      ...Array.from({ length: 120 }, (_, index) => `NGC ${index + 1}`)
+    ].slice(0, 300);
     const DESTINATIONS = Object.fromEntries(DESTINATION_NAMES.map((name, index) => {
       const number = index + 1;
       return [`destination-${number}`, {
@@ -702,9 +737,9 @@
       const grid = document.getElementById('car-selection-grid');
       if (!grid) return;
       grid.innerHTML = Object.entries(CARS).map(([id, car]) => `
-        <button type="button" onclick="selectCar('${id}')" id="car-select-${id}" class="car-card cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-3 md:p-4 transition-all transform hover:-translate-y-1 text-center">
-          <span class="text-4xl md:text-5xl block mb-1 md:mb-2">${car.emoji}</span>
-          <span class="game-font text-[10px] md:text-xs ${car.textClass}">${car.label}</span>
+        <button type="button" onclick="selectCar('${id}')" id="car-select-${id}" class="car-card cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-2 transition-all transform hover:-translate-y-1 text-center min-h-[96px] flex flex-col justify-center">
+          <span class="text-3xl md:text-4xl block mb-1">${car.emoji}</span>
+          <span class="game-font text-[9px] md:text-[10px] ${car.textClass} leading-tight break-keep">${car.label}</span>
         </button>
       `).join('');
     }
@@ -713,9 +748,9 @@
       const grid = document.getElementById('destination-selection-grid');
       if (!grid) return;
       grid.innerHTML = Object.entries(DESTINATIONS).map(([id, destination]) => `
-        <button type="button" onclick="selectDestination('${id}')" id="destination-select-${id}" class="destination-card cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-3 transition-all transform hover:-translate-y-1 text-center min-h-[106px] flex flex-col justify-center">
+        <button type="button" onclick="selectDestination('${id}')" id="destination-select-${id}" class="destination-card cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-2 transition-all transform hover:-translate-y-1 text-center min-h-[96px] flex flex-col justify-center">
           <span class="text-3xl md:text-4xl block mb-1">${destination.icon}</span>
-          <span class="game-font text-[10px] md:text-xs ${destination.textClass} leading-tight break-keep">${destination.name}</span>
+          <span class="game-font text-[9px] md:text-[10px] ${destination.textClass} leading-tight break-keep">${destination.name}</span>
         </button>
       `).join('');
     }
