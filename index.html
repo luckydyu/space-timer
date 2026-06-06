@@ -184,7 +184,16 @@
       </div>
 
       <!-- 로켓 선택 -->
+      <div class="text-left">
+        <h3 class="game-font text-lg text-indigo-300 mb-2">비행 그림 선택</h3>
+      </div>
       <div id="car-selection-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-3 md:gap-4 max-h-[236px] md:max-h-[264px] overflow-y-auto pr-1 rounded-2xl"></div>
+
+      <!-- 도착지 선택 -->
+      <div class="text-left">
+        <h3 class="game-font text-lg text-indigo-300 mb-2">도착지 선택</h3>
+        <div id="destination-selection-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-3 md:gap-4 max-h-[236px] md:max-h-[264px] overflow-y-auto pr-1 rounded-2xl"></div>
+      </div>
 
       <!-- 음성 인식 제어 스위치 추가 (실습형 기능) -->
       <div class="bg-slate-900 border border-indigo-500/30 rounded-2xl p-4 text-left flex items-center justify-between gap-4">
@@ -255,7 +264,7 @@
             <div class="absolute left-0 right-0 h-1 bg-indigo-500/50 border-dashed border-t border-indigo-400 top-1/2 -translate-y-1/2"></div>
             
             <div class="absolute left-4 top-2 text-[10px] font-bold text-slate-500">출발 (지구)</div>
-            <div class="absolute right-4 top-2 text-[10px] font-bold text-slate-500">도착 (달)</div>
+            <div id="track-destination-label" class="absolute right-4 top-2 text-[10px] font-bold text-slate-500 text-right max-w-[120px]">도착 (달)</div>
 
             <!-- 로켓 컨테이너 -->
             <div id="track-car-wrapper" class="absolute left-4 transition-all duration-100 ease-out flex items-center z-10" style="transform: translateX(0%);">
@@ -360,6 +369,7 @@
     let targetLaps = 10;
     let currentLap = 1;
     let chosenCar = "car-1";
+    let chosenDestination = "destination-1";
     let timerInterval = null;
     let lapStartTime = 0;
     let totalElapsedMs = 0;
@@ -394,6 +404,28 @@
       return [`car-${number}`, {
         emoji,
         label: `그림 ${number}`,
+        borderClass: CAR_BORDER_CLASSES[index % CAR_BORDER_CLASSES.length],
+        textClass: CAR_TEXT_CLASSES[index % CAR_TEXT_CLASSES.length]
+      }];
+    }));
+    const DESTINATION_ICONS = ["🌙", "🪐", "🌕", "☄️", "⭐", "🌌", "✨", "🔭", "🕳️", "💫"];
+    const DESTINATION_NAMES = [
+      "달", "수성", "금성", "화성", "목성", "토성", "천왕성", "해왕성", "명왕성", "세레스",
+      "에리스", "하우메아", "마케마케", "이오", "유로파", "가니메데", "칼리스토", "타이탄", "엔셀라두스", "미마스",
+      "테티스", "디오네", "레아", "이아페투스", "트리톤", "네레이드", "카론", "닉스", "히드라", "케르베로스",
+      "스틱스", "포보스", "데이모스", "베스타", "팔라스", "히기에이아", "에로스", "이다", "베누", "류구",
+      "아로코스", "태양", "시리우스", "베텔게우스", "리겔", "베가", "알타이르", "데네브", "폴라리스", "프로키온",
+      "아크투루스", "카펠라", "알데바란", "스피카", "안타레스", "포말하우트", "카노푸스", "알파 센타우리", "프록시마 센타우리", "바너드별",
+      "트라피스트-1", "안드로메다 은하", "삼각형자리 은하", "대마젤란 은하", "소마젤란 은하", "우리 은하", "소용돌이 은하", "솜브레로 은하", "바람개비 은하", "검은눈 은하",
+      "시가 은하", "조각가 은하", "켄타우루스 A", "오리온 성운", "독수리 성운", "게 성운", "석호 성운", "삼렬 성운", "고리 성운", "헬릭스 성운",
+      "말머리 성운", "장미 성운", "타란툴라 성운", "카리나 성운", "고양이눈 성운", "플레이아데스", "히아데스", "오메가 성단", "큰부리새자리 47", "헤라클레스 구상성단",
+      "궁수자리 A*", "M87*", "백조자리 X-1", "벨라 펄서", "게 펄서", "케플러-22b", "프록시마 b", "트라피스트-1e", "페가수스자리 51 b", "HD 209458 b"
+    ];
+    const DESTINATIONS = Object.fromEntries(DESTINATION_NAMES.map((name, index) => {
+      const number = index + 1;
+      return [`destination-${number}`, {
+        name,
+        icon: DESTINATION_ICONS[index % DESTINATION_ICONS.length],
         borderClass: CAR_BORDER_CLASSES[index % CAR_BORDER_CLASSES.length],
         textClass: CAR_TEXT_CLASSES[index % CAR_TEXT_CLASSES.length]
       }];
@@ -677,6 +709,17 @@
       `).join('');
     }
 
+    function renderDestinationSelectionGrid() {
+      const grid = document.getElementById('destination-selection-grid');
+      if (!grid) return;
+      grid.innerHTML = Object.entries(DESTINATIONS).map(([id, destination]) => `
+        <button type="button" onclick="selectDestination('${id}')" id="destination-select-${id}" class="destination-card cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-3 transition-all transform hover:-translate-y-1 text-center min-h-[106px] flex flex-col justify-center">
+          <span class="text-3xl md:text-4xl block mb-1">${destination.icon}</span>
+          <span class="game-font text-[10px] md:text-xs ${destination.textClass} leading-tight break-keep">${destination.name}</span>
+        </button>
+      `).join('');
+    }
+
     function selectCar(color, shouldPrimeAudio = true) {
       if (shouldPrimeAudio) primeUserAudio();
       chosenCar = color;
@@ -694,6 +737,25 @@
 
       document.getElementById('track-car').innerHTML = CARS[color].emoji;
       document.getElementById('result-car-emoji').innerHTML = CARS[color].emoji;
+      sndClick();
+    }
+
+    function selectDestination(destinationId, shouldPrimeAudio = true) {
+      if (shouldPrimeAudio) primeUserAudio();
+      if (!DESTINATIONS[destinationId]) return;
+      chosenDestination = destinationId;
+
+      document.querySelectorAll('.destination-card').forEach(card => {
+        Object.values(DESTINATIONS).forEach(destination => card.classList.remove(destination.borderClass));
+        card.classList.add('border-transparent');
+      });
+
+      const destination = DESTINATIONS[destinationId];
+      const targetCard = document.getElementById(`destination-select-${destinationId}`);
+      if (!targetCard) return;
+      targetCard.classList.remove('border-transparent');
+      targetCard.classList.add(destination.borderClass);
+      document.getElementById('track-destination-label').textContent = `도착 (${destination.name})`;
       sndClick();
     }
 
@@ -1075,7 +1137,9 @@
 
     // 초기 로드 시 그림 선택지와 기본값 바인딩
     renderCarSelectionGrid();
+    renderDestinationSelectionGrid();
     selectCar('car-1', false);
+    selectDestination('destination-1', false);
     startRealSpeechEngine();
   </script>
 </body>
