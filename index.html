@@ -141,7 +141,7 @@
       }
       #car-selection-grid,
       #destination-selection-grid {
-        max-height: clamp(118px, 18vh, 168px) !important;
+        max-height: clamp(150px, 22vh, 205px) !important;
         gap: 0.35rem !important;
       }
       .car-card,
@@ -209,7 +209,7 @@
       }
       #car-selection-grid,
       #destination-selection-grid {
-        max-height: 150px !important;
+        max-height: 180px !important;
         gap: 0.35rem !important;
       }
       .car-card,
@@ -322,7 +322,7 @@
       <div class="text-3xl animate-bounce">🚀</div>
       <div>
         <h1 class="game-font text-xl md:text-2xl tracking-wider text-indigo-300">우주 초스피드 레이서</h1>
-        <p class="text-xs text-slate-400">지정 음성 입력 및 터치 인터랙션 타이머</p>
+        <p class="game-font text-[11px] md:text-xs text-yellow-300 leading-tight">오늘의 미션 세팅</p>
       </div>
     </div>
     <!-- 상태 표시기 -->
@@ -340,15 +340,13 @@
   </header>
 
   <!-- ==================== 메인 콘텐츠 ==================== -->
-  <main id="main-container" class="flex-1 flex flex-col items-center justify-center p-3 md:p-4 max-w-7xl w-full mx-auto transition-all duration-300 relative my-2">
+  <main id="main-container" class="flex-1 flex flex-col items-center justify-start p-1 md:p-2 max-w-7xl w-full mx-auto transition-all duration-300 relative my-0">
     
     <!-- 말풍선 피드백 레이어 -->
     <div id="bubble-container" class="absolute top-10 left-1/2 -translate-x-1/2 z-40 pointer-events-none"></div>
 
     <!-- [1] 준비 & 세팅 화면 -->
     <div id="screen-setup" class="w-full max-w-6xl bg-slate-800/90 border-4 border-slate-700 rounded-3xl p-4 shadow-2xl text-center space-y-3 md:space-y-4">
-      <h2 class="game-font text-3xl text-yellow-300">오늘의 미션 세팅!</h2>
-      
       <!-- Laps 설정 (10단위 증감 추가) -->
       <div class="flex items-center justify-center gap-2 md:gap-3 py-2 md:py-3 bg-slate-950/50 rounded-2xl border border-slate-700 shadow-inner px-2">
         <button onclick="changeLaps(-100)" class="w-12 h-12 bg-slate-900 hover:bg-slate-800 rounded-xl flex items-center justify-center text-[11px] md:text-xs font-extrabold shadow-md border-b-4 border-slate-950 active:transform active:translate-y-0.5 text-slate-500">-100</button>
@@ -373,14 +371,14 @@
         <div>
           <h3 class="game-font text-lg text-indigo-300 mb-2">로켓 선택</h3>
           <div id="car-category-tabs" class="flex flex-wrap gap-1.5 pb-2 mb-2"></div>
-          <div id="car-selection-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-2 md:gap-3 max-h-[204px] md:max-h-[214px] overflow-y-auto pr-1 rounded-2xl"></div>
+          <div id="car-selection-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-2 md:gap-3 max-h-[236px] md:max-h-[250px] overflow-y-auto pr-1 rounded-2xl"></div>
         </div>
 
         <!-- 도착지 선택 -->
         <div>
           <h3 class="game-font text-lg text-indigo-300 mb-2">도착지 선택</h3>
           <div id="destination-category-tabs" class="flex flex-wrap gap-1.5 pb-2 mb-2"></div>
-          <div id="destination-selection-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-2 md:gap-3 max-h-[204px] md:max-h-[214px] overflow-y-auto pr-1 rounded-2xl"></div>
+          <div id="destination-selection-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-2 md:gap-3 max-h-[236px] md:max-h-[250px] overflow-y-auto pr-1 rounded-2xl"></div>
         </div>
       </div>
 
