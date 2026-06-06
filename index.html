@@ -87,6 +87,105 @@
     .voice-command-modal {
       backdrop-filter: blur(8px);
     }
+
+    @keyframes destination-hit {
+      0% { transform: translateY(-50%) scale(1) rotate(0deg); opacity: 1; }
+      25% { transform: translateY(-50%) scale(1.25) rotate(8deg); opacity: 1; }
+      100% { transform: translate(130px, -140%) scale(0.3) rotate(45deg); opacity: 0; }
+    }
+    .destination-hit {
+      animation: destination-hit 0.65s ease-out forwards;
+    }
+
+    @media (orientation: landscape) and (max-height: 820px) {
+      body { overflow: hidden; }
+      header { padding: 0.5rem 0.75rem !important; }
+      footer { padding: 0.25rem !important; }
+      #main-container {
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        padding: 0.5rem !important;
+        min-height: 0;
+      }
+      #screen-setup {
+        max-height: calc(100dvh - 86px);
+        overflow: hidden;
+        padding: 0.75rem !important;
+        border-radius: 1rem !important;
+      }
+      #screen-setup h2 {
+        font-size: 1.65rem !important;
+        line-height: 1.9rem !important;
+      }
+      #screen-setup,
+      #screen-running {
+        gap: 0.5rem !important;
+      }
+      #screen-setup > :not([hidden]) ~ :not([hidden]) {
+        margin-top: 0.5rem !important;
+      }
+      #screen-running > :not([hidden]) ~ :not([hidden]),
+      #screen-running .lg\:col-span-2 > :not([hidden]) ~ :not([hidden]) {
+        margin-top: 0.75rem !important;
+      }
+      #car-category-tabs,
+      #destination-category-tabs {
+        gap: 0.25rem !important;
+        padding-bottom: 0.25rem !important;
+        margin-bottom: 0.25rem !important;
+      }
+      #car-category-tabs button,
+      #destination-category-tabs button {
+        padding: 0.2rem 0.45rem !important;
+        font-size: 0.62rem !important;
+      }
+      #car-selection-grid,
+      #destination-selection-grid {
+        max-height: 150px !important;
+        gap: 0.35rem !important;
+      }
+      .car-card,
+      .destination-card {
+        min-height: 68px !important;
+        padding: 0.35rem !important;
+      }
+      .car-card span:nth-child(2),
+      .destination-card span:nth-child(2) {
+        font-size: 1.6rem !important;
+        margin-bottom: 0.1rem !important;
+      }
+      #screen-running {
+        max-height: calc(100dvh - 72px);
+        overflow: hidden;
+      }
+      #screen-running > .grid {
+        gap: 0.75rem !important;
+      }
+      #screen-running .lg\:col-span-2,
+      #screen-running .lg\:col-span-2 + div {
+        padding: 0.75rem !important;
+        border-radius: 1rem !important;
+      }
+      #timer-display {
+        font-size: clamp(3rem, 8vh, 4.5rem) !important;
+      }
+      #timer-ms {
+        font-size: clamp(1.25rem, 4vh, 2rem) !important;
+      }
+      #lap-records-list {
+        min-height: 120px !important;
+        max-height: 210px !important;
+      }
+      #space-track {
+        height: 6.5rem !important;
+        padding: 0.65rem !important;
+      }
+      #main-action-button {
+        padding-top: 0.85rem !important;
+        padding-bottom: 0.85rem !important;
+        border-radius: 1rem !important;
+      }
+    }
   </style>
 </head>
 <body class="bg-space text-white min-h-screen flex flex-col justify-between select-none overflow-y-auto">
@@ -294,7 +393,7 @@
           </div>
 
           <!-- === 초화려 우주 트랙 영역 === -->
-          <div class="bg-black border-4 border-slate-900 rounded-2xl p-4 relative overflow-hidden h-32 md:h-36 flex items-center shadow-inner">
+          <div id="space-track" class="bg-black border-4 border-slate-900 rounded-2xl p-4 relative overflow-hidden h-32 md:h-36 flex items-center shadow-inner">
             <!-- 배경 우주 먼지 파티클 컨테이너 -->
             <div id="particle-container" class="absolute inset-0"></div>
             
@@ -302,7 +401,7 @@
             <div class="absolute left-0 right-0 h-2 bg-indigo-950 top-1/2 -translate-y-1/2"></div>
             <div class="absolute left-0 right-0 h-1 bg-indigo-500/50 border-dashed border-t border-indigo-400 top-1/2 -translate-y-1/2"></div>
             
-            <div class="absolute left-4 top-2 text-[10px] font-bold text-slate-500">출발 (지구)</div>
+            <div id="track-start-label" class="absolute left-4 top-2 text-[10px] font-bold text-slate-500 max-w-[150px] truncate">출발 (번개 로켓)</div>
             <div id="track-destination-label" class="absolute right-4 top-2 text-[10px] font-bold text-slate-500 text-right max-w-[140px] flex items-center justify-end gap-1">
               <span id="track-destination-icon" class="text-base leading-none">🌙</span>
               <span id="track-destination-name">도착 (Moon)</span>
@@ -1113,6 +1212,13 @@
       });
     }
 
+    function resetDestinationTarget() {
+      const destinationTarget = document.getElementById('track-destination-target');
+      if (!destinationTarget) return;
+      destinationTarget.classList.remove('destination-hit');
+      void destinationTarget.offsetWidth;
+    }
+
     function renderCarSelectionGrid() {
       const grid = document.getElementById('car-selection-grid');
       if (!grid) return;
@@ -1182,6 +1288,7 @@
       const trackCar = document.getElementById('track-car');
       trackCar.innerHTML = CARS[color].emoji;
       trackCar.classList.toggle('sideways-flight', CARS[color].isSideways);
+      document.getElementById('track-start-label').textContent = `출발 (${CARS[color].label})`;
       document.getElementById('result-car-emoji').innerHTML = CARS[color].emoji;
       sndClick();
     }
@@ -1202,6 +1309,7 @@
       targetCard.classList.remove('border-transparent');
       targetCard.classList.add(destination.borderClass);
       scrollCardIntoSelectionView(targetCard, 'destination-selection-grid');
+      resetDestinationTarget();
       document.getElementById('track-destination-icon').textContent = destination.icon;
       document.getElementById('track-destination-target-icon').textContent = destination.icon;
       document.getElementById('track-destination-name').textContent = `도착 (${destination.name})`;
@@ -1312,6 +1420,7 @@
       carWrapper.style.transition = 'none';
       carWrapper.style.left = '16px'; 
       nitro.classList.add('hidden');
+      resetDestinationTarget();
       
       updateLapDashboard();
 
@@ -1360,15 +1469,24 @@
       sndNitro();
       const carWrapper = document.getElementById('track-car-wrapper');
       const nitro = document.getElementById('nitro-overlay');
+      const destinationTarget = document.getElementById('track-destination-target');
       const mainContainer = document.getElementById('main-container');
+      resetDestinationTarget();
 
       // 1. 니트로 및 흔들림(카메라 쉐이크) 적용
       nitro.classList.remove('hidden');
       mainContainer.classList.add('shake-view');
 
       // 2. 피니시 라인 순간 돌진 연출
-      carWrapper.style.transition = 'left 0.6s cubic-bezier(0.15, 1, 0.3, 1)';
-      carWrapper.style.left = 'calc(100% + 100px)'; // 화면 바깥으로 로켓이 탈출
+      carWrapper.style.transition = 'left 0.35s cubic-bezier(0.15, 1, 0.3, 1)';
+      carWrapper.style.left = 'calc(100% - 150px)';
+      setTimeout(() => {
+        destinationTarget.classList.add('destination-hit');
+      }, 340);
+      setTimeout(() => {
+        carWrapper.style.transition = 'left 0.38s cubic-bezier(0.15, 1, 0.3, 1)';
+        carWrapper.style.left = 'calc(100% + 100px)'; // 화면 바깥으로 로켓이 탈출
+      }, 430);
 
       lapRecords.push(currentLapElapsed);
       recalculateTotalElapsed();
@@ -1386,7 +1504,7 @@
         } else {
           finishRace();
         }
-      }, 850);
+      }, 1050);
     }
 
     // 다음 랩 주행을 대기하는 상태 리셋 작업
@@ -1401,6 +1519,7 @@
       carWrapper.style.transition = 'none';
       carWrapper.style.left = '16px'; 
       nitro.classList.add('hidden');
+      resetDestinationTarget();
 
       updateLapDashboard();
       updateMainActionButton();
