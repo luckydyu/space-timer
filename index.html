@@ -178,7 +178,7 @@
       </div>
 
       <!-- 로켓 선택 -->
-      <div class="grid grid-cols-3 gap-3 md:gap-4">
+      <div id="car-selection-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-3 md:gap-4">
         <div onclick="selectCar('red')" id="car-select-red" class="car-card cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-red-500 rounded-2xl p-3 md:p-4 transition-all transform hover:-translate-y-1 text-center">
           <span class="text-4xl md:text-5xl block mb-1 md:mb-2">🚀</span>
           <span class="game-font text-[10px] md:text-xs text-red-400">레드 호크</span>
@@ -191,6 +191,34 @@
           <span class="text-4xl md:text-5xl block mb-1 md:mb-2">🛸</span>
           <span class="game-font text-[10px] md:text-xs text-yellow-400">골드 UFO</span>
         </div>
+        <div onclick="selectCar('satellite')" id="car-select-satellite" class="car-card cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-3 md:p-4 transition-all transform hover:-translate-y-1 text-center">
+          <span class="text-4xl md:text-5xl block mb-1 md:mb-2">🛰️</span>
+          <span class="game-font text-[10px] md:text-xs text-cyan-400">실버 위성</span>
+        </div>
+        <div onclick="selectCar('planet')" id="car-select-planet" class="car-card cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-3 md:p-4 transition-all transform hover:-translate-y-1 text-center">
+          <span class="text-4xl md:text-5xl block mb-1 md:mb-2">🪐</span>
+          <span class="game-font text-[10px] md:text-xs text-violet-400">링 플래닛</span>
+        </div>
+        <div onclick="selectCar('star')" id="car-select-star" class="car-card cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-3 md:p-4 transition-all transform hover:-translate-y-1 text-center">
+          <span class="text-4xl md:text-5xl block mb-1 md:mb-2">⭐</span>
+          <span class="game-font text-[10px] md:text-xs text-amber-300">스타 버스트</span>
+        </div>
+        <div onclick="selectCar('comet')" id="car-select-comet" class="car-card cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-3 md:p-4 transition-all transform hover:-translate-y-1 text-center">
+          <span class="text-4xl md:text-5xl block mb-1 md:mb-2">🌠</span>
+          <span class="game-font text-[10px] md:text-xs text-sky-300">슈팅스타</span>
+        </div>
+        <div onclick="selectCar('alien')" id="car-select-alien" class="car-card cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-3 md:p-4 transition-all transform hover:-translate-y-1 text-center">
+          <span class="text-4xl md:text-5xl block mb-1 md:mb-2">👾</span>
+          <span class="game-font text-[10px] md:text-xs text-lime-300">네온 탐험가</span>
+        </div>
+        <div onclick="selectCar('robot')" id="car-select-robot" class="car-card cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-3 md:p-4 transition-all transform hover:-translate-y-1 text-center">
+          <span class="text-4xl md:text-5xl block mb-1 md:mb-2">🤖</span>
+          <span class="game-font text-[10px] md:text-xs text-orange-300">로보 파일럿</span>
+        </div>
+        <div onclick="selectCar('astronaut')" id="car-select-astronaut" class="car-card cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-3 md:p-4 transition-all transform hover:-translate-y-1 text-center">
+          <span class="text-4xl md:text-5xl block mb-1 md:mb-2">🧑‍🚀</span>
+          <span class="game-font text-[10px] md:text-xs text-pink-300">우주 대장</span>
+        </div>
       </div>
 
       <!-- 음성 인식 제어 스위치 추가 (실습형 기능) -->
@@ -199,7 +227,7 @@
           <div class="text-3xl">🎙️</div>
           <div>
             <h4 class="game-font text-base text-indigo-300">실제 마이크 음성 인식 활성화</h4>
-            <p class="text-[11px] text-slate-400">"시작", "끝"을 마이크로 외쳐 기기를 제어합니다.</p>
+            <p class="text-[11px] text-slate-400">"시작/스타트/시작해", "끝/스탑/멈춰"를 마이크로 외쳐 기기를 제어합니다.</p>
           </div>
         </div>
         <label class="relative inline-flex items-center cursor-pointer">
@@ -239,7 +267,7 @@
             </div>
             <div class="text-right">
               <span class="text-[10px] text-slate-400 block font-bold">누적 시간</span>
-              <span id="running-total-time" class="game-font text-lg text-slate-200">00:00</span>
+              <span id="running-total-time" class="game-font text-lg text-slate-200">00:00.00</span>
             </div>
           </div>
 
@@ -248,7 +276,7 @@
             <span class="text-[10px] md:text-xs text-emerald-400 block font-bold tracking-wider mb-1 md:mb-2">⏱️ 현재 장 비행 속도 ⏱️</span>
             <div class="inline-flex items-end justify-center">
               <span id="timer-display" class="game-font text-6xl md:text-8xl text-emerald-300 tracking-wider">00:00</span>
-              <span id="timer-ms" class="game-font text-2xl md:text-4xl text-emerald-500/60 ml-1.5 w-12 md:w-16 text-left pb-1">.0</span>
+              <span id="timer-ms" class="game-font text-2xl md:text-4xl text-emerald-500/60 ml-1.5 w-14 md:w-20 text-left pb-1">.00</span>
             </div>
           </div>
 
@@ -331,7 +359,7 @@
             <div id="result-car-emoji" class="text-4xl md:text-6xl">🚀</div>
             <div>
               <span class="text-[9px] md:text-xs text-yellow-300 block font-bold">총 주행시간</span>
-              <span id="result-total-time" class="game-font text-base md:text-2xl text-yellow-300">00:00</span>
+              <span id="result-total-time" class="game-font text-base md:text-2xl text-yellow-300">00:00.00</span>
             </div>
           </div>
           <div class="bg-slate-700/60 rounded-t-2xl p-3 md:p-5 border-t-4 border-amber-600 h-24 md:h-32 flex flex-col justify-between">
@@ -393,10 +421,19 @@
     let totalElapsedMs = 0;
     let currentLapElapsed = 0;
     let lapRecords = [];
+    const START_COMMANDS = ["시작", "스타트", "시작해", "출발", "가자"];
+    const FINISH_COMMANDS = ["끝", "스탑", "멈춰", "완료", "도착", "풀었"];
     const CARS = { 
-      red: { emoji: "🚀" }, 
-      blue: { emoji: "☄️" }, 
-      gold: { emoji: "🛸" } 
+      red: { emoji: "🚀", borderClass: "border-red-500" }, 
+      blue: { emoji: "☄️", borderClass: "border-blue-500" }, 
+      gold: { emoji: "🛸", borderClass: "border-yellow-500" },
+      satellite: { emoji: "🛰️", borderClass: "border-cyan-500" },
+      planet: { emoji: "🪐", borderClass: "border-violet-500" },
+      star: { emoji: "⭐", borderClass: "border-amber-400" },
+      comet: { emoji: "🌠", borderClass: "border-sky-400" },
+      alien: { emoji: "👾", borderClass: "border-lime-400" },
+      robot: { emoji: "🤖", borderClass: "border-orange-400" },
+      astronaut: { emoji: "🧑‍🚀", borderClass: "border-pink-400" } 
     };
 
     // --- 1. 실제 마이크 음성 인식 시스템 (Web Speech API) ---
@@ -477,9 +514,9 @@
           console.log("음성 감지:", resultText);
 
           // 아이의 부정확한 발음 스펙트럼 대응 (키워드 매칭)
-          if (resultText.includes("시작") || resultText.includes("출발") || resultText.includes("가자")) {
+          if (matchesVoiceCommand(resultText, START_COMMANDS)) {
             simulateVoiceCommand('시작');
-          } else if (resultText.includes("끝") || resultText.includes("완료") || resultText.includes("도착") || resultText.includes("풀었")) {
+          } else if (matchesVoiceCommand(resultText, FINISH_COMMANDS)) {
             simulateVoiceCommand('끝');
           }
         };
@@ -522,9 +559,10 @@
       const totalSeconds = Math.max(0, Math.floor(ms / 1000));
       const minutes = Math.floor(totalSeconds / 60);
       const seconds = totalSeconds % 60;
+      const hundredths = String(Math.floor((Math.max(0, ms) % 1000) / 10)).padStart(2, '0');
       const timeText = minutes > 0
-        ? `${minutes}분 ${seconds}초입니다`
-        : `${seconds}초입니다`;
+        ? `${minutes}분 ${seconds}.${hundredths}초입니다`
+        : `${seconds}.${hundredths}초입니다`;
 
       const shouldResumeRecognition = isRealSpeechActive && recognition && appState !== "RESULT";
       if (shouldResumeRecognition) {
@@ -551,6 +589,11 @@
       utterance.onend = utterance.onerror = resumeRecognition;
       resumeTimer = setTimeout(resumeRecognition, 5000);
       window.speechSynthesis.speak(utterance);
+    }
+
+    function matchesVoiceCommand(text, commands) {
+      const normalizedText = String(text).replace(/\s+/g, '').toLowerCase();
+      return commands.some(command => normalizedText.includes(command.replace(/\s+/g, '').toLowerCase()));
     }
 
     // --- 2. 가상 음성 명령 시뮬레이션 시스템 ---
@@ -665,15 +708,13 @@
       
       // 테두리 클래스 수동 갱신 (Tailwind purge 방지 목적)
       document.querySelectorAll('.car-card').forEach(card => {
-        card.classList.remove('border-red-500', 'border-blue-500', 'border-yellow-500');
+        Object.values(CARS).forEach(car => card.classList.remove(car.borderClass));
         card.classList.add('border-transparent');
       });
       
       const targetCard = document.getElementById(`car-select-${color}`);
       targetCard.classList.remove('border-transparent');
-      if (color === 'red') targetCard.classList.add('border-red-500');
-      if (color === 'blue') targetCard.classList.add('border-blue-500');
-      if (color === 'gold') targetCard.classList.add('border-yellow-500');
+      targetCard.classList.add(CARS[color].borderClass);
 
       document.getElementById('track-car').innerHTML = CARS[color].emoji;
       document.getElementById('result-car-emoji').innerHTML = CARS[color].emoji;
@@ -705,7 +746,7 @@
       document.getElementById('screen-countdown').classList.add('hidden');
       document.getElementById('screen-result').classList.add('hidden');
       document.getElementById('screen-running').classList.remove('hidden');
-      document.getElementById('running-total-time').textContent = "00:00";
+      document.getElementById('running-total-time').textContent = "00:00.00";
 
       createParticles();
       prepareNextLap();
@@ -795,7 +836,7 @@
         const totalSecs = Math.floor(currentLapElapsed / 1000);
         const minutes = Math.floor(totalSecs / 60);
         const seconds = totalSecs % 60;
-        const msFraction = Math.floor((currentLapElapsed % 1000) / 100);
+        const msFraction = String(Math.floor((currentLapElapsed % 1000) / 10)).padStart(2, '0');
 
         document.getElementById('timer-display').textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         document.getElementById('timer-ms').textContent = `.${msFraction}`;
@@ -843,7 +884,7 @@
       carWrapper.style.left = 'calc(100% + 100px)'; // 화면 바깥으로 로켓이 탈출
 
       lapRecords.push(currentLapElapsed);
-      totalElapsedMs += currentLapElapsed;
+      recalculateTotalElapsed();
 
       setTimeout(() => {
         mainContainer.classList.remove('shake-view');
@@ -865,7 +906,7 @@
     function prepareNextLap() {
       // 타이머 디스플레이 리셋
       document.getElementById('timer-display').textContent = "00:00";
-      document.getElementById('timer-ms').textContent = ".0";
+      document.getElementById('timer-ms').textContent = ".00";
 
       // 로켓 원위치 및 파괴 이펙트 초기화
       const carWrapper = document.getElementById('track-car-wrapper');
@@ -935,11 +976,31 @@
 
 
     // --- 7. 유틸리티 효과 함수 ---
+    function recalculateTotalElapsed() {
+      totalElapsedMs = lapRecords.reduce((acc, curr) => acc + curr, 0);
+    }
+
+    function updateTotalTimeDisplay() {
+      const activeElapsed = appState === "FOCUS" ? currentLapElapsed : 0;
+      document.getElementById('running-total-time').textContent = formatTime(totalElapsedMs + activeElapsed);
+    }
+
+    function deleteRecordedLap(index) {
+      if (index < 0 || index >= lapRecords.length || appState === "ANIMATING") return;
+      lapRecords.splice(index, 1);
+      recalculateTotalElapsed();
+      currentLap = Math.min(targetLaps, lapRecords.length + 1);
+      updateTotalTimeDisplay();
+      updateLapDashboard();
+      sndClick();
+    }
+
     function formatTime(ms) {
       const totalSecs = Math.floor(ms / 1000);
       const mins = Math.floor(totalSecs / 60);
       const secs = totalSecs % 60;
-      return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      const hundredths = Math.floor((Math.max(0, ms) % 1000) / 10);
+      return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}.${String(hundredths).padStart(2, '0')}`;
     }
 
     function updateLapDashboard() {
@@ -952,7 +1013,10 @@
         list.insertAdjacentHTML('beforeend', `
           <div class="flex items-center justify-between p-3 rounded-xl border-2 ${isRecorded ? 'border-emerald-500 bg-emerald-950/30' : isCurrent ? 'border-indigo-500 bg-indigo-500/10 animate-pulse' : 'border-slate-700 bg-slate-900/40'} transition-all text-xs md:text-sm">
             <span class="game-font ${isRecorded ? 'text-emerald-300' : isCurrent ? 'text-indigo-300' : 'text-slate-400'}">#${i + 1}번째 장</span>
-            <span class="game-font font-bold ${isRecorded ? 'text-white' : 'text-slate-500'}">${isRecorded ? formatTime(lapRecords[i]) : isCurrent ? (appState === "LAP_WAITING" ? "출발 대기 중" : "비행 중...") : '대기 중'}🏁</span>
+            <div class="flex items-center gap-2">
+              <span class="game-font font-bold ${isRecorded ? 'text-white' : 'text-slate-500'}">${isRecorded ? formatTime(lapRecords[i]) : isCurrent ? (appState === "LAP_WAITING" ? "출발 대기 중" : "비행 중...") : '대기 중'}🏁</span>
+              ${isRecorded ? `<button type="button" onclick="deleteRecordedLap(${i})" class="game-font text-[10px] md:text-xs px-2 py-1 rounded-lg bg-slate-800 hover:bg-rose-700 text-slate-300 hover:text-white border border-slate-600 hover:border-rose-400 transition-colors" aria-label="${i + 1}번째 기록 삭제">삭제</button>` : ''}
+            </div>
           </div>
         `);
       }
