@@ -173,6 +173,7 @@
       
       <!-- Laps 설정 (10단위 증감 추가) -->
       <div class="flex items-center justify-center gap-2 md:gap-3 py-2 md:py-3 bg-slate-950/50 rounded-2xl border border-slate-700 shadow-inner px-2">
+        <button onclick="changeLaps(-100)" class="w-12 h-12 bg-slate-900 hover:bg-slate-800 rounded-xl flex items-center justify-center text-[11px] md:text-xs font-extrabold shadow-md border-b-4 border-slate-950 active:transform active:translate-y-0.5 text-slate-500">-100</button>
         <button onclick="changeLaps(-10)" class="w-12 h-12 bg-slate-800 hover:bg-slate-700 rounded-xl flex items-center justify-center text-sm md:text-base font-extrabold shadow-md border-b-4 border-slate-900 active:transform active:translate-y-0.5 text-slate-400">-10</button>
         <button onclick="changeLaps(-1)" class="w-12 h-12 bg-slate-700 hover:bg-slate-600 rounded-xl flex items-center justify-center text-xl md:text-2xl font-extrabold shadow-md border-b-4 border-slate-900 active:transform active:translate-y-0.5">-1</button>
         <div class="min-w-[90px] md:min-w-[120px]">
@@ -181,6 +182,7 @@
         </div>
         <button onclick="changeLaps(1)" class="w-12 h-12 bg-slate-700 hover:bg-slate-600 rounded-xl flex items-center justify-center text-xl md:text-2xl font-extrabold shadow-md border-b-4 border-slate-900 active:transform active:translate-y-0.5">+1</button>
         <button onclick="changeLaps(10)" class="w-12 h-12 bg-slate-800 hover:bg-slate-700 rounded-xl flex items-center justify-center text-sm md:text-base font-extrabold shadow-md border-b-4 border-slate-900 active:transform active:translate-y-0.5 text-slate-400">+10</button>
+        <button onclick="changeLaps(100)" class="w-12 h-12 bg-slate-900 hover:bg-slate-800 rounded-xl flex items-center justify-center text-[11px] md:text-xs font-extrabold shadow-md border-b-4 border-slate-950 active:transform active:translate-y-0.5 text-slate-500">+100</button>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 text-left">
@@ -266,7 +268,10 @@
             <div class="absolute left-0 right-0 h-1 bg-indigo-500/50 border-dashed border-t border-indigo-400 top-1/2 -translate-y-1/2"></div>
             
             <div class="absolute left-4 top-2 text-[10px] font-bold text-slate-500">출발 (지구)</div>
-            <div id="track-destination-label" class="absolute right-4 top-2 text-[10px] font-bold text-slate-500 text-right max-w-[120px]">도착 (달)</div>
+            <div id="track-destination-label" class="absolute right-4 top-2 text-[10px] font-bold text-slate-500 text-right max-w-[140px] flex items-center justify-end gap-1">
+              <span id="track-destination-icon" class="text-base leading-none">🌙</span>
+              <span id="track-destination-name">도착 (달)</span>
+            </div>
 
             <!-- 로켓 컨테이너 -->
             <div id="track-car-wrapper" class="absolute left-4 transition-all duration-100 ease-out flex items-center z-10" style="transform: translateX(0%);">
@@ -790,14 +795,15 @@
       if (!targetCard) return;
       targetCard.classList.remove('border-transparent');
       targetCard.classList.add(destination.borderClass);
-      document.getElementById('track-destination-label').textContent = `도착 (${destination.name})`;
+      document.getElementById('track-destination-icon').textContent = destination.icon;
+      document.getElementById('track-destination-name').textContent = `도착 (${destination.name})`;
       sndClick();
     }
 
     function changeLaps(diff) {
       primeUserAudio();
-      // 최대 100장까지 한도 대폭 증가
-      targetLaps = Math.max(1, Math.min(100, targetLaps + diff));
+      // 최대 1000장까지 설정
+      targetLaps = Math.max(1, Math.min(1000, targetLaps + diff));
       document.getElementById('setup-lap-count').textContent = targetLaps;
       sndClick();
     }
@@ -1018,11 +1024,13 @@
       details.innerHTML = '';
       lapRecords.forEach((time, index) => {
         const isBest = time === minTime;
+        const rank = getLapRank(time);
         details.insertAdjacentHTML('beforeend', `
           <div class="flex justify-between items-center py-2 border-b border-slate-900 text-xs md:text-sm">
             <span class="text-slate-400 game-font">🚀 ${index + 1}장째 학습지 완주</span>
             <div class="flex items-center gap-2">
               ${isBest ? '<span class="text-[9px] bg-emerald-600 text-white px-1.5 py-0.5 rounded game-font animate-pulse">초광속 비행기록 ⚡</span>' : ''}
+              <span class="text-[9px] bg-indigo-700 text-indigo-100 px-1.5 py-0.5 rounded game-font">${rank}등</span>
               <span class="font-bold text-slate-100 game-font">${formatTime(time)}</span>
             </div>
           </div>
@@ -1076,6 +1084,10 @@
       return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}.${String(hundredths).padStart(2, '0')}`;
     }
 
+    function getLapRank(time) {
+      return 1 + lapRecords.filter(record => record < time).length;
+    }
+
     function updateLapDashboard() {
       document.getElementById('running-lap-indicator').textContent = `MISSION ${currentLap} / ${targetLaps}`;
       const list = document.getElementById('lap-records-list');
@@ -1083,10 +1095,12 @@
       for (let i = 0; i < targetLaps; i++) {
         const isRecorded = i < lapRecords.length;
         const isCurrent = i === (currentLap - 1);
+        const rank = isRecorded ? getLapRank(lapRecords[i]) : null;
         list.insertAdjacentHTML('beforeend', `
           <div class="flex items-center justify-between p-3 rounded-xl border-2 ${isRecorded ? 'border-emerald-500 bg-emerald-950/30' : isCurrent ? 'border-indigo-500 bg-indigo-500/10 animate-pulse' : 'border-slate-700 bg-slate-900/40'} transition-all text-xs md:text-sm">
             <span class="game-font ${isRecorded ? 'text-emerald-300' : isCurrent ? 'text-indigo-300' : 'text-slate-400'}">#${i + 1}번째 장</span>
             <div class="flex items-center gap-2">
+              ${isRecorded ? `<span class="game-font text-[10px] md:text-xs px-2 py-1 rounded-lg bg-indigo-900/80 text-indigo-100 border border-indigo-500">${rank}등</span>` : ''}
               <span class="game-font font-bold ${isRecorded ? 'text-white' : 'text-slate-500'}">${isRecorded ? formatTime(lapRecords[i]) : isCurrent ? (appState === "LAP_WAITING" ? "출발 대기 중" : "비행 중...") : '대기 중'}🏁</span>
               ${isRecorded ? `<button type="button" onclick="deleteRecordedLap(${i})" class="game-font text-[10px] md:text-xs px-2 py-1 rounded-lg bg-slate-800 hover:bg-rose-700 text-slate-300 hover:text-white border border-slate-600 hover:border-rose-400 transition-colors" aria-label="${i + 1}번째 기록 삭제">삭제</button>` : ''}
             </div>
