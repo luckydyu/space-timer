@@ -88,6 +88,57 @@
       backdrop-filter: blur(8px);
     }
 
+    @media (max-height: 900px) {
+      #main-container {
+        padding-top: 0.5rem !important;
+        padding-bottom: 0.5rem !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+      }
+      #screen-setup {
+        padding: 0.75rem !important;
+        border-radius: 1.25rem !important;
+      }
+      #screen-setup h2 {
+        font-size: 1.8rem !important;
+        line-height: 2rem !important;
+      }
+      #screen-setup > :not([hidden]) ~ :not([hidden]) {
+        margin-top: 0.55rem !important;
+      }
+      #screen-setup .py-2,
+      #screen-setup .md\:py-3 {
+        padding-top: 0.35rem !important;
+        padding-bottom: 0.35rem !important;
+      }
+      #car-category-tabs,
+      #destination-category-tabs {
+        gap: 0.25rem !important;
+        padding-bottom: 0.2rem !important;
+        margin-bottom: 0.2rem !important;
+      }
+      #car-category-tabs button,
+      #destination-category-tabs button {
+        padding: 0.18rem 0.45rem !important;
+        font-size: 0.62rem !important;
+      }
+      #car-selection-grid,
+      #destination-selection-grid {
+        max-height: clamp(118px, 18vh, 168px) !important;
+        gap: 0.35rem !important;
+      }
+      .car-card,
+      .destination-card {
+        min-height: 66px !important;
+        padding: 0.35rem !important;
+      }
+      .car-card span:nth-child(2),
+      .destination-card span:nth-child(2) {
+        font-size: 1.55rem !important;
+        margin-bottom: 0.1rem !important;
+      }
+    }
+
     @keyframes destination-hit {
       0% { transform: translateY(-50%) scale(1) rotate(0deg); opacity: 1; }
       25% { transform: translateY(-50%) scale(1.25) rotate(8deg); opacity: 1; }
@@ -403,7 +454,6 @@
             
             <div id="track-start-label" class="absolute left-4 top-2 text-[10px] font-bold text-slate-500 max-w-[150px] truncate">출발 (번개 로켓)</div>
             <div id="track-destination-label" class="absolute right-4 top-2 text-[10px] font-bold text-slate-500 text-right max-w-[140px] flex items-center justify-end gap-1">
-              <span id="track-destination-icon" class="text-base leading-none">🌙</span>
               <span id="track-destination-name">도착 (Moon)</span>
             </div>
 
@@ -1310,7 +1360,6 @@
       targetCard.classList.add(destination.borderClass);
       scrollCardIntoSelectionView(targetCard, 'destination-selection-grid');
       resetDestinationTarget();
-      document.getElementById('track-destination-icon').textContent = destination.icon;
       document.getElementById('track-destination-target-icon').textContent = destination.icon;
       document.getElementById('track-destination-name').textContent = `도착 (${destination.name})`;
       sndClick();
