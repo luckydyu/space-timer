@@ -83,6 +83,10 @@
       transform: rotate(45deg);
       transform-origin: center;
     }
+
+    .voice-command-modal {
+      backdrop-filter: blur(8px);
+    }
   </style>
 </head>
 <body class="bg-space text-white min-h-screen flex flex-col justify-between select-none overflow-y-auto">
@@ -208,12 +212,36 @@
             <p class="text-[11px] text-slate-400">시작/스타트/시작해/출발/가자, 끝/스탑/멈춰/완료/도착/풀었을 인식합니다.</p>
           </div>
         </div>
-        <label class="relative inline-flex items-center cursor-pointer">
-          <input type="checkbox" id="mic-toggle-input" class="sr-only peer" onchange="toggleSpeechRecognition()" checked>
-          <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
-        </label>
+        <div class="flex items-center gap-3">
+          <button type="button" onclick="openVoiceCommandHelp()" class="game-font text-xs px-3 py-2 rounded-xl bg-indigo-800 hover:bg-indigo-700 text-indigo-100 border border-indigo-500 shadow-md">
+            명령어 보기
+          </button>
+          <label class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="mic-toggle-input" class="sr-only peer" onchange="toggleSpeechRecognition()" checked>
+            <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+          </label>
+        </div>
       </div>
       <div id="mic-support-alert" class="text-xs text-slate-400 hidden"></div>
+
+      <div id="voice-command-modal" class="voice-command-modal hidden fixed inset-0 z-50 bg-slate-950/70 flex items-center justify-center p-4">
+        <div class="w-full max-w-2xl bg-slate-900 border-4 border-indigo-500 rounded-2xl shadow-2xl p-4 md:p-5 text-left">
+          <div class="flex items-center justify-between gap-3 border-b border-slate-700 pb-3 mb-3">
+            <h3 class="game-font text-xl text-indigo-200">음성 명령어</h3>
+            <button type="button" onclick="closeVoiceCommandHelp()" class="game-font px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600">닫기</button>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <h4 class="game-font text-emerald-300 mb-2">시작 계열</h4>
+              <div id="voice-start-command-list" class="max-h-52 overflow-y-auto rounded-xl bg-slate-950/70 border border-slate-700 p-3 text-xs leading-relaxed text-slate-200"></div>
+            </div>
+            <div>
+              <h4 class="game-font text-rose-300 mb-2">완료 계열</h4>
+              <div id="voice-finish-command-list" class="max-h-52 overflow-y-auto rounded-xl bg-slate-950/70 border border-slate-700 p-3 text-xs leading-relaxed text-slate-200"></div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <!-- 즉시 시작하기 큰 버튼 -->
       <button onclick="enterMissionReady()" class="w-full game-font text-2xl md:text-3xl py-2.5 md:py-3 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-slate-950 rounded-2xl border-b-8 border-amber-700 shadow-xl transition-all active:transform active:translate-y-1 transform hover:scale-[1.01]">
@@ -270,7 +298,7 @@
             <div class="absolute left-4 top-2 text-[10px] font-bold text-slate-500">출발 (지구)</div>
             <div id="track-destination-label" class="absolute right-4 top-2 text-[10px] font-bold text-slate-500 text-right max-w-[140px] flex items-center justify-end gap-1">
               <span id="track-destination-icon" class="text-base leading-none">🌙</span>
-              <span id="track-destination-name">도착 (달)</span>
+              <span id="track-destination-name">도착 (Moon)</span>
             </div>
 
             <!-- 로켓 컨테이너 -->
@@ -382,8 +410,20 @@
     let totalElapsedMs = 0;
     let currentLapElapsed = 0;
     let lapRecords = [];
-    const START_COMMANDS = ["시작", "스타트", "시작해", "출발", "가자"];
-    const FINISH_COMMANDS = ["끝", "스탑", "멈춰", "완료", "도착", "풀었"];
+    const START_COMMANDS = [
+      "시작", "시작해", "시자", "시작께", "시자케", "시작하", "시작한다", "시작할게", "시작하자",
+      "스타트", "스타뜨", "스타", "스따트", "스탓", "스타투", "start", "go", "고", "고고",
+      "출발", "출바", "출발해", "출발하자", "출발한다", "출바알", "가자", "가즈아", "가", "간다",
+      "런", "러닝", "시동", "시동켜", "엔진", "엔진켜"
+    ];
+    const FINISH_COMMANDS = [
+      "끝", "끄읕", "끗", "끝내", "끝났어", "끝났다", "끝이야", "끝내자", "끝났", "끝남",
+      "스탑", "스톱", "스톱해", "스탑해", "스또프", "스톱프", "stop", "스탑한다",
+      "멈춰", "멈처", "멈춰라", "멈추", "멈추자", "멈췄어", "멈춤", "정지", "정지해",
+      "완료", "완료해", "완료했어", "완료다", "다했어", "다했다", "다함", "다풀었어",
+      "도착", "도착해", "도착했어", "도차", "도차악", "골", "골인", "피니시", "finish",
+      "풀었", "풀었어", "풀었다", "풀었어요", "다 풀었어", "다 풀었어요"
+    ];
     const CAR_BORDER_CLASSES = [
       "border-red-500", "border-blue-500", "border-yellow-500", "border-cyan-500",
       "border-violet-500", "border-amber-400", "border-sky-400", "border-lime-400",
@@ -395,6 +435,7 @@
       "text-orange-300", "text-pink-300"
     ];
     const ROCKET_ICONS = ["🚀", "🛰️", "🛸", "✈️", "🛩️", "🔥", "☄️", "🌠", "🧑‍🚀", "🔭"];
+    const SIDEWAYS_ROCKET_ICONS = new Set(["🚀", "✈️", "🛩️", "☄️", "🌠"]);
     const ROCKET_NAMES = [
       "Saturn V", "Saturn IB", "Juno I", "Juno II", "Redstone", "Mercury-Redstone", "Atlas LV-3B", "Atlas-Agena", "Atlas-Centaur", "Titan I",
       "Titan II", "Titan IIIA", "Titan IIIB", "Titan IIIC", "Titan IIID", "Titan IIIE", "Titan 23G", "Titan IV", "Titan IVB", "Minotaur I",
@@ -436,23 +477,25 @@
       const number = index + 1;
       return [`car-${number}`, {
         emoji: ROCKET_ICONS[index % ROCKET_ICONS.length],
+        number,
         label: name,
+        isSideways: SIDEWAYS_ROCKET_ICONS.has(ROCKET_ICONS[index % ROCKET_ICONS.length]),
         borderClass: CAR_BORDER_CLASSES[index % CAR_BORDER_CLASSES.length],
         textClass: CAR_TEXT_CLASSES[index % CAR_TEXT_CLASSES.length]
       }];
     }));
     const DESTINATION_ICONS = ["🌙", "🪐", "🌕", "☄️", "⭐", "🌌", "✨", "🔭", "🕳️", "💫"];
     const NAMED_DESTINATIONS = [
-      "달", "수성", "금성", "화성", "목성", "토성", "천왕성", "해왕성", "명왕성", "세레스",
-      "에리스", "하우메아", "마케마케", "이오", "유로파", "가니메데", "칼리스토", "타이탄", "엔셀라두스", "미마스",
-      "테티스", "디오네", "레아", "이아페투스", "트리톤", "네레이드", "카론", "닉스", "히드라", "케르베로스",
-      "스틱스", "포보스", "데이모스", "베스타", "팔라스", "히기에이아", "에로스", "이다", "베누", "류구",
-      "아로코스", "태양", "시리우스", "베텔게우스", "리겔", "베가", "알타이르", "데네브", "폴라리스", "프로키온",
-      "아크투루스", "카펠라", "알데바란", "스피카", "안타레스", "포말하우트", "카노푸스", "알파 센타우리", "프록시마 센타우리", "바너드별",
-      "트라피스트-1", "안드로메다 은하", "삼각형자리 은하", "대마젤란 은하", "소마젤란 은하", "우리 은하", "소용돌이 은하", "솜브레로 은하", "바람개비 은하", "검은눈 은하",
-      "시가 은하", "조각가 은하", "켄타우루스 A", "오리온 성운", "독수리 성운", "게 성운", "석호 성운", "삼렬 성운", "고리 성운", "헬릭스 성운",
-      "말머리 성운", "장미 성운", "타란툴라 성운", "카리나 성운", "고양이눈 성운", "플레이아데스", "히아데스", "오메가 성단", "큰부리새자리 47", "헤라클레스 구상성단",
-      "궁수자리 A*", "M87*", "백조자리 X-1", "벨라 펄서", "게 펄서", "케플러-22b", "프록시마 b", "트라피스트-1e", "페가수스자리 51 b", "HD 209458 b",
+      "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto", "Ceres",
+      "Eris", "Haumea", "Makemake", "Io", "Europa", "Ganymede", "Callisto", "Titan", "Enceladus", "Mimas",
+      "Tethys", "Dione", "Rhea", "Iapetus", "Triton", "Nereid", "Charon", "Nix", "Hydra", "Kerberos",
+      "Styx", "Phobos", "Deimos", "Vesta", "Pallas", "Hygiea", "Eros", "Ida", "Bennu", "Ryugu",
+      "Arrokoth", "Sun", "Sirius", "Betelgeuse", "Rigel", "Vega", "Altair", "Deneb", "Polaris", "Procyon",
+      "Arcturus", "Capella", "Aldebaran", "Spica", "Antares", "Fomalhaut", "Canopus", "Alpha Centauri", "Proxima Centauri", "Barnard's Star",
+      "TRAPPIST-1", "Andromeda Galaxy", "Triangulum Galaxy", "Large Magellanic Cloud", "Small Magellanic Cloud", "Milky Way", "Whirlpool Galaxy", "Sombrero Galaxy", "Pinwheel Galaxy", "Black Eye Galaxy",
+      "Cigar Galaxy", "Sculptor Galaxy", "Centaurus A", "Orion Nebula", "Eagle Nebula", "Crab Nebula", "Lagoon Nebula", "Trifid Nebula", "Ring Nebula", "Helix Nebula",
+      "Horsehead Nebula", "Rosette Nebula", "Tarantula Nebula", "Carina Nebula", "Cat's Eye Nebula", "Pleiades", "Hyades", "Omega Centauri", "47 Tucanae", "Hercules Globular Cluster",
+      "Sagittarius A*", "M87*", "Cygnus X-1", "Vela Pulsar", "Crab Pulsar", "Kepler-22b", "Proxima b", "TRAPPIST-1e", "51 Pegasi b", "HD 209458 b",
       "TRAPPIST-1b", "TRAPPIST-1c", "TRAPPIST-1d", "TRAPPIST-1f", "TRAPPIST-1g", "TRAPPIST-1h", "Kepler-10b", "Kepler-16b", "Kepler-62e", "Kepler-62f",
       "Kepler-69c", "Kepler-90i", "Kepler-186f", "Kepler-452b", "TOI-700 d", "TOI-700 e", "LHS 1140 b", "GJ 1214 b", "55 Cancri e", "Upsilon Andromedae b"
     ];
@@ -465,6 +508,7 @@
       const number = index + 1;
       return [`destination-${number}`, {
         name,
+        number,
         icon: DESTINATION_ICONS[index % DESTINATION_ICONS.length],
         borderClass: CAR_BORDER_CLASSES[index % CAR_BORDER_CLASSES.length],
         textClass: CAR_TEXT_CLASSES[index % CAR_TEXT_CLASSES.length]
@@ -627,8 +671,28 @@
     }
 
     function matchesVoiceCommand(text, commands) {
-      const normalizedText = String(text).replace(/\s+/g, '').toLowerCase();
-      return commands.some(command => normalizedText.includes(command.replace(/\s+/g, '').toLowerCase()));
+      const normalizeVoiceText = value => String(value).toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
+      const normalizedText = normalizeVoiceText(text);
+      return commands.some(command => normalizedText.includes(normalizeVoiceText(command)));
+    }
+
+    function renderVoiceCommandHelp() {
+      const renderCommandPills = commands => commands.map(command =>
+        `<span class="inline-block mr-1.5 mb-1.5 px-2 py-1 rounded-lg bg-slate-800 border border-slate-600 text-slate-100 game-font">${command}</span>`
+      ).join('');
+      const startList = document.getElementById('voice-start-command-list');
+      const finishList = document.getElementById('voice-finish-command-list');
+      if (startList) startList.innerHTML = renderCommandPills(START_COMMANDS);
+      if (finishList) finishList.innerHTML = renderCommandPills(FINISH_COMMANDS);
+    }
+
+    function openVoiceCommandHelp() {
+      renderVoiceCommandHelp();
+      document.getElementById('voice-command-modal').classList.remove('hidden');
+    }
+
+    function closeVoiceCommandHelp() {
+      document.getElementById('voice-command-modal').classList.add('hidden');
     }
 
     // --- 2. 가상 음성 명령 시뮬레이션 시스템 ---
@@ -742,8 +806,9 @@
       const grid = document.getElementById('car-selection-grid');
       if (!grid) return;
       grid.innerHTML = Object.entries(CARS).map(([id, car]) => `
-        <button type="button" onclick="selectCar('${id}')" id="car-select-${id}" class="car-card cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-2 transition-all transform hover:-translate-y-1 text-center min-h-[96px] flex flex-col justify-center">
-          <span class="text-3xl md:text-4xl block mb-1">${car.emoji}</span>
+        <button type="button" onclick="selectCar('${id}')" id="car-select-${id}" class="car-card relative cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-2 transition-all transform hover:-translate-y-1 text-center min-h-[96px] flex flex-col justify-center">
+          <span class="absolute left-1.5 top-1.5 min-w-5 px-1 rounded-md bg-slate-950/80 text-[9px] font-bold text-slate-300 border border-slate-600">${car.number}</span>
+          <span class="${car.isSideways ? 'sideways-flight' : 'inline-block'} text-3xl md:text-4xl block mb-1">${car.emoji}</span>
           <span class="game-font text-[9px] md:text-[10px] ${car.textClass} leading-tight break-keep">${car.label}</span>
         </button>
       `).join('');
@@ -753,7 +818,8 @@
       const grid = document.getElementById('destination-selection-grid');
       if (!grid) return;
       grid.innerHTML = Object.entries(DESTINATIONS).map(([id, destination]) => `
-        <button type="button" onclick="selectDestination('${id}')" id="destination-select-${id}" class="destination-card cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-2 transition-all transform hover:-translate-y-1 text-center min-h-[96px] flex flex-col justify-center">
+        <button type="button" onclick="selectDestination('${id}')" id="destination-select-${id}" class="destination-card relative cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-2 transition-all transform hover:-translate-y-1 text-center min-h-[96px] flex flex-col justify-center">
+          <span class="absolute left-1.5 top-1.5 min-w-5 px-1 rounded-md bg-slate-950/80 text-[9px] font-bold text-slate-300 border border-slate-600">${destination.number}</span>
           <span class="text-3xl md:text-4xl block mb-1">${destination.icon}</span>
           <span class="game-font text-[9px] md:text-[10px] ${destination.textClass} leading-tight break-keep">${destination.name}</span>
         </button>
@@ -775,7 +841,9 @@
       targetCard.classList.remove('border-transparent');
       targetCard.classList.add(CARS[color].borderClass);
 
-      document.getElementById('track-car').innerHTML = CARS[color].emoji;
+      const trackCar = document.getElementById('track-car');
+      trackCar.innerHTML = CARS[color].emoji;
+      trackCar.classList.toggle('sideways-flight', CARS[color].isSideways);
       document.getElementById('result-car-emoji').innerHTML = CARS[color].emoji;
       sndClick();
     }
