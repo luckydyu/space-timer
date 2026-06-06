@@ -184,48 +184,7 @@
       </div>
 
       <!-- 로켓 선택 -->
-      <div id="car-selection-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-3 md:gap-4">
-        <div onclick="selectCar('red')" id="car-select-red" class="car-card cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-red-500 rounded-2xl p-3 md:p-4 transition-all transform hover:-translate-y-1 text-center">
-          <span class="text-4xl md:text-5xl block mb-1 md:mb-2">🚀</span>
-          <span class="game-font text-[10px] md:text-xs text-red-400">레드 호크</span>
-        </div>
-        <div onclick="selectCar('blue')" id="car-select-blue" class="car-card cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-3 md:p-4 transition-all transform hover:-translate-y-1 text-center">
-          <span class="text-4xl md:text-5xl block mb-1 md:mb-2">☄️</span>
-          <span class="game-font text-[10px] md:text-xs text-blue-400">블루 코멧</span>
-        </div>
-        <div onclick="selectCar('gold')" id="car-select-gold" class="car-card cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-3 md:p-4 transition-all transform hover:-translate-y-1 text-center">
-          <span class="text-4xl md:text-5xl block mb-1 md:mb-2">🛸</span>
-          <span class="game-font text-[10px] md:text-xs text-yellow-400">골드 UFO</span>
-        </div>
-        <div onclick="selectCar('satellite')" id="car-select-satellite" class="car-card cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-3 md:p-4 transition-all transform hover:-translate-y-1 text-center">
-          <span class="text-4xl md:text-5xl block mb-1 md:mb-2">🛰️</span>
-          <span class="game-font text-[10px] md:text-xs text-cyan-400">실버 위성</span>
-        </div>
-        <div onclick="selectCar('planet')" id="car-select-planet" class="car-card cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-3 md:p-4 transition-all transform hover:-translate-y-1 text-center">
-          <span class="text-4xl md:text-5xl block mb-1 md:mb-2">🪐</span>
-          <span class="game-font text-[10px] md:text-xs text-violet-400">링 플래닛</span>
-        </div>
-        <div onclick="selectCar('star')" id="car-select-star" class="car-card cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-3 md:p-4 transition-all transform hover:-translate-y-1 text-center">
-          <span class="text-4xl md:text-5xl block mb-1 md:mb-2">⭐</span>
-          <span class="game-font text-[10px] md:text-xs text-amber-300">스타 버스트</span>
-        </div>
-        <div onclick="selectCar('comet')" id="car-select-comet" class="car-card cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-3 md:p-4 transition-all transform hover:-translate-y-1 text-center">
-          <span class="text-4xl md:text-5xl block mb-1 md:mb-2">🌠</span>
-          <span class="game-font text-[10px] md:text-xs text-sky-300">슈팅스타</span>
-        </div>
-        <div onclick="selectCar('alien')" id="car-select-alien" class="car-card cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-3 md:p-4 transition-all transform hover:-translate-y-1 text-center">
-          <span class="text-4xl md:text-5xl block mb-1 md:mb-2">👾</span>
-          <span class="game-font text-[10px] md:text-xs text-lime-300">네온 탐험가</span>
-        </div>
-        <div onclick="selectCar('robot')" id="car-select-robot" class="car-card cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-3 md:p-4 transition-all transform hover:-translate-y-1 text-center">
-          <span class="text-4xl md:text-5xl block mb-1 md:mb-2">🤖</span>
-          <span class="game-font text-[10px] md:text-xs text-orange-300">로보 파일럿</span>
-        </div>
-        <div onclick="selectCar('astronaut')" id="car-select-astronaut" class="car-card cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-3 md:p-4 transition-all transform hover:-translate-y-1 text-center">
-          <span class="text-4xl md:text-5xl block mb-1 md:mb-2">🧑‍🚀</span>
-          <span class="game-font text-[10px] md:text-xs text-pink-300">우주 대장</span>
-        </div>
-      </div>
+      <div id="car-selection-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-3 md:gap-4 max-h-[236px] md:max-h-[264px] overflow-y-auto pr-1 rounded-2xl"></div>
 
       <!-- 음성 인식 제어 스위치 추가 (실습형 기능) -->
       <div class="bg-slate-900 border border-indigo-500/30 rounded-2xl p-4 text-left flex items-center justify-between gap-4">
@@ -389,27 +348,6 @@
 
   </main>
 
-  <!-- ==================== 음성 입력 모킹 컨트롤러 (테스트용) ==================== -->
-  <section class="bg-slate-900 border-t-4 border-slate-800 px-4 py-4 z-20">
-    <div class="max-w-xl mx-auto flex flex-col items-center gap-3">
-      <div class="text-center">
-        <span class="game-font text-xs md:text-sm text-indigo-400 font-bold">🎤 아동용 음성 인식 프리뷰 시뮬레이터</span>
-        <p class="text-[10px] text-slate-400">마이크 연동 없이 아래 테스트 버튼으로 "음성 명령"을 가상으로 작동시킵니다.</p>
-      </div>
-      
-      <div class="flex gap-3 w-full justify-center">
-        <!-- 시작 계열 음성 명령 모킹 버튼 -->
-        <button id="mock-voice-start" onclick="simulateVoiceCommand('시작')" class="flex-1 max-w-[260px] bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl py-2 px-3 flex items-center justify-center gap-2 border-b-4 border-indigo-900 active:translate-y-0.5 active:border-b-0 transition-all text-[11px] md:text-xs game-font leading-tight">
-          💬 시작/스타트/시작해/출발/가자
-        </button>
-        <!-- 완료 계열 음성 명령 모킹 버튼 -->
-        <button id="mock-voice-finish" onclick="simulateVoiceCommand('끝')" class="flex-1 max-w-[260px] bg-rose-600 hover:bg-rose-500 text-white rounded-xl py-2 px-3 flex items-center justify-center gap-2 border-b-4 border-rose-900 active:translate-y-0.5 active:border-b-0 transition-all text-[11px] md:text-xs game-font leading-tight opacity-40 cursor-not-allowed" disabled>
-          💬 끝/스탑/멈춰/완료/도착/풀었
-        </button>
-      </div>
-    </div>
-  </section>
-
   <!-- ==================== 푸터 영역 ==================== -->
   <footer class="bg-slate-950 p-2 text-center border-t border-slate-900 z-10 relative">
     <p class="text-[10px] text-slate-600">© 2026 Space Study Racer. 아이가 공부에 몰입할 수 있도록 돕습니다!</p>
@@ -421,7 +359,7 @@
     let appState = "SETUP"; // SETUP, COUNTDOWN, FOCUS, LAP_WAITING, ANIMATING, RESULT
     let targetLaps = 10;
     let currentLap = 1;
-    let chosenCar = "red";
+    let chosenCar = "car-1";
     let timerInterval = null;
     let lapStartTime = 0;
     let totalElapsedMs = 0;
@@ -429,18 +367,37 @@
     let lapRecords = [];
     const START_COMMANDS = ["시작", "스타트", "시작해", "출발", "가자"];
     const FINISH_COMMANDS = ["끝", "스탑", "멈춰", "완료", "도착", "풀었"];
-    const CARS = { 
-      red: { emoji: "🚀", borderClass: "border-red-500" }, 
-      blue: { emoji: "☄️", borderClass: "border-blue-500" }, 
-      gold: { emoji: "🛸", borderClass: "border-yellow-500" },
-      satellite: { emoji: "🛰️", borderClass: "border-cyan-500" },
-      planet: { emoji: "🪐", borderClass: "border-violet-500" },
-      star: { emoji: "⭐", borderClass: "border-amber-400" },
-      comet: { emoji: "🌠", borderClass: "border-sky-400" },
-      alien: { emoji: "👾", borderClass: "border-lime-400" },
-      robot: { emoji: "🤖", borderClass: "border-orange-400" },
-      astronaut: { emoji: "🧑‍🚀", borderClass: "border-pink-400" } 
-    };
+    const CAR_BORDER_CLASSES = [
+      "border-red-500", "border-blue-500", "border-yellow-500", "border-cyan-500",
+      "border-violet-500", "border-amber-400", "border-sky-400", "border-lime-400",
+      "border-orange-400", "border-pink-400"
+    ];
+    const CAR_TEXT_CLASSES = [
+      "text-red-400", "text-blue-400", "text-yellow-400", "text-cyan-400",
+      "text-violet-400", "text-amber-300", "text-sky-300", "text-lime-300",
+      "text-orange-300", "text-pink-300"
+    ];
+    const CAR_EMOJIS = [
+      "🚀","☄️","🛸","🛰️","🪐","⭐","🌠","👾","🤖","🧑‍🚀",
+      "🌙","☀️","🌎","🌍","🌏","✨","💫","🌟","🦄","🐲",
+      "🐉","🦖","🦕","🐙","🦑","🐳","🐬","🦈","🐢","🦋",
+      "🐝","🐞","🦜","🦚","🦩","🦢","🦉","🦅","🐧","🐥",
+      "🐸","🐹","🐰","🦊","🐼","🐨","🐯","🦁","🐵","🙈",
+      "🚗","🏎️","🚓","🚕","🚌","🚑","🚒","🚜","🛵","🏍️",
+      "🚲","🛴","🚁","✈️","🛩️","⛵","🚤","🛥️","🚂","🚆",
+      "🎈","🎯","🎮","🕹️","🎲","🧩","🏆","🥇","⚽","🏀",
+      "🏈","⚾","🎾","🏐","🏓","🥏","🪁","🎸","🎺","🥁",
+      "🍎","🍊","🍋","🍉","🍇","🍓","🍒","🍩","🍪","🍭"
+    ];
+    const CARS = Object.fromEntries(CAR_EMOJIS.map((emoji, index) => {
+      const number = index + 1;
+      return [`car-${number}`, {
+        emoji,
+        label: `그림 ${number}`,
+        borderClass: CAR_BORDER_CLASSES[index % CAR_BORDER_CLASSES.length],
+        textClass: CAR_TEXT_CLASSES[index % CAR_TEXT_CLASSES.length]
+      }];
+    }));
 
     // --- 1. 실제 마이크 음성 인식 시스템 (Web Speech API) ---
     let recognition = null;
@@ -651,6 +608,7 @@
     function updateMockControls() {
       const startBtn = document.getElementById('mock-voice-start');
       const finishBtn = document.getElementById('mock-voice-finish');
+      if (!startBtn || !finishBtn) return;
 
       if (appState === "SETUP" || appState === "LAP_WAITING") {
         startBtn.classList.remove('opacity-40', 'cursor-not-allowed');
@@ -708,6 +666,17 @@
 
 
     // --- 3. 기본 UI 세팅 조작 ---
+    function renderCarSelectionGrid() {
+      const grid = document.getElementById('car-selection-grid');
+      if (!grid) return;
+      grid.innerHTML = Object.entries(CARS).map(([id, car]) => `
+        <button type="button" onclick="selectCar('${id}')" id="car-select-${id}" class="car-card cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-3 md:p-4 transition-all transform hover:-translate-y-1 text-center">
+          <span class="text-4xl md:text-5xl block mb-1 md:mb-2">${car.emoji}</span>
+          <span class="game-font text-[10px] md:text-xs ${car.textClass}">${car.label}</span>
+        </button>
+      `).join('');
+    }
+
     function selectCar(color, shouldPrimeAudio = true) {
       if (shouldPrimeAudio) primeUserAudio();
       chosenCar = color;
@@ -719,6 +688,7 @@
       });
       
       const targetCard = document.getElementById(`car-select-${color}`);
+      if (!targetCard || !CARS[color]) return;
       targetCard.classList.remove('border-transparent');
       targetCard.classList.add(CARS[color].borderClass);
 
@@ -1103,8 +1073,9 @@
       }
     }
 
-    // 초기 로드 시 차량 기본값 바인딩
-    selectCar('red', false);
+    // 초기 로드 시 그림 선택지와 기본값 바인딩
+    renderCarSelectionGrid();
+    selectCar('car-1', false);
     startRealSpeechEngine();
   </script>
 </body>
