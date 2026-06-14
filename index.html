@@ -928,13 +928,27 @@
       isRealSpeechActive = toggle.checked;
 
       if (isRealSpeechActive) {
-        startRealSpeechEngine();
+        if (appState === "SETUP") {
+          setSpeechRecognitionWaitingStatus();
+        } else {
+          startRealSpeechEngine();
+        }
       } else {
         stopRealSpeechEngine();
       }
     }
 
+    function setSpeechRecognitionWaitingStatus() {
+      document.getElementById('status-dot').className = "w-2.5 h-2.5 rounded-full bg-yellow-500";
+      document.getElementById('status-text').textContent = "첫 미션부터 마이크 대기";
+    }
+
     function startRealSpeechEngine() {
+      if (appState === "SETUP") {
+        setSpeechRecognitionWaitingStatus();
+        return;
+      }
+
       initAudio();
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -968,7 +982,7 @@
 
         recognition.onend = function() {
           // 음성 인식이 꺼지면 상태가 진행 중이거나 대기 중일 때 자동 리스타트하여 상시 가동
-          if (isRealSpeechActive && !isRecognitionPausedForSpeech && appState !== "RESULT") {
+          if (isRealSpeechActive && !isRecognitionPausedForSpeech && appState !== "SETUP" && appState !== "RESULT") {
             try { recognition.start(); } catch(e){}
           }
         };
@@ -1398,6 +1412,10 @@
 
       createParticles();
       prepareNextLap();
+
+      if (isRealSpeechActive) {
+        startRealSpeechEngine();
+      }
     }
 
     function startCountdown() {
@@ -1625,9 +1643,9 @@
       appState = "SETUP";
       updateMockControls();
       
-      // 토글 상태에 따라 마이크 상시 재가동
+      // 첫 화면에서는 마이크를 실제로 켜지 않고, 다음 미션 화면부터 대기한다.
       if (isRealSpeechActive) {
-        startRealSpeechEngine();
+        setSpeechRecognitionWaitingStatus();
       }
 
       document.getElementById('screen-result').classList.add('hidden');
@@ -1770,7 +1788,7 @@
     renderCarSelectionGrid();
     renderDestinationSelectionGrid();
     randomizeMissionSelection(false);
-    startRealSpeechEngine();
+    setSpeechRecognitionWaitingStatus();
   </script>
 </body>
 </html>
