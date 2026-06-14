@@ -3,6 +3,8 @@
   let raceStats = null;
   let raceView = null;
   let resultView = null;
+  let setupView = null;
+  let kitanPlan = null;
   let audio = null;
   let speech = null;
   let effects = null;
@@ -12,6 +14,8 @@
     raceStats = options.raceStats;
     raceView = options.raceView;
     resultView = options.resultView;
+    setupView = options.setupView;
+    kitanPlan = options.kitanPlan;
     audio = options.audio;
     speech = options.speech;
     effects = options.effects;
@@ -36,6 +40,8 @@
     state.lapRecords = [];
     state.totalElapsedMs = 0;
     state.currentLapElapsed = 0;
+    state.kitanMissionStartIndex = kitanPlan.getNextStartIndex();
+    state.kitanMissionPageCount = state.targetLaps;
     if (state.timerInterval) clearInterval(state.timerInterval);
 
     raceView.showMissionReadyScreen();
@@ -150,6 +156,8 @@
 
   function finishRace() {
     state.appState = 'RESULT';
+    kitanPlan.advanceNextStart(state.kitanMissionPageCount);
+    setupView.renderKitanPlan();
     raceView.updateMockControls();
     speech.stopRealSpeechEngine();
     resultView.showResultScreen();

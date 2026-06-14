@@ -22,12 +22,51 @@ test('loads setup screen without starting speech recognition immediately', async
 });
 
 test('updates lap target within the setup screen bounds', async ({ page }) => {
-  await page.getByRole('button', { name: '+1', exact: true }).click();
+  await page.locator('button[data-lap-diff="1"]').click();
   await expect(page.locator('#setup-lap-count')).toHaveText('11');
+  await expect(page.locator('#kitan-current-range')).toHaveText('F-1 1~11장');
 
-  await page.getByRole('button', { name: '-10', exact: true }).click();
-  await page.getByRole('button', { name: '-10', exact: true }).click();
+  await page.locator('button[data-lap-diff="-10"]').click();
+  await page.locator('button[data-lap-diff="-10"]').click();
   await expect(page.locator('#setup-lap-count')).toHaveText('1');
+  await expect(page.locator('#kitan-current-range')).toHaveText('F-1 1장');
+});
+
+test('shows Kitan start range and calendar plan by series color', async ({ page }) => {
+  await expect(page.locator('#kitan-current-range')).toHaveText('F-1 1~10장');
+
+  await page.locator('button[data-kitan-page-diff="10"]').click();
+  await expect(page.locator('#kitan-current-range')).toHaveText('F-1 11~20장');
+  await page.locator('button[data-kitan-page-diff="-10"]').click();
+  await expect(page.locator('#kitan-current-range')).toHaveText('F-1 1~10장');
+
+  await page.locator('#kitan-page-input').fill('11');
+  await page.locator('#kitan-page-input').blur();
+  await expect(page.locator('#kitan-current-range')).toHaveText('F-1 11~20장');
+
+  await page.locator('#kitan-series-select').selectOption('G');
+  await page.locator('#kitan-book-select').selectOption('2');
+  await page.locator('#kitan-page-input').fill('5');
+  await page.locator('#kitan-page-input').blur();
+  await expect(page.locator('#kitan-current-range')).toHaveText('G-2 5~14장');
+
+  await page.locator('button[data-action="open-kitan-calendar"]').click();
+  await expect(page.locator('#kitan-calendar-modal')).not.toHaveClass(hiddenClass);
+  await expect.poll(async () => page.locator('.kitan-calendar-month').count()).toBeGreaterThan(1);
+  await expect.poll(async () => page.locator('.kitan-calendar-weekday').count()).toBeGreaterThan(7);
+  await expect.poll(async () => page.locator('.kitan-calendar-day').count()).toBeGreaterThanOrEqual(35);
+  await expect(page.locator('.kitan-calendar-day.is-today')).toContainText('오늘');
+  await expect(page.locator('.kitan-calendar-day.is-today')).toContainText('G-2 5~14장');
+  await expect(page.locator('.kitan-calendar-day.is-today')).toHaveClass(/kitan-series-G/);
+  await expect(page.locator('.kitan-series-chip.kitan-series-G')).toHaveText('G');
+  await expect.poll(async () => page.locator('.kitan-calendar-weekday.is-sunday').count()).toBeGreaterThan(1);
+  await expect.poll(async () => page.locator('.kitan-calendar-weekday.is-saturday').count()).toBeGreaterThan(1);
+  await expect.poll(async () => page.locator('.kitan-calendar-day.is-sunday').count()).toBeGreaterThan(1);
+  await expect.poll(async () => page.locator('.kitan-calendar-day.is-saturday').count()).toBeGreaterThan(1);
+  await expect(page.locator('#kitan-calendar-list')).toContainText('G-2 15~24장');
+
+  await page.locator('button[data-action="close-kitan-calendar"]').click();
+  await expect(page.locator('#kitan-calendar-modal')).toHaveClass(hiddenClass);
 });
 
 test('stores up to three favorite rockets and destinations locally', async ({ page }) => {

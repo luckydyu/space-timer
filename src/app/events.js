@@ -3,16 +3,26 @@
     const { dom, handlers } = options;
 
     dom.byId('mic-toggle-input')?.addEventListener('change', handlers.toggleSpeechRecognition);
+    document.addEventListener('change', event => {
+      const target = dom.closest(event.target, '[data-kitan-field]');
+      if (!target) return;
+      handlers.updateKitanStart(target.dataset.kitanField, target.value);
+    });
 
     document.addEventListener('click', event => {
       const target = dom.closest(
         event.target,
-        '[data-action], [data-lap-diff], [data-car-id], [data-destination-id], [data-favorite-car-id], [data-favorite-destination-id], [data-remove-favorite-car-id], [data-remove-favorite-destination-id], [data-delete-lap-index]'
+        '[data-action], [data-lap-diff], [data-kitan-page-diff], [data-car-id], [data-destination-id], [data-favorite-car-id], [data-favorite-destination-id], [data-remove-favorite-car-id], [data-remove-favorite-destination-id], [data-delete-lap-index]'
       );
       if (!target) return;
 
       if (target.dataset.lapDiff !== undefined) {
         handlers.changeLaps(Number(target.dataset.lapDiff));
+        return;
+      }
+
+      if (target.dataset.kitanPageDiff !== undefined) {
+        handlers.changeKitanPage(Number(target.dataset.kitanPageDiff));
         return;
       }
 
@@ -55,6 +65,8 @@
       const actionHandlers = {
         'open-voice-help': handlers.openVoiceCommandHelp,
         'close-voice-help': handlers.closeVoiceCommandHelp,
+        'open-kitan-calendar': handlers.openKitanCalendar,
+        'close-kitan-calendar': handlers.closeKitanCalendar,
         'randomize-mission': handlers.randomizeMissionSelection,
         'enter-mission-ready': handlers.enterMissionReady,
         'main-action': handlers.handleMainAction,

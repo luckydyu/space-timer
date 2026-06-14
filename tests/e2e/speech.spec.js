@@ -28,7 +28,7 @@ test('starts speech recognition only after moving past setup', async ({ page }) 
 });
 
 test('uses speech commands during mission flow', async ({ page }) => {
-  await page.getByRole('button', { name: '-10', exact: true }).click();
+  await page.locator('button[data-lap-diff="-10"]').click();
   await page.getByRole('button', { name: '🏁 경기 시작하기 (터치!)' }).click();
 
   await emitSpeechResult(page, '가');

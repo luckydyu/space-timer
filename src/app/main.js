@@ -10,6 +10,7 @@ const byId = id => dom.byId(id);
 const raceStats = window.SpaceTimerRaceStats;
 const effectsService = window.SpaceTimerEffects;
 const preferences = window.SpaceTimerPreferences;
+const kitanPlan = window.SpaceTimerKitanPlan;
 
 
 // --- 1. 실제 마이크 음성 인식 시스템 (Web Speech API) ---
@@ -37,6 +38,7 @@ setupView.init({
   data: window.SpaceTimerData,
   dom,
   preferences,
+  kitanPlan,
   primeUserAudio,
   playClick: sndClick
 });
@@ -55,19 +57,27 @@ const toggleFavoriteDestination = id => setupView.toggleFavoriteDestination(id);
 const removeFavoriteCar = id => setupView.removeFavoriteCar(id);
 const removeFavoriteDestination = id => setupView.removeFavoriteDestination(id);
 const changeLaps = diff => setupView.changeLaps(diff);
+const renderKitanStartOptions = () => setupView.renderKitanStartOptions();
+const renderKitanPlan = () => setupView.renderKitanPlan();
+const updateKitanStart = (field, value) => setupView.updateKitanStart(field, value);
+const changeKitanPage = diff => setupView.changeKitanPage(diff);
+const openKitanCalendar = () => setupView.openKitanCalendar();
+const closeKitanCalendar = () => setupView.closeKitanCalendar();
 
 const raceView = window.SpaceTimerRaceView;
 raceView.init({
   state,
   dom,
   raceStats,
-  setupView
+  setupView,
+  kitanPlan
 });
 const resultView = window.SpaceTimerResultView;
 resultView.init({
   state,
   dom,
-  raceStats
+  raceStats,
+  kitanPlan
 });
 
 const raceController = window.SpaceTimerRaceController;
@@ -76,6 +86,8 @@ raceController.init({
   raceStats,
   raceView,
   resultView,
+  setupView,
+  kitanPlan,
   audio: {
     click: sndClick,
     beepLow: sndBeepLow,
@@ -163,6 +175,10 @@ function bindEventHandlers() {
       deleteRecordedLap,
       openVoiceCommandHelp,
       closeVoiceCommandHelp,
+      updateKitanStart,
+      changeKitanPage,
+      openKitanCalendar,
+      closeKitanCalendar,
       randomizeMissionSelection,
       enterMissionReady,
       handleMainAction,
@@ -179,6 +195,8 @@ bindEventHandlers();
 renderCarCategoryTabs();
 renderDestinationCategoryTabs();
 renderFavorites();
+renderKitanStartOptions();
+renderKitanPlan();
 renderCarSelectionGrid();
 renderDestinationSelectionGrid();
 randomizeMissionSelection(false);

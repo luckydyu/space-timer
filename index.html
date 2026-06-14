@@ -15,6 +15,7 @@
   <script src="./src/services/speech.js"></script>
   <script src="./src/services/effects.js"></script>
   <script src="./src/services/preferences.js"></script>
+  <script src="./src/services/kitanPlan.js"></script>
 
   <!-- ==================== 헤더 영역 ==================== -->
   <header class="bg-slate-900/90 border-b-2 border-indigo-500 px-3 py-1.5 shadow-lg flex justify-between items-center z-10">
@@ -60,6 +61,40 @@
         <button type="button" data-lap-diff="100" class="w-12 h-12 bg-slate-900 hover:bg-slate-800 rounded-xl flex items-center justify-center text-[11px] md:text-xs font-extrabold shadow-md border-b-4 border-slate-950 active:transform active:translate-y-0.5 text-slate-500">+100</button>
       </div>
 
+      <div class="bg-slate-950/50 rounded-2xl border border-slate-700 p-3 text-left space-y-2">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+          <div>
+            <h3 class="game-font text-base md:text-lg text-emerald-300">기탄수학 현재 단계</h3>
+            <p id="kitan-current-range" class="game-font text-xl md:text-2xl text-yellow-300">F-1 1~10장</p>
+          </div>
+          <button type="button" data-action="open-kitan-calendar" class="game-font text-sm px-3 py-2 rounded-xl bg-indigo-700 hover:bg-indigo-600 text-indigo-50 border border-indigo-400">
+            달력 보기
+          </button>
+        </div>
+        <div class="grid grid-cols-3 gap-2">
+          <label class="space-y-1">
+            <span class="game-font text-[10px] text-slate-400">시리즈</span>
+            <select id="kitan-series-select" data-kitan-field="series" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-2 py-2 game-font text-sm text-white"></select>
+          </label>
+          <label class="space-y-1">
+            <span class="game-font text-[10px] text-slate-400">권</span>
+            <select id="kitan-book-select" data-kitan-field="book" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-2 py-2 game-font text-sm text-white"></select>
+          </label>
+          <label class="space-y-1">
+            <span class="game-font text-[10px] text-slate-400">시작 장</span>
+            <div class="grid grid-cols-[auto_1fr_auto] gap-1">
+              <button type="button" data-kitan-page-diff="-10" class="game-font px-2 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600">-10</button>
+              <input id="kitan-page-input" data-kitan-field="page" type="number" min="1" max="60" inputmode="numeric" class="w-full min-w-0 bg-slate-900 border border-slate-600 rounded-xl px-2 py-2 game-font text-sm text-white text-center">
+              <button type="button" data-kitan-page-diff="10" class="game-font px-2 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600">+10</button>
+            </div>
+            <div class="grid grid-cols-2 gap-1">
+              <button type="button" data-kitan-page-diff="-1" class="game-font px-2 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 border border-slate-700">-1</button>
+              <button type="button" data-kitan-page-diff="1" class="game-font px-2 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 border border-slate-700">+1</button>
+            </div>
+          </label>
+        </div>
+      </div>
+
       <button type="button" data-action="randomize-mission" class="w-full game-font text-base md:text-lg py-2 bg-slate-900 hover:bg-slate-800 text-yellow-200 rounded-2xl border-2 border-yellow-500/60 shadow-md transition-all active:transform active:translate-y-0.5 flex items-center justify-center gap-2">
         <span class="text-xl leading-none">🎲</span>
         <span>랜덤 미션 뽑기</span>
@@ -102,6 +137,16 @@
               <div id="voice-finish-command-list" class="max-h-52 overflow-y-auto rounded-xl bg-slate-950/70 border border-slate-700 p-3 text-xs leading-relaxed text-slate-200"></div>
             </div>
           </div>
+        </div>
+      </div>
+
+      <div id="kitan-calendar-modal" class="voice-command-modal hidden fixed inset-0 z-50 bg-slate-950/70 flex items-center justify-center p-4">
+        <div class="w-full max-w-5xl bg-slate-900 border-4 border-emerald-500 rounded-2xl shadow-2xl p-4 md:p-5 text-left">
+          <div class="flex items-center justify-between gap-3 border-b border-slate-700 pb-3 mb-3">
+            <h3 class="game-font text-xl text-emerald-200">기탄수학 계획 달력</h3>
+            <button type="button" data-action="close-kitan-calendar" class="game-font px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600">닫기</button>
+          </div>
+          <div id="kitan-calendar-list" class="max-h-[70vh] overflow-y-auto rounded-xl bg-slate-950/70 border border-slate-700 p-2 text-sm"></div>
         </div>
       </div>
 

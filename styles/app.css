@@ -134,6 +134,70 @@
       border-left: 1px solid rgba(133, 77, 14, 0.3);
       background: rgba(253, 224, 71, 0.7);
     }
+    .kitan-calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+      gap: 0.35rem;
+    }
+    .kitan-calendar-weekday {
+      padding: 0.35rem;
+      text-align: center;
+      color: #cbd5e1;
+      border-bottom: 1px solid #334155;
+    }
+    .kitan-calendar-weekday.is-sunday {
+      color: #fca5a5;
+    }
+    .kitan-calendar-weekday.is-saturday {
+      color: #93c5fd;
+    }
+    .kitan-calendar-day {
+      min-height: 82px;
+      border: 1px solid #334155;
+      border-radius: 0.75rem;
+      padding: 0.45rem;
+      background: rgba(15, 23, 42, 0.84);
+      color: #e2e8f0;
+      overflow: hidden;
+    }
+    .kitan-calendar-day.is-muted {
+      opacity: 0.42;
+    }
+    .kitan-calendar-day.is-today {
+      outline: 2px solid #facc15;
+      outline-offset: 1px;
+    }
+    .kitan-series-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 1.5rem;
+      padding: 0.15rem 0.35rem;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      font-family: 'Jua', sans-serif;
+      color: #020617;
+    }
+    .kitan-series-F { background: #fde68a; color: #422006; border-color: #f59e0b; }
+    .kitan-series-G { background: #bbf7d0; color: #052e16; border-color: #22c55e; }
+    .kitan-series-H { background: #bfdbfe; color: #172554; border-color: #3b82f6; }
+    .kitan-series-I { background: #ddd6fe; color: #2e1065; border-color: #8b5cf6; }
+    .kitan-series-J { background: #fecdd3; color: #4c0519; border-color: #f43f5e; }
+    .kitan-series-K { background: #fed7aa; color: #431407; border-color: #f97316; }
+    .kitan-series-L { background: #a7f3d0; color: #022c22; border-color: #10b981; }
+    .kitan-series-M { background: #c4b5fd; color: #312e81; border-color: #6366f1; }
+    .kitan-series-N { background: #fbcfe8; color: #500724; border-color: #ec4899; }
+    .kitan-series-O { background: #bae6fd; color: #082f49; border-color: #0ea5e9; }
+    .kitan-calendar-day.is-sunday {
+      box-shadow: inset 0 0 0 2px rgba(248, 113, 113, 0.72);
+    }
+    .kitan-calendar-day.is-saturday {
+      box-shadow: inset 0 0 0 2px rgba(96, 165, 250, 0.72);
+    }
+    .kitan-calendar-day.is-today {
+      outline: 2px solid #facc15;
+      outline-offset: 1px;
+    }
     #car-category-tabs,
     #destination-category-tabs {
       padding-bottom: 0.5rem;

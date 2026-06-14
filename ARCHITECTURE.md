@@ -23,18 +23,19 @@ ES module import/export를 쓰지 않는 이유는 현재 배포 방식을 단�
 2. `src/services/speech.js`
 3. `src/services/effects.js`
 4. `src/services/preferences.js`
-5. `src/state.js`
-6. `src/data/voiceCommands.js`
-7. `src/data/missionData.js`
-8. `src/data/categoryIcons.js`
-9. `src/utils/raceStats.js`
-10. `src/dom/elements.js`
-11. `src/features/setupView.js`
-12. `src/views/raceView.js`
-13. `src/views/resultView.js`
-14. `src/features/raceController.js`
-15. `src/app/events.js`
-16. `src/app/main.js`
+5. `src/services/kitanPlan.js`
+6. `src/state.js`
+7. `src/data/voiceCommands.js`
+8. `src/data/missionData.js`
+9. `src/data/categoryIcons.js`
+10. `src/utils/raceStats.js`
+11. `src/dom/elements.js`
+12. `src/features/setupView.js`
+13. `src/views/raceView.js`
+14. `src/views/resultView.js`
+15. `src/features/raceController.js`
+16. `src/app/events.js`
+17. `src/app/main.js`
 
 `main.js`는 마지막에 실행되어 앞에서 등록된 전역 객체들을 초기화합니다.
 
@@ -53,6 +54,7 @@ ES module import/export를 쓰지 않는 이유는 현재 배포 방식을 단�
 - `window.SpaceTimerSpeech`: Web Speech API와 음성 합성
 - `window.SpaceTimerEffects`: 배경 파티클과 confetti 효과
 - `window.SpaceTimerPreferences`: localStorage 기반 설정/즐겨찾기 저장
+- `window.SpaceTimerKitanPlan`: 기탄수학 단계/권/장 진도와 달력 계획 계산
 - `window.SpaceTimerEvents`: 이벤트 위임 라우터
 
 `audio.js`는 아직 `sndClick`, `sndBeepLow` 같은 classic script 전역 함수를 제공합니다. `main.js`는 ESLint를 위해 해당 함수들을 `/* global ... */` 주석으로 선언합니다.
@@ -135,6 +137,13 @@ ES module import/export를 쓰지 않는 이유는 현재 배포 방식을 단�
 - 브라우저 저장소가 제한되거나 저장 값이 깨진 경우에도 앱이 계속 동작하도록 기본값으로 복구합니다.
 - 즐겨찾기 개수 제한 같은 저장 정책은 이 서비스에서 관리합니다.
 
+`src/services/kitanPlan.js`
+
+- F부터 O까지의 기탄수학 시리즈, 시리즈당 5권, 권당 60장 규칙을 관리합니다.
+- `localStorage`에 다음에 풀 시작 장의 index를 저장합니다.
+- 설정 화면의 현재 미션 범위와 달력 팝업 계획을 계산합니다.
+- 미션을 끝까지 완료하면 `raceController`가 완료 장수만큼 다음 시작 장을 전진시킵니다.
+
 ### Utils and DOM
 
 `src/utils/raceStats.js`
@@ -162,7 +171,8 @@ ES module import/export를 쓰지 않는 이유는 현재 배포 방식을 단�
 1. 사용자가 `경기 시작하기`를 누르거나 음성 시작 명령을 냅니다.
 2. 이벤트 라우터 또는 음성 라우터가 `enterMissionReady`를 호출합니다.
 3. `raceController`가 상태를 `LAP_WAITING`으로 바꾸고 러닝 화면을 보여줍니다.
-4. 마이크 옵션이 켜져 있으면 이 시점부터 실제 음성 인식을 시작합니다.
+4. 현재 기탄수학 시작 장과 목표 장수를 이번 미션 범위로 상태에 고정합니다.
+5. 마이크 옵션이 켜져 있으면 이 시점부터 실제 음성 인식을 시작합니다.
 
 ### 랩 진행
 
@@ -175,9 +185,10 @@ ES module import/export를 쓰지 않는 이유는 현재 배포 방식을 단�
 ### 결과
 
 1. 마지막 랩 완료 후 `finishRace`가 호출됩니다.
-2. 음성 인식을 중지합니다.
-3. `resultView`가 결과 화면과 기록 목록을 렌더링합니다.
-4. fanfare와 confetti 효과를 실행합니다.
+2. 완료한 장수만큼 기탄수학 다음 시작 장을 전진시킵니다.
+3. 음성 인식을 중지합니다.
+4. `resultView`가 결과 화면과 기록 목록을 렌더링합니다.
+5. fanfare와 confetti 효과를 실행합니다.
 
 ## 테스트
 

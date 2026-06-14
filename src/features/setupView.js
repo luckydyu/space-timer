@@ -3,6 +3,7 @@
   let data = null;
   let dom = null;
   let preferences = null;
+  let kitanPlan = null;
   let primeUserAudio = () => {};
   let playClick = () => {};
 
@@ -11,6 +12,7 @@
     data = options.data;
     dom = options.dom;
     preferences = options.preferences;
+    kitanPlan = options.kitanPlan;
     primeUserAudio = options.primeUserAudio;
     playClick = options.playClick;
   }
@@ -121,6 +123,105 @@
   function renderFavorites() {
     renderFavoriteCars();
     renderFavoriteDestinations();
+  }
+
+  function renderKitanStartOptions() {
+    const seriesSelect = dom.byId('kitan-series-select');
+    const bookSelect = dom.byId('kitan-book-select');
+    if (!seriesSelect || !bookSelect) return;
+
+    seriesSelect.innerHTML = kitanPlan.SERIES.map(series => `
+      <option value="${series}">${series}</option>
+    `).join('');
+    bookSelect.innerHTML = Array.from({ length: kitanPlan.BOOKS_PER_SERIES }, (_, index) => `
+      <option value="${index + 1}">${index + 1}권</option>
+    `).join('');
+  }
+
+  function renderKitanPlan() {
+    const position = kitanPlan.fromIndex(kitanPlan.getNextStartIndex());
+    const seriesSelect = dom.byId('kitan-series-select');
+    const bookSelect = dom.byId('kitan-book-select');
+    const pageInput = dom.byId('kitan-page-input');
+    const rangeLabel = dom.byId('kitan-current-range');
+
+    if (seriesSelect) seriesSelect.value = position.series;
+    if (bookSelect) bookSelect.value = String(position.book);
+    if (pageInput) pageInput.value = String(position.page);
+    if (rangeLabel) rangeLabel.textContent = kitanPlan.formatRange(position.index, state.targetLaps);
+    renderKitanCalendar();
+  }
+
+  function renderKitanCalendar() {
+    const list = dom.byId('kitan-calendar-list');
+    if (!list) return;
+    const calendars = kitanPlan.getCalendars(state.targetLaps);
+    list.innerHTML = `
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+        <h4 class="game-font text-lg text-emerald-200">완료까지 전체 계획</h4>
+        <div class="flex flex-wrap gap-1 text-[10px]">
+          ${kitanPlan.SERIES.map(series => `
+            <span class="kitan-series-chip kitan-series-${series}">${series}</span>
+          `).join('')}
+        </div>
+      </div>
+      <div class="space-y-5">
+        ${calendars.map(calendar => `
+          <section class="kitan-calendar-month">
+            <h5 class="game-font text-base md:text-lg text-slate-100 mb-2">${calendar.monthLabel}</h5>
+            <div class="kitan-calendar-grid">
+              ${calendar.weekdays.map((weekday, index) => `
+                <div class="kitan-calendar-weekday game-font ${index === 0 ? 'is-sunday' : ''} ${index === 6 ? 'is-saturday' : ''}">${weekday}</div>
+              `).join('')}
+              ${calendar.weeks.flat().map(day => `
+                <div class="kitan-calendar-day ${day.isToday ? 'is-today' : ''} ${day.isCurrentMonth ? '' : 'is-muted'} ${day.isSunday ? 'is-sunday' : ''} ${day.isSaturday ? 'is-saturday' : ''} ${day.plan ? `kitan-series-${day.plan.series}` : ''}">
+                  <div class="flex items-center justify-between gap-1">
+                    <span class="game-font text-xs">${day.dayNumber}</span>
+                    ${day.isToday ? '<span class="game-font text-[9px]">오늘</span>' : ''}
+                  </div>
+                  ${day.plan ? `
+                    <div class="mt-1">
+                      <span class="game-font text-[10px]">${day.plan.dayLabel}</span>
+                      <p class="game-font text-[10px] md:text-xs leading-tight">${day.plan.rangeLabel}</p>
+                    </div>
+                  ` : ''}
+                </div>
+              `).join('')}
+            </div>
+          </section>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  function updateKitanStart(field, value) {
+    primeUserAudio();
+    const current = kitanPlan.fromIndex(kitanPlan.getNextStartIndex());
+    const next = {
+      series: current.series,
+      book: current.book,
+      page: current.page,
+      [field]: value
+    };
+    kitanPlan.setNextStart(next.series, next.book, next.page);
+    renderKitanPlan();
+    playClick();
+  }
+
+  function changeKitanPage(diff) {
+    primeUserAudio();
+    kitanPlan.setNextStartIndex(kitanPlan.getNextStartIndex() + diff);
+    renderKitanPlan();
+    playClick();
+  }
+
+  function openKitanCalendar() {
+    renderKitanCalendar();
+    dom.byId('kitan-calendar-modal')?.classList.remove('hidden');
+  }
+
+  function closeKitanCalendar() {
+    dom.byId('kitan-calendar-modal')?.classList.add('hidden');
   }
 
   function scrollCardIntoSelectionView(card, gridId) {
@@ -310,6 +411,7 @@
     primeUserAudio();
     state.targetLaps = Math.max(1, Math.min(1000, state.targetLaps + diff));
     dom.byId('setup-lap-count').textContent = state.targetLaps;
+    renderKitanPlan();
     playClick();
   }
 
@@ -320,6 +422,12 @@
     renderCarSelectionGrid,
     renderDestinationSelectionGrid,
     renderFavorites,
+    renderKitanStartOptions,
+    renderKitanPlan,
+    updateKitanStart,
+    changeKitanPage,
+    openKitanCalendar,
+    closeKitanCalendar,
     randomizeMissionSelection,
     selectCarCategory,
     selectDestinationCategory,

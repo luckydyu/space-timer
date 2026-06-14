@@ -3,12 +3,14 @@
   let dom = null;
   let raceStats = null;
   let setupView = null;
+  let kitanPlan = null;
 
   function init(options) {
     state = options.state;
     dom = options.dom;
     raceStats = options.raceStats;
     setupView = options.setupView;
+    kitanPlan = options.kitanPlan;
   }
 
   function byId(id) {
@@ -21,6 +23,11 @@
 
   function getLapRank(time) {
     return raceStats.getLapRank(state.lapRecords, time);
+  }
+
+  function getKitanLapLabel(index) {
+    const startIndex = state.kitanMissionStartIndex + index;
+    return kitanPlan.formatRange(startIndex, 1);
   }
 
   function updateMockControls() {
@@ -190,7 +197,8 @@
 
   function updateLapDashboard() {
     updateUndoButton();
-    byId('running-lap-indicator').textContent = `MISSION ${state.currentLap} / ${state.targetLaps}`;
+    byId('running-lap-indicator').textContent =
+      `MISSION ${state.currentLap} / ${state.targetLaps} · ${getKitanLapLabel(state.currentLap - 1)}`;
     const list = byId('lap-records-list');
     list.innerHTML = '';
     for (let i = 0; i < state.targetLaps; i++) {
@@ -199,7 +207,7 @@
       const rank = isRecorded ? getLapRank(state.lapRecords[i]) : null;
       list.insertAdjacentHTML('beforeend', `
         <div class="flex items-center justify-between p-3 rounded-xl border-2 ${isRecorded ? 'border-emerald-500 bg-emerald-950/30' : isCurrent ? 'border-indigo-500 bg-indigo-500/10 animate-pulse' : 'border-slate-700 bg-slate-900/40'} transition-all text-xs md:text-sm">
-          <span class="game-font ${isRecorded ? 'text-emerald-300' : isCurrent ? 'text-indigo-300' : 'text-slate-400'}">#${i + 1}번째 장</span>
+          <span class="game-font ${isRecorded ? 'text-emerald-300' : isCurrent ? 'text-indigo-300' : 'text-slate-400'}">#${i + 1} ${getKitanLapLabel(i)}</span>
           <div class="flex items-center gap-2">
             ${isRecorded ? `<span class="game-font text-[10px] md:text-xs px-2 py-1 rounded-lg bg-indigo-900/80 text-indigo-100 border border-indigo-500">${rank}등</span>` : ''}
             <span class="game-font font-bold ${isRecorded ? 'text-white' : 'text-slate-500'}">${isRecorded ? formatTime(state.lapRecords[i]) : isCurrent ? (state.appState === 'LAP_WAITING' ? '출발 대기 중' : '비행 중...') : '대기 중'}🏁</span>

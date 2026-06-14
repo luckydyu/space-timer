@@ -10,5 +10,7 @@ window.SpaceTimerState = {
   lapStartTime: 0,
   totalElapsedMs: 0,
   currentLapElapsed: 0,
+  kitanMissionStartIndex: 0,
+  kitanMissionPageCount: 10,
   lapRecords: []
 };
