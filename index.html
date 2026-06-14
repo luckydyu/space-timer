@@ -12,6 +12,7 @@
 </head>
 <body class="bg-space text-white min-h-screen flex flex-col justify-between select-none overflow-y-auto">
   <script src="./src/services/audio.js"></script>
+  <script src="./src/services/speech.js"></script>
 
   <!-- ==================== 헤더 영역 ==================== -->
   <header class="bg-slate-900/90 border-b-2 border-indigo-500 px-3 py-1.5 shadow-lg flex justify-between items-center z-10">
@@ -289,199 +290,23 @@
 
 
     // --- 1. 실제 마이크 음성 인식 시스템 (Web Speech API) ---
-    let recognition = null;
-    let isRealSpeechActive = true;
-    let isRecognitionPausedForSpeech = false;
-    let isSpeechSynthesisPrimed = false;
-    let koreanVoice = null;
-
-    function loadSpeechVoices() {
-      if (!('speechSynthesis' in window)) return;
-      const voices = window.speechSynthesis.getVoices();
-      koreanVoice = voices.find(voice => voice.lang === 'ko-KR')
-        || voices.find(voice => voice.lang.startsWith('ko'))
-        || null;
-    }
-
-    if ('speechSynthesis' in window) {
-      loadSpeechVoices();
-      window.speechSynthesis.onvoiceschanged = loadSpeechVoices;
-    }
-
-    function primeSpeechSynthesis() {
-      if (isSpeechSynthesisPrimed || !('speechSynthesis' in window)) return;
-      loadSpeechVoices();
-
-      try {
-        const utterance = new SpeechSynthesisUtterance(' ');
-        utterance.lang = 'ko-KR';
-        if (koreanVoice) utterance.voice = koreanVoice;
-        utterance.volume = 0;
-        utterance.rate = 1;
-        window.speechSynthesis.resume();
-        window.speechSynthesis.speak(utterance);
-        isSpeechSynthesisPrimed = true;
-      } catch(e) {}
-    }
-
-    function primeUserAudio() {
-      initAudio();
-      primeSpeechSynthesis();
-    }
-
-    function toggleSpeechRecognition() {
-      primeUserAudio();
-      const toggle = document.getElementById('mic-toggle-input');
-      isRealSpeechActive = toggle.checked;
-
-      if (isRealSpeechActive) {
-        if (state.appState === "SETUP") {
-          setSpeechRecognitionWaitingStatus();
-        } else {
-          startRealSpeechEngine();
-        }
-      } else {
-        stopRealSpeechEngine();
-      }
-    }
-
-    function setSpeechRecognitionWaitingStatus() {
-      document.getElementById('status-dot').className = "w-2.5 h-2.5 rounded-full bg-yellow-500";
-      document.getElementById('status-text').textContent = "첫 미션부터 마이크 대기";
-    }
-
-    function startRealSpeechEngine() {
-      if (state.appState === "SETUP") {
-        setSpeechRecognitionWaitingStatus();
-        return;
-      }
-      if (state.appState === "RESULT") return;
-
-      initAudio();
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-      if (!SpeechRecognition) {
-        // alert 사용 금지 규칙 준수: 화면 내 텍스트 엘리먼트에 안전 경고 표시
-        const warningBox = document.getElementById('mic-support-alert');
-        warningBox.innerHTML = "⚠️ 이 브라우저 또는 태블릿 기기는 실제 음성 인식 API를 지원하지 않습니다. (구글 크롬 / 애플 사파리 권장)";
-        warningBox.classList.remove('hidden');
-        document.getElementById('mic-toggle-input').checked = false;
-        isRealSpeechActive = false;
-        return;
-      }
-
-      if (!recognition) {
-        recognition = new SpeechRecognition();
-        recognition.lang = 'ko-KR';
-        recognition.continuous = true; // 대기 지속성 허용
-        recognition.interimResults = false; // 최종 결과 완료 시 반환
-
-        recognition.onresult = function(event) {
-          const resultText = event.results[event.results.length - 1][0].transcript.trim();
-          console.log("음성 감지:", resultText);
-
-          // 아이의 부정확한 발음 스펙트럼 대응 (키워드 매칭)
-          if (matchesVoiceCommand(resultText, START_COMMANDS)) {
-            simulateVoiceCommand('시작');
-          } else if (matchesVoiceCommand(resultText, FINISH_COMMANDS)) {
-            simulateVoiceCommand('끝');
-          }
-        };
-
-        recognition.onend = function() {
-          // 음성 인식이 꺼지면 상태가 진행 중이거나 대기 중일 때 자동 리스타트하여 상시 가동
-          if (isRealSpeechActive && !isRecognitionPausedForSpeech && state.appState !== "SETUP" && state.appState !== "RESULT") {
-            try { recognition.start(); } catch(e){}
-          }
-        };
-
-        recognition.onerror = function(event) {
-          console.error("음성 인식 오류 발생:", event.error);
-        };
-      }
-
-      try {
-        recognition.start();
-        document.getElementById('status-dot').className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
-        document.getElementById('status-text').textContent = "실제 마이크 작동 중";
-      } catch (e) {
-        console.error("인식 시작 차단:", e);
-      }
-    }
-
-    function stopRealSpeechEngine() {
-      if (recognition) {
-        try {
-          recognition.stop();
-        } catch(e){}
-      }
-      document.getElementById('status-dot').className = "w-2.5 h-2.5 rounded-full bg-red-500";
-      document.getElementById('status-text').textContent = "음성 인식 꺼짐";
-    }
-
-    function speakMissionTime(ms) {
-      if (!('speechSynthesis' in window)) return;
-      loadSpeechVoices();
-
-      const totalSeconds = Math.max(0, Math.floor(ms / 1000));
-      const minutes = Math.floor(totalSeconds / 60);
-      const seconds = totalSeconds % 60;
-      const hundredths = String(Math.floor((Math.max(0, ms) % 1000) / 10)).padStart(2, '0');
-      const timeText = minutes > 0
-        ? `${minutes}분 ${seconds}.${hundredths} 초입니다`
-        : `${seconds}.${hundredths} 초입니다`;
-
-      const shouldResumeRecognition = isRealSpeechActive && recognition && state.appState !== "RESULT";
-      if (shouldResumeRecognition) {
-        isRecognitionPausedForSpeech = true;
-        try { recognition.stop(); } catch(e){}
-      }
-
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.resume();
-      const utterance = new SpeechSynthesisUtterance(timeText);
-      utterance.lang = 'ko-KR';
-      if (koreanVoice) utterance.voice = koreanVoice;
-      utterance.volume = 1;
-      utterance.rate = 0.95;
-      utterance.pitch = 1.05;
-      let resumeTimer = null;
-      const resumeRecognition = function() {
-        if (resumeTimer) clearTimeout(resumeTimer);
-        if (shouldResumeRecognition && state.appState !== "RESULT") {
-          isRecognitionPausedForSpeech = false;
-          startRealSpeechEngine();
-        }
-      };
-      utterance.onend = utterance.onerror = resumeRecognition;
-      resumeTimer = setTimeout(resumeRecognition, 5000);
-      window.speechSynthesis.speak(utterance);
-    }
-
-    function matchesVoiceCommand(text, commands) {
-      const normalizeVoiceText = value => String(value).toLowerCase().replace(/[^\p{L}\p{N}]+/gu, '');
-      const normalizedText = normalizeVoiceText(text);
-      return commands.some(command => normalizedText.includes(normalizeVoiceText(command)));
-    }
-
-    function renderVoiceCommandHelp() {
-      const renderCommandPills = commands => commands.map(command =>
-        `<span class="inline-block mr-1.5 mb-1.5 px-2 py-1 rounded-lg bg-slate-800 border border-slate-600 text-slate-100 game-font">${command}</span>`
-      ).join('');
-      const startList = document.getElementById('voice-start-command-list');
-      const finishList = document.getElementById('voice-finish-command-list');
-      if (startList) startList.innerHTML = renderCommandPills(START_COMMANDS);
-      if (finishList) finishList.innerHTML = renderCommandPills(FINISH_COMMANDS);
-    }
-
-    function openVoiceCommandHelp() {
-      renderVoiceCommandHelp();
-      document.getElementById('voice-command-modal').classList.remove('hidden');
-    }
-
-    function closeVoiceCommandHelp() {
-      document.getElementById('voice-command-modal').classList.add('hidden');
-    }
+    const speechService = window.SpaceTimerSpeech;
+    speechService.init({
+      state,
+      startCommands: START_COMMANDS,
+      finishCommands: FINISH_COMMANDS,
+      initAudio,
+      onCommand: simulateVoiceCommand
+    });
+    const primeUserAudio = () => speechService.primeUserAudio();
+    const toggleSpeechRecognition = () => speechService.toggleSpeechRecognition();
+    const setSpeechRecognitionWaitingStatus = () => speechService.setSpeechRecognitionWaitingStatus();
+    const startRealSpeechEngine = () => speechService.startRealSpeechEngine();
+    const stopRealSpeechEngine = () => speechService.stopRealSpeechEngine();
+    const speakMissionTime = ms => speechService.speakMissionTime(ms);
+    const isSpeechRecognitionActive = () => speechService.isSpeechRecognitionActive();
+    const openVoiceCommandHelp = () => speechService.openVoiceCommandHelp();
+    const closeVoiceCommandHelp = () => speechService.closeVoiceCommandHelp();
 
     // --- 2. 가상 음성 명령 시뮬레이션 시스템 ---
     function simulateVoiceCommand(word) {
@@ -860,7 +685,7 @@
       createParticles();
       prepareNextLap();
 
-      if (isRealSpeechActive) {
+      if (isSpeechRecognitionActive()) {
         startRealSpeechEngine();
       }
     }
@@ -1091,7 +916,7 @@
       updateMockControls();
       
       // 첫 화면에서는 마이크를 실제로 켜지 않고, 다음 미션 화면부터 대기한다.
-      if (isRealSpeechActive) {
+      if (isSpeechRecognitionActive()) {
         setSpeechRecognitionWaitingStatus();
       }
 
