@@ -12,9 +12,8 @@ export default [
   js.configs.recommended,
   {
     files: [
-      '*.js',
-      'tests/**/*.js',
-      'tests/**/*.mjs'
+      '**/*.js',
+      '**/*.mjs'
     ],
     languageOptions: {
       ecmaVersion: 'latest',
@@ -26,6 +25,12 @@ export default [
     },
     rules: {
       'no-console': 'off'
+    }
+  },
+  {
+    files: ['src/services/audio.js'],
+    languageOptions: {
+      sourceType: 'script'
     }
   }
 ];
