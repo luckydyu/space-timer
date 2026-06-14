@@ -267,6 +267,7 @@
   <script src="./src/utils/raceStats.js"></script>
   <script src="./src/dom/elements.js"></script>
   <script src="./src/features/setupView.js"></script>
+  <script src="./src/app/events.js"></script>
 
   <!-- ==================== 앱 코어 스크립트 ==================== -->
   <script>
@@ -278,7 +279,6 @@
     } = window.SpaceTimerData;
     const dom = window.SpaceTimerDom;
     const byId = id => dom.byId(id);
-    const closest = (target, selector) => dom.closest(target, selector);
     const raceStats = window.SpaceTimerRaceStats;
     const formatTime = ms => raceStats.formatTime(ms);
     const getLapRank = time => raceStats.getLapRank(state.lapRecords, time);
@@ -433,60 +433,22 @@
     }
 
     function bindEventHandlers() {
-      byId('mic-toggle-input')?.addEventListener('change', toggleSpeechRecognition);
-
-      document.addEventListener('click', event => {
-        const target = closest(event.target,
-          '[data-action], [data-lap-diff], [data-car-id], [data-destination-id], [data-delete-lap-index]'
-        );
-        if (!target) return;
-
-        if (target.dataset.lapDiff !== undefined) {
-          changeLaps(Number(target.dataset.lapDiff));
-          return;
-        }
-
-        if (target.dataset.carId) {
-          selectCar(target.dataset.carId);
-          return;
-        }
-
-        if (target.dataset.destinationId) {
-          selectDestination(target.dataset.destinationId);
-          return;
-        }
-
-        if (target.dataset.deleteLapIndex !== undefined) {
-          deleteRecordedLap(Number(target.dataset.deleteLapIndex));
-          return;
-        }
-
-        const category = target.dataset.category;
-        switch (target.dataset.action) {
-          case 'open-voice-help':
-            openVoiceCommandHelp();
-            break;
-          case 'close-voice-help':
-            closeVoiceCommandHelp();
-            break;
-          case 'randomize-mission':
-            randomizeMissionSelection();
-            break;
-          case 'enter-mission-ready':
-            enterMissionReady();
-            break;
-          case 'main-action':
-            handleMainAction();
-            break;
-          case 'restart-app':
-            restartApp();
-            break;
-          case 'selectCarCategory':
-            selectCarCategory(category);
-            break;
-          case 'selectDestinationCategory':
-            selectDestinationCategory(category);
-            break;
+      window.SpaceTimerEvents.bind({
+        dom,
+        handlers: {
+          toggleSpeechRecognition,
+          changeLaps,
+          selectCar,
+          selectDestination,
+          deleteRecordedLap,
+          openVoiceCommandHelp,
+          closeVoiceCommandHelp,
+          randomizeMissionSelection,
+          enterMissionReady,
+          handleMainAction,
+          restartApp,
+          selectCarCategory,
+          selectDestinationCategory
         }
       });
     }
