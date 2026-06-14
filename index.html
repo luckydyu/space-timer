@@ -263,6 +263,7 @@
   <script src="./src/data/voiceCommands.js"></script>
   <script src="./src/data/missionData.js"></script>
   <script src="./src/data/categoryIcons.js"></script>
+  <script src="./src/utils/raceStats.js"></script>
 
   <!-- ==================== 앱 코어 스크립트 ==================== -->
   <script>
@@ -287,6 +288,9 @@
       DESTINATIONS,
       CATEGORY_ICONS
     } = window.SpaceTimerData;
+    const raceStats = window.SpaceTimerRaceStats;
+    const formatTime = ms => raceStats.formatTime(ms);
+    const getLapRank = time => raceStats.getLapRank(state.lapRecords, time);
 
 
     // --- 1. 실제 마이크 음성 인식 시스템 (Web Speech API) ---
@@ -881,9 +885,7 @@
       document.getElementById('screen-result').classList.remove('hidden');
 
       // 성적 대시보드 주입 계산
-      const totalTime = state.lapRecords.reduce((acc, curr) => acc + curr, 0);
-      const minTime = Math.min(...state.lapRecords);
-      const avgTime = Math.floor(totalTime / state.lapRecords.length);
+      const { totalTime, minTime, avgTime } = raceStats.getRaceSummary(state.lapRecords);
 
       document.getElementById('result-total-time').textContent = formatTime(totalTime);
       document.getElementById('result-avg-lap').textContent = formatTime(avgTime);
@@ -928,7 +930,7 @@
 
     // --- 7. 유틸리티 효과 함수 ---
     function recalculateTotalElapsed() {
-      state.totalElapsedMs = state.lapRecords.reduce((acc, curr) => acc + curr, 0);
+      state.totalElapsedMs = raceStats.sumLapRecords(state.lapRecords);
     }
 
     function updateTotalTimeDisplay() {
@@ -944,18 +946,6 @@
       updateTotalTimeDisplay();
       updateLapDashboard();
       sndClick();
-    }
-
-    function formatTime(ms) {
-      const totalSecs = Math.floor(ms / 1000);
-      const mins = Math.floor(totalSecs / 60);
-      const secs = totalSecs % 60;
-      const hundredths = Math.floor((Math.max(0, ms) % 1000) / 10);
-      return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}.${String(hundredths).padStart(2, '0')}`;
-    }
-
-    function getLapRank(time) {
-      return 1 + state.lapRecords.filter(record => record < time).length;
     }
 
     function updateLapDashboard() {
