@@ -266,6 +266,7 @@
   <script src="./src/data/categoryIcons.js"></script>
   <script src="./src/utils/raceStats.js"></script>
   <script src="./src/dom/elements.js"></script>
+  <script src="./src/features/setupView.js"></script>
 
   <!-- ==================== 앱 코어 스크립트 ==================== -->
   <script>
@@ -273,26 +274,10 @@
     const state = window.SpaceTimerState;
     const {
       START_COMMANDS,
-      FINISH_COMMANDS,
-      CAR_BORDER_CLASSES,
-      CAR_TEXT_CLASSES,
-      ROCKET_ICONS,
-      SIDEWAYS_ROCKET_ICONS,
-      ROCKET_NAMES,
-      ADVENTURE_ITEMS,
-      CAR_CATEGORIES,
-      CARS,
-      DESTINATION_ICONS,
-      NAMED_DESTINATIONS,
-      DESTINATION_NAMES,
-      PLACE_ITEMS,
-      DESTINATION_CATEGORIES,
-      DESTINATIONS,
-      CATEGORY_ICONS
+      FINISH_COMMANDS
     } = window.SpaceTimerData;
     const dom = window.SpaceTimerDom;
     const byId = id => dom.byId(id);
-    const all = selector => dom.all(selector);
     const closest = (target, selector) => dom.closest(target, selector);
     const raceStats = window.SpaceTimerRaceStats;
     const formatTime = ms => raceStats.formatTime(ms);
@@ -321,6 +306,26 @@
     const isSpeechRecognitionActive = () => speechService.isSpeechRecognitionActive();
     const openVoiceCommandHelp = () => speechService.openVoiceCommandHelp();
     const closeVoiceCommandHelp = () => speechService.closeVoiceCommandHelp();
+
+    const setupView = window.SpaceTimerSetupView;
+    setupView.init({
+      state,
+      data: window.SpaceTimerData,
+      dom,
+      primeUserAudio,
+      playClick: sndClick
+    });
+    const renderCarCategoryTabs = () => setupView.renderCarCategoryTabs();
+    const renderDestinationCategoryTabs = () => setupView.renderDestinationCategoryTabs();
+    const renderCarSelectionGrid = () => setupView.renderCarSelectionGrid();
+    const renderDestinationSelectionGrid = () => setupView.renderDestinationSelectionGrid();
+    const randomizeMissionSelection = shouldPrimeAudio => setupView.randomizeMissionSelection(shouldPrimeAudio);
+    const selectCarCategory = category => setupView.selectCarCategory(category);
+    const selectDestinationCategory = category => setupView.selectDestinationCategory(category);
+    const selectCar = (color, shouldPrimeAudio) => setupView.selectCar(color, shouldPrimeAudio);
+    const selectDestination = (destinationId, shouldPrimeAudio) => setupView.selectDestination(destinationId, shouldPrimeAudio);
+    const changeLaps = diff => setupView.changeLaps(diff);
+    const resetDestinationTarget = () => setupView.resetDestinationTarget();
 
     // --- 2. 가상 음성 명령 시뮬레이션 시스템 ---
     function simulateVoiceCommand(word) {
@@ -485,198 +490,6 @@
         }
       });
     }
-
-
-    // --- 3. 기본 UI 세팅 조작 ---
-    function getFilteredEntries(collection, category) {
-      const entries = Object.entries(collection);
-      if (category === "전체") return entries;
-      return entries.filter(([, item]) => item.category === category);
-    }
-
-    function renderCategoryTabs(containerId, categories, selectedCategory, onSelectName) {
-      const container = byId(containerId);
-      if (!container) return;
-      container.innerHTML = categories.map(category => {
-        const icon = CATEGORY_ICONS[category] || "✨";
-        const isSelected = category === selectedCategory;
-        const selectedClass = isSelected
-          ? "bg-yellow-400 text-slate-950 border-yellow-200"
-          : "bg-slate-900 text-slate-300 border-slate-700 hover:bg-slate-800";
-        return `
-          <button type="button" data-action="${onSelectName}" data-category="${category}" class="shrink-0 game-font text-[10px] md:text-xs px-2 py-1.5 rounded-xl border ${selectedClass} transition-colors flex items-center gap-1">
-            <span class="text-sm leading-none">${icon}</span>
-            <span>${category}</span>
-          </button>
-        `;
-      }).join('');
-    }
-
-    function renderCarCategoryTabs() {
-      renderCategoryTabs('car-category-tabs', CAR_CATEGORIES, state.selectedCarCategory, 'selectCarCategory');
-    }
-
-    function renderDestinationCategoryTabs() {
-      renderCategoryTabs('destination-category-tabs', DESTINATION_CATEGORIES, state.selectedDestinationCategory, 'selectDestinationCategory');
-    }
-
-    function pickRandom(array) {
-      return array[Math.floor(Math.random() * array.length)];
-    }
-
-    function pickRandomCategory(categories) {
-      const selectableCategories = categories.filter(category => category !== "전체");
-      return pickRandom(selectableCategories.length ? selectableCategories : categories);
-    }
-
-    function randomizeMissionSelection(shouldPrimeAudio = true) {
-      if (shouldPrimeAudio) primeUserAudio();
-
-      state.selectedCarCategory = pickRandomCategory(CAR_CATEGORIES);
-      state.selectedDestinationCategory = pickRandomCategory(DESTINATION_CATEGORIES);
-
-      renderCarCategoryTabs();
-      renderDestinationCategoryTabs();
-      renderCarSelectionGrid();
-      renderDestinationSelectionGrid();
-
-      const randomCar = pickRandom(getFilteredEntries(CARS, state.selectedCarCategory));
-      const randomDestination = pickRandom(getFilteredEntries(DESTINATIONS, state.selectedDestinationCategory));
-
-      if (randomCar) selectCar(randomCar[0], false);
-      if (randomDestination) selectDestination(randomDestination[0], false);
-      if (shouldPrimeAudio) sndClick();
-    }
-
-    function scrollCardIntoSelectionView(card, gridId) {
-      const grid = byId(gridId);
-      if (!card || !grid) return;
-      requestAnimationFrame(() => {
-        const gridRect = grid.getBoundingClientRect();
-        const cardRect = card.getBoundingClientRect();
-        const nextScrollTop = grid.scrollTop
-          + (cardRect.top - gridRect.top)
-          - (grid.clientHeight / 2)
-          + (cardRect.height / 2);
-
-        grid.scrollTo({
-          top: Math.max(0, nextScrollTop),
-          behavior: "smooth"
-        });
-      });
-    }
-
-    function resetDestinationTarget() {
-      const destinationTarget = byId('track-destination-target');
-      if (!destinationTarget) return;
-      destinationTarget.classList.remove('destination-hit');
-      void destinationTarget.offsetWidth;
-    }
-
-    function renderCarSelectionGrid() {
-      const grid = byId('car-selection-grid');
-      if (!grid) return;
-      const visibleCars = getFilteredEntries(CARS, state.selectedCarCategory);
-      grid.innerHTML = visibleCars.map(([id, car]) => `
-        <button type="button" data-car-id="${id}" id="car-select-${id}" class="car-card relative cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-2 transition-all transform hover:-translate-y-1 text-center min-h-[96px] flex flex-col justify-center">
-          <span class="absolute left-1.5 top-1.5 min-w-5 px-1 rounded-md bg-slate-950/80 text-[9px] font-bold text-slate-300 border border-slate-600">${car.number}</span>
-          <span class="${car.isSideways ? 'sideways-flight' : 'inline-block'} text-3xl md:text-4xl block mb-1">${car.emoji}</span>
-          <span class="game-font text-[9px] md:text-[10px] ${car.textClass} leading-tight break-keep">${car.label}</span>
-        </button>
-      `).join('');
-    }
-
-    function renderDestinationSelectionGrid() {
-      const grid = byId('destination-selection-grid');
-      if (!grid) return;
-      const visibleDestinations = getFilteredEntries(DESTINATIONS, state.selectedDestinationCategory);
-      grid.innerHTML = visibleDestinations.map(([id, destination]) => `
-        <button type="button" data-destination-id="${id}" id="destination-select-${id}" class="destination-card relative cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-2 transition-all transform hover:-translate-y-1 text-center min-h-[96px] flex flex-col justify-center">
-          <span class="absolute left-1.5 top-1.5 min-w-5 px-1 rounded-md bg-slate-950/80 text-[9px] font-bold text-slate-300 border border-slate-600">${destination.number}</span>
-          <span class="text-3xl md:text-4xl block mb-1">${destination.icon}</span>
-          <span class="game-font text-[9px] md:text-[10px] ${destination.textClass} leading-tight break-keep">${destination.name}</span>
-        </button>
-      `).join('');
-    }
-
-    function selectCarCategory(category) {
-      state.selectedCarCategory = category;
-      renderCarCategoryTabs();
-      renderCarSelectionGrid();
-      if (!getFilteredEntries(CARS, state.selectedCarCategory).some(([id]) => id === state.chosenCar)) {
-        const firstVisibleCar = getFilteredEntries(CARS, state.selectedCarCategory)[0];
-        if (firstVisibleCar) selectCar(firstVisibleCar[0]);
-      } else {
-        selectCar(state.chosenCar, false);
-      }
-    }
-
-    function selectDestinationCategory(category) {
-      state.selectedDestinationCategory = category;
-      renderDestinationCategoryTabs();
-      renderDestinationSelectionGrid();
-      if (!getFilteredEntries(DESTINATIONS, state.selectedDestinationCategory).some(([id]) => id === state.chosenDestination)) {
-        const firstVisibleDestination = getFilteredEntries(DESTINATIONS, state.selectedDestinationCategory)[0];
-        if (firstVisibleDestination) selectDestination(firstVisibleDestination[0]);
-      } else {
-        selectDestination(state.chosenDestination, false);
-      }
-    }
-
-    function selectCar(color, shouldPrimeAudio = true) {
-      if (shouldPrimeAudio) primeUserAudio();
-      state.chosenCar = color;
-      
-      // 테두리 클래스 수동 갱신 (Tailwind purge 방지 목적)
-      all('.car-card').forEach(card => {
-        Object.values(CARS).forEach(car => card.classList.remove(car.borderClass));
-        card.classList.add('border-transparent');
-      });
-      
-      const targetCard = byId(`car-select-${color}`);
-      if (!targetCard || !CARS[color]) return;
-      targetCard.classList.remove('border-transparent');
-      targetCard.classList.add(CARS[color].borderClass);
-      scrollCardIntoSelectionView(targetCard, 'car-selection-grid');
-
-      const trackCar = byId('track-car');
-      trackCar.innerHTML = CARS[color].emoji;
-      trackCar.classList.toggle('sideways-flight', CARS[color].isSideways);
-      byId('track-start-label').textContent = `출발 (${CARS[color].label})`;
-      byId('result-car-emoji').innerHTML = CARS[color].emoji;
-      sndClick();
-    }
-
-    function selectDestination(destinationId, shouldPrimeAudio = true) {
-      if (shouldPrimeAudio) primeUserAudio();
-      if (!DESTINATIONS[destinationId]) return;
-      state.chosenDestination = destinationId;
-
-      all('.destination-card').forEach(card => {
-        Object.values(DESTINATIONS).forEach(destination => card.classList.remove(destination.borderClass));
-        card.classList.add('border-transparent');
-      });
-
-      const destination = DESTINATIONS[destinationId];
-      const targetCard = byId(`destination-select-${destinationId}`);
-      if (!targetCard) return;
-      targetCard.classList.remove('border-transparent');
-      targetCard.classList.add(destination.borderClass);
-      scrollCardIntoSelectionView(targetCard, 'destination-selection-grid');
-      resetDestinationTarget();
-      byId('track-destination-target-icon').textContent = destination.icon;
-      byId('track-destination-name').textContent = `도착 (${destination.name})`;
-      sndClick();
-    }
-
-    function changeLaps(diff) {
-      primeUserAudio();
-      // 최대 1000장까지 설정
-      state.targetLaps = Math.max(1, Math.min(1000, state.targetLaps + diff));
-      byId('setup-lap-count').textContent = state.targetLaps;
-      sndClick();
-    }
-
 
     // --- 4. 우주선 엔진 가동 카운트다운 ---
     function enterMissionReady() {
