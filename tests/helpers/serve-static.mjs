@@ -48,7 +48,7 @@ export function listenStaticServer(serverPort = port) {
   });
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const server = await listenStaticServer();
 
   function shutdown() {
