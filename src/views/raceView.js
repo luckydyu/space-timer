@@ -70,6 +70,14 @@
     }
   }
 
+  function updateUndoButton() {
+    const button = byId('undo-last-lap-button');
+    if (!button) return;
+
+    const canUndo = state.appState === 'LAP_WAITING' && state.lapRecords.length > 0;
+    button.classList.toggle('hidden', !canUndo);
+  }
+
   function showMissionReadyScreen() {
     byId('screen-setup').classList.add('hidden');
     byId('screen-countdown').classList.add('hidden');
@@ -174,6 +182,7 @@
   }
 
   function updateLapDashboard() {
+    updateUndoButton();
     byId('running-lap-indicator').textContent = `MISSION ${state.currentLap} / ${state.targetLaps}`;
     const list = byId('lap-records-list');
     list.innerHTML = '';
@@ -205,6 +214,7 @@
     init,
     updateMockControls,
     updateMainActionButton,
+    updateUndoButton,
     showMissionReadyScreen,
     showCountdownScreen,
     setCountdownText,

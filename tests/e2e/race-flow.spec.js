@@ -47,3 +47,29 @@ test('returns to setup screen after restart', async ({ page }) => {
   await expect(page.locator('#screen-result')).toHaveClass(hiddenClass);
   await expect(page.locator('#status-text')).toHaveText('첫 미션부터 마이크 대기');
 });
+
+test('undoes the latest completed mission and resumes from its elapsed time', async ({ page }) => {
+  await page.getByRole('button', { name: '-10', exact: true }).click();
+  await page.getByRole('button', { name: '+1', exact: true }).click();
+  await expect(page.locator('#setup-lap-count')).toHaveText('2');
+  await page.getByRole('button', { name: '🏁 경기 시작하기 (터치!)' }).click();
+
+  await page.locator('#main-action-button').click();
+  await page.waitForTimeout(180);
+  await page.locator('#main-action-button').click();
+
+  await expect(page.locator('#running-lap-indicator')).toHaveText('MISSION 2 / 2', { timeout: 3000 });
+  await expect(page.locator('#undo-last-lap-button')).not.toHaveClass(hiddenClass);
+  await expect(page.locator('#lap-records-list')).toContainText('1등');
+
+  await page.locator('#undo-last-lap-button').click();
+
+  await expect(page.locator('#running-lap-indicator')).toHaveText('MISSION 1 / 2');
+  await expect(page.locator('#undo-last-lap-button')).toHaveClass(hiddenClass);
+  await expect(page.locator('#lap-records-list')).not.toContainText('1등');
+  await expect(page.locator('#lap-records-list')).toContainText('출발 대기 중');
+  await expect(page.locator('#running-total-time')).not.toHaveText('00:00.00');
+
+  await page.locator('#main-action-button').click();
+  await expect(page.locator('#lap-records-list')).toContainText('비행 중');
+});

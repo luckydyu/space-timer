@@ -93,9 +93,10 @@
   }
 
   function startLapTimer() {
-    state.lapStartTime = Date.now();
+    state.lapStartTime = Date.now() - state.currentLapElapsed;
     raceView.resetTrackForLap();
     raceView.updateLapDashboard();
+    raceView.updateLapTimer();
 
     if (state.timerInterval) clearInterval(state.timerInterval);
     state.timerInterval = setInterval(() => {
@@ -143,6 +144,7 @@
   }
 
   function prepareNextLap() {
+    state.currentLapElapsed = 0;
     raceView.prepareLap();
   }
 
@@ -182,6 +184,22 @@
     audio.click();
   }
 
+  function undoLastLap() {
+    if (state.appState !== 'LAP_WAITING' || state.lapRecords.length === 0) return;
+
+    const restoredElapsed = state.lapRecords.pop();
+    recalculateTotalElapsed();
+    state.currentLap = state.lapRecords.length + 1;
+    state.currentLapElapsed = restoredElapsed;
+
+    raceView.resetTrackForLap();
+    raceView.updateLapTimer();
+    raceView.updateLapDashboard();
+    raceView.updateMainActionButton();
+    raceView.updateMockControls();
+    audio.click();
+  }
+
   window.SpaceTimerRaceController = {
     init,
     handleMainAction,
@@ -190,6 +208,7 @@
     startNextLap,
     completeLap,
     restartApp,
-    deleteRecordedLap
+    deleteRecordedLap,
+    undoLastLap
   };
 })();

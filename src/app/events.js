@@ -38,6 +38,7 @@
         'randomize-mission': handlers.randomizeMissionSelection,
         'enter-mission-ready': handlers.enterMissionReady,
         'main-action': handlers.handleMainAction,
+        'undo-last-lap': handlers.undoLastLap,
         'restart-app': handlers.restartApp,
         selectCarCategory: () => handlers.selectCarCategory(category),
         selectDestinationCategory: () => handlers.selectDestinationCategory(category)

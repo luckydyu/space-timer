@@ -197,6 +197,9 @@
             <h3 class="game-font text-lg md:text-xl text-indigo-300 border-b border-slate-700 pb-2 mb-3 flex items-center gap-2">
               📋 오늘의 비행 일지
             </h3>
+            <button id="undo-last-lap-button" type="button" data-action="undo-last-lap" class="hidden w-full mb-3 game-font text-xs md:text-sm px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 border-b-4 border-amber-800 active:translate-y-1 transition-all">
+              ↩️ 방금 기록 되돌리기
+            </button>
             <!-- 최대 100장이 들어가도 망가지지 않게 max-height 및 스크롤바 추가 -->
             <div id="lap-records-list" class="space-y-2.5 min-h-[180px] lg:min-h-[260px] max-h-[350px] overflow-y-auto pr-1"></div>
           </div>

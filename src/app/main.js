@@ -93,6 +93,7 @@ const startNextLap = () => raceController.startNextLap();
 const completeLap = () => raceController.completeLap();
 const restartApp = () => raceController.restartApp();
 const deleteRecordedLap = index => raceController.deleteRecordedLap(index);
+const undoLastLap = () => raceController.undoLastLap();
 
 // --- 2. 가상 음성 명령 시뮬레이션 시스템 ---
 function simulateVoiceCommand(word) {
@@ -154,6 +155,7 @@ function bindEventHandlers() {
       randomizeMissionSelection,
       enterMissionReady,
       handleMainAction,
+      undoLastLap,
       restartApp,
       selectCarCategory,
       selectDestinationCategory
