@@ -258,6 +258,7 @@
     <p class="text-[10px] text-slate-600">© 2026 Space Study Racer. 아이가 공부에 몰입할 수 있도록 돕습니다!</p>
   </footer>
 
+  <script src="./src/state.js"></script>
   <script src="./src/data/voiceCommands.js"></script>
   <script src="./src/data/missionData.js"></script>
   <script src="./src/data/categoryIcons.js"></script>
@@ -265,18 +266,7 @@
   <!-- ==================== 앱 코어 스크립트 ==================== -->
   <script>
     // --- 0. 기본 상태 및 기획 변수 ---
-    let appState = "SETUP"; // SETUP, COUNTDOWN, FOCUS, LAP_WAITING, ANIMATING, RESULT
-    let targetLaps = 10;
-    let currentLap = 1;
-    let chosenCar = "car-1";
-    let chosenDestination = "destination-1";
-    let selectedCarCategory = "전체";
-    let selectedDestinationCategory = "전체";
-    let timerInterval = null;
-    let lapStartTime = 0;
-    let totalElapsedMs = 0;
-    let currentLapElapsed = 0;
-    let lapRecords = [];
+    const state = window.SpaceTimerState;
     const {
       START_COMMANDS,
       FINISH_COMMANDS,
@@ -345,7 +335,7 @@
       isRealSpeechActive = toggle.checked;
 
       if (isRealSpeechActive) {
-        if (appState === "SETUP") {
+        if (state.appState === "SETUP") {
           setSpeechRecognitionWaitingStatus();
         } else {
           startRealSpeechEngine();
@@ -361,11 +351,11 @@
     }
 
     function startRealSpeechEngine() {
-      if (appState === "SETUP") {
+      if (state.appState === "SETUP") {
         setSpeechRecognitionWaitingStatus();
         return;
       }
-      if (appState === "RESULT") return;
+      if (state.appState === "RESULT") return;
 
       initAudio();
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -400,7 +390,7 @@
 
         recognition.onend = function() {
           // 음성 인식이 꺼지면 상태가 진행 중이거나 대기 중일 때 자동 리스타트하여 상시 가동
-          if (isRealSpeechActive && !isRecognitionPausedForSpeech && appState !== "SETUP" && appState !== "RESULT") {
+          if (isRealSpeechActive && !isRecognitionPausedForSpeech && state.appState !== "SETUP" && state.appState !== "RESULT") {
             try { recognition.start(); } catch(e){}
           }
         };
@@ -441,7 +431,7 @@
         ? `${minutes}분 ${seconds}.${hundredths} 초입니다`
         : `${seconds}.${hundredths} 초입니다`;
 
-      const shouldResumeRecognition = isRealSpeechActive && recognition && appState !== "RESULT";
+      const shouldResumeRecognition = isRealSpeechActive && recognition && state.appState !== "RESULT";
       if (shouldResumeRecognition) {
         isRecognitionPausedForSpeech = true;
         try { recognition.stop(); } catch(e){}
@@ -458,7 +448,7 @@
       let resumeTimer = null;
       const resumeRecognition = function() {
         if (resumeTimer) clearTimeout(resumeTimer);
-        if (shouldResumeRecognition && appState !== "RESULT") {
+        if (shouldResumeRecognition && state.appState !== "RESULT") {
           isRecognitionPausedForSpeech = false;
           startRealSpeechEngine();
         }
@@ -499,17 +489,17 @@
       
       // 실제 명령 로직 수행
       if (word === '시작') {
-        if (appState === "SETUP") {
+        if (state.appState === "SETUP") {
           createVoiceBubble(word);
           sndClick();
           enterMissionReady();
-        } else if (appState === "LAP_WAITING") {
+        } else if (state.appState === "LAP_WAITING") {
           createVoiceBubble(word);
           sndClick();
           startNextLap();
         }
       } else if (word === '끝') {
-        if (appState === "FOCUS") {
+        if (state.appState === "FOCUS") {
           createVoiceBubble(word);
           completeLap();
         }
@@ -544,12 +534,12 @@
       const finishBtn = document.getElementById('mock-voice-finish');
       if (!startBtn || !finishBtn) return;
 
-      if (appState === "SETUP" || appState === "LAP_WAITING") {
+      if (state.appState === "SETUP" || state.appState === "LAP_WAITING") {
         startBtn.classList.remove('opacity-40', 'cursor-not-allowed');
         startBtn.disabled = false;
         finishBtn.classList.add('opacity-40', 'cursor-not-allowed');
         finishBtn.disabled = true;
-      } else if (appState === "FOCUS") {
+      } else if (state.appState === "FOCUS") {
         startBtn.classList.add('opacity-40', 'cursor-not-allowed');
         startBtn.disabled = true;
         finishBtn.classList.remove('opacity-40', 'cursor-not-allowed');
@@ -569,19 +559,19 @@
 
       const baseClass = "w-full game-font text-xl md:text-2xl py-5 md:py-6 rounded-3xl border-b-8 active:transform active:translate-y-2 shadow-2xl transition-all relative overflow-hidden group ";
 
-      if (appState === "FOCUS") {
+      if (state.appState === "FOCUS") {
         btn.className = baseClass + "bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white border-red-950";
         btn.innerHTML = `
           <div class="absolute inset-0 bg-white/10 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
           ✏️ 끝/스탑/멈춰/완료/도착/풀었 또는 터치!
         `;
-      } else if (appState === "LAP_WAITING") {
+      } else if (state.appState === "LAP_WAITING") {
         btn.className = baseClass + "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white border-emerald-950 animate-pulse";
         btn.innerHTML = `
           <div class="absolute inset-0 bg-white/10 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
           🚀 시작/스타트/시작해/출발/가자 또는 터치!
         `;
-      } else if (appState === "ANIMATING") {
+      } else if (state.appState === "ANIMATING") {
         btn.className = baseClass + "bg-slate-700 text-slate-400 border-slate-900 cursor-not-allowed";
         btn.innerHTML = `✨ 초광속 우주 비행 중... ✨`;
       }
@@ -590,9 +580,9 @@
     // 중앙의 다기능 버튼 통합 이벤트 리스너
     function handleMainAction() {
       primeUserAudio();
-      if (appState === "FOCUS") {
+      if (state.appState === "FOCUS") {
         completeLap();
-      } else if (appState === "LAP_WAITING") {
+      } else if (state.appState === "LAP_WAITING") {
         sndClick();
         startNextLap();
       }
@@ -625,11 +615,11 @@
     }
 
     function renderCarCategoryTabs() {
-      renderCategoryTabs('car-category-tabs', CAR_CATEGORIES, selectedCarCategory, 'selectCarCategory');
+      renderCategoryTabs('car-category-tabs', CAR_CATEGORIES, state.selectedCarCategory, 'selectCarCategory');
     }
 
     function renderDestinationCategoryTabs() {
-      renderCategoryTabs('destination-category-tabs', DESTINATION_CATEGORIES, selectedDestinationCategory, 'selectDestinationCategory');
+      renderCategoryTabs('destination-category-tabs', DESTINATION_CATEGORIES, state.selectedDestinationCategory, 'selectDestinationCategory');
     }
 
     function pickRandom(array) {
@@ -644,16 +634,16 @@
     function randomizeMissionSelection(shouldPrimeAudio = true) {
       if (shouldPrimeAudio) primeUserAudio();
 
-      selectedCarCategory = pickRandomCategory(CAR_CATEGORIES);
-      selectedDestinationCategory = pickRandomCategory(DESTINATION_CATEGORIES);
+      state.selectedCarCategory = pickRandomCategory(CAR_CATEGORIES);
+      state.selectedDestinationCategory = pickRandomCategory(DESTINATION_CATEGORIES);
 
       renderCarCategoryTabs();
       renderDestinationCategoryTabs();
       renderCarSelectionGrid();
       renderDestinationSelectionGrid();
 
-      const randomCar = pickRandom(getFilteredEntries(CARS, selectedCarCategory));
-      const randomDestination = pickRandom(getFilteredEntries(DESTINATIONS, selectedDestinationCategory));
+      const randomCar = pickRandom(getFilteredEntries(CARS, state.selectedCarCategory));
+      const randomDestination = pickRandom(getFilteredEntries(DESTINATIONS, state.selectedDestinationCategory));
 
       if (randomCar) selectCar(randomCar[0], false);
       if (randomDestination) selectDestination(randomDestination[0], false);
@@ -688,7 +678,7 @@
     function renderCarSelectionGrid() {
       const grid = document.getElementById('car-selection-grid');
       if (!grid) return;
-      const visibleCars = getFilteredEntries(CARS, selectedCarCategory);
+      const visibleCars = getFilteredEntries(CARS, state.selectedCarCategory);
       grid.innerHTML = visibleCars.map(([id, car]) => `
         <button type="button" onclick="selectCar('${id}')" id="car-select-${id}" class="car-card relative cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-2 transition-all transform hover:-translate-y-1 text-center min-h-[96px] flex flex-col justify-center">
           <span class="absolute left-1.5 top-1.5 min-w-5 px-1 rounded-md bg-slate-950/80 text-[9px] font-bold text-slate-300 border border-slate-600">${car.number}</span>
@@ -701,7 +691,7 @@
     function renderDestinationSelectionGrid() {
       const grid = document.getElementById('destination-selection-grid');
       if (!grid) return;
-      const visibleDestinations = getFilteredEntries(DESTINATIONS, selectedDestinationCategory);
+      const visibleDestinations = getFilteredEntries(DESTINATIONS, state.selectedDestinationCategory);
       grid.innerHTML = visibleDestinations.map(([id, destination]) => `
         <button type="button" onclick="selectDestination('${id}')" id="destination-select-${id}" class="destination-card relative cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-2 transition-all transform hover:-translate-y-1 text-center min-h-[96px] flex flex-col justify-center">
           <span class="absolute left-1.5 top-1.5 min-w-5 px-1 rounded-md bg-slate-950/80 text-[9px] font-bold text-slate-300 border border-slate-600">${destination.number}</span>
@@ -712,32 +702,32 @@
     }
 
     function selectCarCategory(category) {
-      selectedCarCategory = category;
+      state.selectedCarCategory = category;
       renderCarCategoryTabs();
       renderCarSelectionGrid();
-      if (!getFilteredEntries(CARS, selectedCarCategory).some(([id]) => id === chosenCar)) {
-        const firstVisibleCar = getFilteredEntries(CARS, selectedCarCategory)[0];
+      if (!getFilteredEntries(CARS, state.selectedCarCategory).some(([id]) => id === state.chosenCar)) {
+        const firstVisibleCar = getFilteredEntries(CARS, state.selectedCarCategory)[0];
         if (firstVisibleCar) selectCar(firstVisibleCar[0]);
       } else {
-        selectCar(chosenCar, false);
+        selectCar(state.chosenCar, false);
       }
     }
 
     function selectDestinationCategory(category) {
-      selectedDestinationCategory = category;
+      state.selectedDestinationCategory = category;
       renderDestinationCategoryTabs();
       renderDestinationSelectionGrid();
-      if (!getFilteredEntries(DESTINATIONS, selectedDestinationCategory).some(([id]) => id === chosenDestination)) {
-        const firstVisibleDestination = getFilteredEntries(DESTINATIONS, selectedDestinationCategory)[0];
+      if (!getFilteredEntries(DESTINATIONS, state.selectedDestinationCategory).some(([id]) => id === state.chosenDestination)) {
+        const firstVisibleDestination = getFilteredEntries(DESTINATIONS, state.selectedDestinationCategory)[0];
         if (firstVisibleDestination) selectDestination(firstVisibleDestination[0]);
       } else {
-        selectDestination(chosenDestination, false);
+        selectDestination(state.chosenDestination, false);
       }
     }
 
     function selectCar(color, shouldPrimeAudio = true) {
       if (shouldPrimeAudio) primeUserAudio();
-      chosenCar = color;
+      state.chosenCar = color;
       
       // 테두리 클래스 수동 갱신 (Tailwind purge 방지 목적)
       document.querySelectorAll('.car-card').forEach(card => {
@@ -762,7 +752,7 @@
     function selectDestination(destinationId, shouldPrimeAudio = true) {
       if (shouldPrimeAudio) primeUserAudio();
       if (!DESTINATIONS[destinationId]) return;
-      chosenDestination = destinationId;
+      state.chosenDestination = destinationId;
 
       document.querySelectorAll('.destination-card').forEach(card => {
         Object.values(DESTINATIONS).forEach(destination => card.classList.remove(destination.borderClass));
@@ -784,8 +774,8 @@
     function changeLaps(diff) {
       primeUserAudio();
       // 최대 1000장까지 설정
-      targetLaps = Math.max(1, Math.min(1000, targetLaps + diff));
-      document.getElementById('setup-lap-count').textContent = targetLaps;
+      state.targetLaps = Math.max(1, Math.min(1000, state.targetLaps + diff));
+      document.getElementById('setup-lap-count').textContent = state.targetLaps;
       sndClick();
     }
 
@@ -793,14 +783,14 @@
     // --- 4. 우주선 엔진 가동 카운트다운 ---
     function enterMissionReady() {
       primeUserAudio();
-      appState = "LAP_WAITING";
+      state.appState = "LAP_WAITING";
       updateMockControls();
 
-      currentLap = 1;
-      lapRecords = [];
-      totalElapsedMs = 0;
-      currentLapElapsed = 0;
-      if (timerInterval) clearInterval(timerInterval);
+      state.currentLap = 1;
+      state.lapRecords = [];
+      state.totalElapsedMs = 0;
+      state.currentLapElapsed = 0;
+      if (state.timerInterval) clearInterval(state.timerInterval);
 
       document.getElementById('screen-setup').classList.add('hidden');
       document.getElementById('screen-countdown').classList.add('hidden');
@@ -817,7 +807,7 @@
     }
 
     function startCountdown() {
-      appState = "COUNTDOWN";
+      state.appState = "COUNTDOWN";
       updateMockControls();
 
       document.getElementById('screen-setup').classList.add('hidden');
@@ -865,13 +855,13 @@
 
     // --- 5. 주행 타이머 루프 및 애니메이션 ---
     function startRace() {
-      appState = "FOCUS";
+      state.appState = "FOCUS";
       updateMockControls();
       updateMainActionButton();
 
-      currentLap = 1; 
-      lapRecords = []; 
-      totalElapsedMs = 0;
+      state.currentLap = 1; 
+      state.lapRecords = []; 
+      state.totalElapsedMs = 0;
 
       document.getElementById('screen-countdown').classList.add('hidden');
       document.getElementById('screen-running').classList.remove('hidden');
@@ -881,7 +871,7 @@
     }
 
     function startLapTimer() {
-      lapStartTime = Date.now();
+      state.lapStartTime = Date.now();
       
       // 로켓 시작 라인 원위치 및 파란 부스터 제거
       const carWrapper = document.getElementById('track-car-wrapper');
@@ -893,25 +883,25 @@
       
       updateLapDashboard();
 
-      if (timerInterval) clearInterval(timerInterval);
-      timerInterval = setInterval(() => {
-        currentLapElapsed = Date.now() - lapStartTime;
+      if (state.timerInterval) clearInterval(state.timerInterval);
+      state.timerInterval = setInterval(() => {
+        state.currentLapElapsed = Date.now() - state.lapStartTime;
         
         // 타이머 및 분:초 파싱
-        const totalSecs = Math.floor(currentLapElapsed / 1000);
+        const totalSecs = Math.floor(state.currentLapElapsed / 1000);
         const minutes = Math.floor(totalSecs / 60);
         const seconds = totalSecs % 60;
-        const msFraction = String(Math.floor((currentLapElapsed % 1000) / 10)).padStart(2, '0');
+        const msFraction = String(Math.floor((state.currentLapElapsed % 1000) / 10)).padStart(2, '0');
 
         document.getElementById('timer-display').textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         document.getElementById('timer-ms').textContent = `.${msFraction}`;
-        document.getElementById('running-total-time').textContent = formatTime(totalElapsedMs + currentLapElapsed);
+        document.getElementById('running-total-time').textContent = formatTime(state.totalElapsedMs + state.currentLapElapsed);
 
         // --- 로켓 서서히 전진 주행 구현 ---
         // 아이가 부담을 덜 가지게끔 1장 표준 해결시간을 5분(300,000ms) 목표로 설정
         // 최대 85%선까지 천천히 나아가다가 완료 탭 시 골라인을 시원하게 격파합니다.
         const targetStandardMs = 300000;
-        const progress = Math.min((currentLapElapsed / targetStandardMs) * 85, 85);
+        const progress = Math.min((state.currentLapElapsed / targetStandardMs) * 85, 85);
         carWrapper.style.transition = 'left 0.1s linear';
         carWrapper.style.left = `calc(${progress}% + 16px)`;
 
@@ -919,18 +909,18 @@
     }
 
     function startNextLap() {
-      if (appState !== "LAP_WAITING") return;
-      appState = "FOCUS";
+      if (state.appState !== "LAP_WAITING") return;
+      state.appState = "FOCUS";
       updateMockControls();
       updateMainActionButton();
       startLapTimer();
     }
 
     function completeLap() {
-      if (appState !== "FOCUS") return;
-      clearInterval(timerInterval);
+      if (state.appState !== "FOCUS") return;
+      clearInterval(state.timerInterval);
       
-      appState = "ANIMATING"; // 애니메이션 중 음성/클릭 오입력 차단
+      state.appState = "ANIMATING"; // 애니메이션 중 음성/클릭 오입력 차단
       updateMockControls();
       updateMainActionButton();
 
@@ -957,17 +947,17 @@
         carWrapper.style.left = 'calc(100% + 100px)'; // 화면 바깥으로 로켓이 탈출
       }, 430);
 
-      lapRecords.push(currentLapElapsed);
+      state.lapRecords.push(state.currentLapElapsed);
       recalculateTotalElapsed();
 
       setTimeout(() => {
         mainContainer.classList.remove('shake-view');
         sndSuccess();
-        speakMissionTime(currentLapElapsed);
+        speakMissionTime(state.currentLapElapsed);
         
-        if (currentLap < targetLaps) {
-          currentLap++;
-          appState = "LAP_WAITING"; // 대기실 상태로 변경하여 자동 시작 방지
+        if (state.currentLap < state.targetLaps) {
+          state.currentLap++;
+          state.appState = "LAP_WAITING"; // 대기실 상태로 변경하여 자동 시작 방지
           updateMockControls();
           prepareNextLap();
         } else {
@@ -997,7 +987,7 @@
 
     // --- 6. 최종 완주 결과 계산 및 축하 ---
     function finishRace() {
-      appState = "RESULT";
+      state.appState = "RESULT";
       updateMockControls();
 
       // 음성 엔진 리스너 오프
@@ -1007,9 +997,9 @@
       document.getElementById('screen-result').classList.remove('hidden');
 
       // 성적 대시보드 주입 계산
-      const totalTime = lapRecords.reduce((acc, curr) => acc + curr, 0);
-      const minTime = Math.min(...lapRecords);
-      const avgTime = Math.floor(totalTime / lapRecords.length);
+      const totalTime = state.lapRecords.reduce((acc, curr) => acc + curr, 0);
+      const minTime = Math.min(...state.lapRecords);
+      const avgTime = Math.floor(totalTime / state.lapRecords.length);
 
       document.getElementById('result-total-time').textContent = formatTime(totalTime);
       document.getElementById('result-avg-lap').textContent = formatTime(avgTime);
@@ -1018,7 +1008,7 @@
       // 세부 미션 분석 렌더링
       const details = document.getElementById('final-lap-details');
       details.innerHTML = '';
-      lapRecords.forEach((time, index) => {
+      state.lapRecords.forEach((time, index) => {
         const isBest = time === minTime;
         const rank = getLapRank(time);
         details.insertAdjacentHTML('beforeend', `
@@ -1038,7 +1028,7 @@
     }
 
     function restartApp() {
-      appState = "SETUP";
+      state.appState = "SETUP";
       updateMockControls();
       
       // 첫 화면에서는 마이크를 실제로 켜지 않고, 다음 미션 화면부터 대기한다.
@@ -1054,19 +1044,19 @@
 
     // --- 7. 유틸리티 효과 함수 ---
     function recalculateTotalElapsed() {
-      totalElapsedMs = lapRecords.reduce((acc, curr) => acc + curr, 0);
+      state.totalElapsedMs = state.lapRecords.reduce((acc, curr) => acc + curr, 0);
     }
 
     function updateTotalTimeDisplay() {
-      const activeElapsed = appState === "FOCUS" ? currentLapElapsed : 0;
-      document.getElementById('running-total-time').textContent = formatTime(totalElapsedMs + activeElapsed);
+      const activeElapsed = state.appState === "FOCUS" ? state.currentLapElapsed : 0;
+      document.getElementById('running-total-time').textContent = formatTime(state.totalElapsedMs + activeElapsed);
     }
 
     function deleteRecordedLap(index) {
-      if (index < 0 || index >= lapRecords.length || appState === "ANIMATING") return;
-      lapRecords.splice(index, 1);
+      if (index < 0 || index >= state.lapRecords.length || state.appState === "ANIMATING") return;
+      state.lapRecords.splice(index, 1);
       recalculateTotalElapsed();
-      currentLap = Math.min(targetLaps, lapRecords.length + 1);
+      state.currentLap = Math.min(state.targetLaps, state.lapRecords.length + 1);
       updateTotalTimeDisplay();
       updateLapDashboard();
       sndClick();
@@ -1081,23 +1071,23 @@
     }
 
     function getLapRank(time) {
-      return 1 + lapRecords.filter(record => record < time).length;
+      return 1 + state.lapRecords.filter(record => record < time).length;
     }
 
     function updateLapDashboard() {
-      document.getElementById('running-lap-indicator').textContent = `MISSION ${currentLap} / ${targetLaps}`;
+      document.getElementById('running-lap-indicator').textContent = `MISSION ${state.currentLap} / ${state.targetLaps}`;
       const list = document.getElementById('lap-records-list');
       list.innerHTML = '';
-      for (let i = 0; i < targetLaps; i++) {
-        const isRecorded = i < lapRecords.length;
-        const isCurrent = i === (currentLap - 1);
-        const rank = isRecorded ? getLapRank(lapRecords[i]) : null;
+      for (let i = 0; i < state.targetLaps; i++) {
+        const isRecorded = i < state.lapRecords.length;
+        const isCurrent = i === (state.currentLap - 1);
+        const rank = isRecorded ? getLapRank(state.lapRecords[i]) : null;
         list.insertAdjacentHTML('beforeend', `
           <div class="flex items-center justify-between p-3 rounded-xl border-2 ${isRecorded ? 'border-emerald-500 bg-emerald-950/30' : isCurrent ? 'border-indigo-500 bg-indigo-500/10 animate-pulse' : 'border-slate-700 bg-slate-900/40'} transition-all text-xs md:text-sm">
             <span class="game-font ${isRecorded ? 'text-emerald-300' : isCurrent ? 'text-indigo-300' : 'text-slate-400'}">#${i + 1}번째 장</span>
             <div class="flex items-center gap-2">
               ${isRecorded ? `<span class="game-font text-[10px] md:text-xs px-2 py-1 rounded-lg bg-indigo-900/80 text-indigo-100 border border-indigo-500">${rank}등</span>` : ''}
-              <span class="game-font font-bold ${isRecorded ? 'text-white' : 'text-slate-500'}">${isRecorded ? formatTime(lapRecords[i]) : isCurrent ? (appState === "LAP_WAITING" ? "출발 대기 중" : "비행 중...") : '대기 중'}🏁</span>
+              <span class="game-font font-bold ${isRecorded ? 'text-white' : 'text-slate-500'}">${isRecorded ? formatTime(state.lapRecords[i]) : isCurrent ? (state.appState === "LAP_WAITING" ? "출발 대기 중" : "비행 중...") : '대기 중'}🏁</span>
               ${isRecorded ? `<button type="button" onclick="deleteRecordedLap(${i})" class="game-font text-[10px] md:text-xs px-2 py-1 rounded-lg bg-slate-800 hover:bg-rose-700 text-slate-300 hover:text-white border border-slate-600 hover:border-rose-400 transition-colors" aria-label="${i + 1}번째 기록 삭제">삭제</button>` : ''}
             </div>
           </div>
@@ -1105,7 +1095,7 @@
       }
       
       // 현재 미션이 보이지 않을 때만, 보이는 만큼만 최소 스크롤
-      const currentActiveNode = list.children[currentLap - 1];
+      const currentActiveNode = list.children[state.currentLap - 1];
       if (currentActiveNode) {
         const minScrollToShowCurrent =
           currentActiveNode.offsetTop + currentActiveNode.offsetHeight - list.clientHeight;
