@@ -86,6 +86,13 @@
     byId('running-total-time').textContent = '00:00.00';
   }
 
+  function showSetupScreen() {
+    byId('screen-countdown').classList.add('hidden');
+    byId('screen-running').classList.add('hidden');
+    byId('screen-result').classList.add('hidden');
+    byId('screen-setup').classList.remove('hidden');
+  }
+
   function showCountdownScreen() {
     byId('screen-setup').classList.add('hidden');
     byId('screen-countdown').classList.remove('hidden');
@@ -216,6 +223,7 @@
     updateMainActionButton,
     updateUndoButton,
     showMissionReadyScreen,
+    showSetupScreen,
     showCountdownScreen,
     setCountdownText,
     resetLights,

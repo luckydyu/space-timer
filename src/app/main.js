@@ -9,6 +9,7 @@ const dom = window.SpaceTimerDom;
 const byId = id => dom.byId(id);
 const raceStats = window.SpaceTimerRaceStats;
 const effectsService = window.SpaceTimerEffects;
+const preferences = window.SpaceTimerPreferences;
 
 
 // --- 1. 실제 마이크 음성 인식 시스템 (Web Speech API) ---
@@ -35,6 +36,7 @@ setupView.init({
   state,
   data: window.SpaceTimerData,
   dom,
+  preferences,
   primeUserAudio,
   playClick: sndClick
 });
@@ -42,11 +44,14 @@ const renderCarCategoryTabs = () => setupView.renderCarCategoryTabs();
 const renderDestinationCategoryTabs = () => setupView.renderDestinationCategoryTabs();
 const renderCarSelectionGrid = () => setupView.renderCarSelectionGrid();
 const renderDestinationSelectionGrid = () => setupView.renderDestinationSelectionGrid();
+const renderFavorites = () => setupView.renderFavorites();
 const randomizeMissionSelection = shouldPrimeAudio => setupView.randomizeMissionSelection(shouldPrimeAudio);
 const selectCarCategory = category => setupView.selectCarCategory(category);
 const selectDestinationCategory = category => setupView.selectDestinationCategory(category);
 const selectCar = (color, shouldPrimeAudio) => setupView.selectCar(color, shouldPrimeAudio);
 const selectDestination = (destinationId, shouldPrimeAudio) => setupView.selectDestination(destinationId, shouldPrimeAudio);
+const toggleFavoriteCar = id => setupView.toggleFavoriteCar(id);
+const toggleFavoriteDestination = id => setupView.toggleFavoriteDestination(id);
 const changeLaps = diff => setupView.changeLaps(diff);
 
 const raceView = window.SpaceTimerRaceView;
@@ -149,6 +154,8 @@ function bindEventHandlers() {
       changeLaps,
       selectCar,
       selectDestination,
+      toggleFavoriteCar,
+      toggleFavoriteDestination,
       deleteRecordedLap,
       openVoiceCommandHelp,
       closeVoiceCommandHelp,
@@ -167,6 +174,7 @@ function bindEventHandlers() {
 bindEventHandlers();
 renderCarCategoryTabs();
 renderDestinationCategoryTabs();
+renderFavorites();
 renderCarSelectionGrid();
 renderDestinationSelectionGrid();
 randomizeMissionSelection(false);

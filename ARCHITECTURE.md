@@ -22,18 +22,19 @@ ES module import/export를 쓰지 않는 이유는 현재 배포 방식을 단�
 1. `src/services/audio.js`
 2. `src/services/speech.js`
 3. `src/services/effects.js`
-4. `src/state.js`
-5. `src/data/voiceCommands.js`
-6. `src/data/missionData.js`
-7. `src/data/categoryIcons.js`
-8. `src/utils/raceStats.js`
-9. `src/dom/elements.js`
-10. `src/features/setupView.js`
-11. `src/views/raceView.js`
-12. `src/views/resultView.js`
-13. `src/features/raceController.js`
-14. `src/app/events.js`
-15. `src/app/main.js`
+4. `src/services/preferences.js`
+5. `src/state.js`
+6. `src/data/voiceCommands.js`
+7. `src/data/missionData.js`
+8. `src/data/categoryIcons.js`
+9. `src/utils/raceStats.js`
+10. `src/dom/elements.js`
+11. `src/features/setupView.js`
+12. `src/views/raceView.js`
+13. `src/views/resultView.js`
+14. `src/features/raceController.js`
+15. `src/app/events.js`
+16. `src/app/main.js`
 
 `main.js`는 마지막에 실행되어 앞에서 등록된 전역 객체들을 초기화합니다.
 
@@ -51,6 +52,7 @@ ES module import/export를 쓰지 않는 이유는 현재 배포 방식을 단�
 - `window.SpaceTimerRaceController`: 레이스 상태 전환과 흐름 제어
 - `window.SpaceTimerSpeech`: Web Speech API와 음성 합성
 - `window.SpaceTimerEffects`: 배경 파티클과 confetti 효과
+- `window.SpaceTimerPreferences`: localStorage 기반 설정/즐겨찾기 저장
 - `window.SpaceTimerEvents`: 이벤트 위임 라우터
 
 `audio.js`는 아직 `sndClick`, `sndBeepLow` 같은 classic script 전역 함수를 제공합니다. `main.js`는 ESLint를 위해 해당 함수들을 `/* global ... */` 주석으로 선언합니다.
@@ -126,6 +128,12 @@ ES module import/export를 쓰지 않는 이유는 현재 배포 방식을 단�
 `src/services/effects.js`
 
 - 우주 배경 파티클과 결과 화면 confetti 애니메이션을 담당합니다.
+
+`src/services/preferences.js`
+
+- 로켓/도착지 즐겨찾기를 `localStorage`에 저장합니다.
+- 브라우저 저장소가 제한되거나 저장 값이 깨진 경우에도 앱이 계속 동작하도록 기본값으로 복구합니다.
+- 즐겨찾기 개수 제한 같은 저장 정책은 이 서비스에서 관리합니다.
 
 ### Utils and DOM
 

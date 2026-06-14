@@ -48,6 +48,21 @@ test('returns to setup screen after restart', async ({ page }) => {
   await expect(page.locator('#status-text')).toHaveText('첫 미션부터 마이크 대기');
 });
 
+test('returns to setup screen when the header title is clicked', async ({ page }) => {
+  await page.getByRole('button', { name: '-10', exact: true }).click();
+  await page.getByRole('button', { name: '🏁 경기 시작하기 (터치!)' }).click();
+  await page.locator('#main-action-button').click();
+  await expect(page.locator('#lap-records-list')).toContainText('비행 중');
+
+  await page.getByRole('button', { name: '🚀 우주 초스피드 레이서' }).click();
+
+  await expect(page.locator('#screen-setup')).not.toHaveClass(hiddenClass);
+  await expect(page.locator('#screen-running')).toHaveClass(hiddenClass);
+  await expect(page.locator('#screen-result')).toHaveClass(hiddenClass);
+  await expect(page.locator('#status-text')).toHaveText('첫 미션부터 마이크 대기');
+});
+
+
 test('undoes the latest completed mission and resumes from its elapsed time', async ({ page }) => {
   await page.getByRole('button', { name: '-10', exact: true }).click();
   await page.getByRole('button', { name: '+1', exact: true }).click();

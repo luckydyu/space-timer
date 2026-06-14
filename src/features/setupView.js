@@ -2,6 +2,7 @@
   let state = null;
   let data = null;
   let dom = null;
+  let preferences = null;
   let primeUserAudio = () => {};
   let playClick = () => {};
 
@@ -9,6 +10,7 @@
     state = options.state;
     data = options.data;
     dom = options.dom;
+    preferences = options.preferences;
     primeUserAudio = options.primeUserAudio;
     playClick = options.playClick;
   }
@@ -78,6 +80,43 @@
     if (shouldPrimeAudio) playClick();
   }
 
+  function renderFavoriteCars() {
+    const container = dom.byId('favorite-car-list');
+    if (!container) return;
+    const favorites = preferences.getFavoriteCars().filter(id => data.CARS[id]);
+    container.innerHTML = favorites.length ? favorites.map(id => {
+      const car = data.CARS[id];
+      return `
+        <button type="button" data-car-id="${id}" class="game-font text-[10px] md:text-xs px-2 py-1 rounded-lg bg-yellow-400 text-slate-950 border border-yellow-200 flex items-center gap-1 max-w-full">
+          <span>${car.number}</span>
+          <span>${car.emoji}</span>
+          <span class="truncate">${car.label}</span>
+        </button>
+      `;
+    }).join('') : '<span class="game-font text-[10px] text-slate-500">즐겨찾기 3개까지 저장 가능</span>';
+  }
+
+  function renderFavoriteDestinations() {
+    const container = dom.byId('favorite-destination-list');
+    if (!container) return;
+    const favorites = preferences.getFavoriteDestinations().filter(id => data.DESTINATIONS[id]);
+    container.innerHTML = favorites.length ? favorites.map(id => {
+      const destination = data.DESTINATIONS[id];
+      return `
+        <button type="button" data-destination-id="${id}" class="game-font text-[10px] md:text-xs px-2 py-1 rounded-lg bg-yellow-400 text-slate-950 border border-yellow-200 flex items-center gap-1 max-w-full">
+          <span>${destination.number}</span>
+          <span>${destination.icon}</span>
+          <span class="truncate">${destination.name}</span>
+        </button>
+      `;
+    }).join('') : '<span class="game-font text-[10px] text-slate-500">즐겨찾기 3개까지 저장 가능</span>';
+  }
+
+  function renderFavorites() {
+    renderFavoriteCars();
+    renderFavoriteDestinations();
+  }
+
   function scrollCardIntoSelectionView(card, gridId) {
     const grid = dom.byId(gridId);
     if (!card || !grid) return;
@@ -107,12 +146,16 @@
     const grid = dom.byId('car-selection-grid');
     if (!grid) return;
     const visibleCars = getFilteredEntries(data.CARS, state.selectedCarCategory);
+    const favoriteCars = preferences.getFavoriteCars();
     grid.innerHTML = visibleCars.map(([id, car]) => `
-      <button type="button" data-car-id="${id}" id="car-select-${id}" class="car-card relative cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-2 transition-all transform hover:-translate-y-1 text-center min-h-[96px] flex flex-col justify-center">
-        <span class="absolute left-1.5 top-1.5 min-w-5 px-1 rounded-md bg-slate-950/80 text-[9px] font-bold text-slate-300 border border-slate-600">${car.number}</span>
-        <span class="${car.isSideways ? 'sideways-flight' : 'inline-block'} text-3xl md:text-4xl block mb-1">${car.emoji}</span>
-        <span class="game-font text-[9px] md:text-[10px] ${car.textClass} leading-tight break-keep">${car.label}</span>
-      </button>
+      <div id="car-select-${id}" class="car-card relative min-w-0 bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-2 transition-all transform hover:-translate-y-1 text-center min-h-[112px]">
+        <button type="button" data-car-id="${id}" class="w-full min-h-[76px] flex flex-col justify-center">
+          <span class="absolute left-1.5 top-1.5 min-w-5 px-1 rounded-md bg-slate-950/80 text-[9px] font-bold text-slate-300 border border-slate-600">${car.number}</span>
+          <span class="${car.isSideways ? 'sideways-flight' : 'inline-block'} text-3xl md:text-4xl block mb-1">${car.emoji}</span>
+          <span class="game-font text-[9px] md:text-[10px] ${car.textClass} leading-tight break-keep">${car.label}</span>
+        </button>
+        <button type="button" data-favorite-car-id="${id}" class="mt-1 w-full game-font text-[10px] px-2 py-1 rounded-lg bg-slate-950/80 border border-slate-600 ${favoriteCars.includes(id) ? 'text-yellow-300' : 'text-slate-500'}" aria-label="${car.label} 즐겨찾기 토글">${favoriteCars.includes(id) ? '★ 즐겨찾기' : '☆ 즐겨찾기'}</button>
+      </div>
     `).join('');
   }
 
@@ -120,12 +163,16 @@
     const grid = dom.byId('destination-selection-grid');
     if (!grid) return;
     const visibleDestinations = getFilteredEntries(data.DESTINATIONS, state.selectedDestinationCategory);
+    const favoriteDestinations = preferences.getFavoriteDestinations();
     grid.innerHTML = visibleDestinations.map(([id, destination]) => `
-      <button type="button" data-destination-id="${id}" id="destination-select-${id}" class="destination-card relative cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-2 transition-all transform hover:-translate-y-1 text-center min-h-[96px] flex flex-col justify-center">
-        <span class="absolute left-1.5 top-1.5 min-w-5 px-1 rounded-md bg-slate-950/80 text-[9px] font-bold text-slate-300 border border-slate-600">${destination.number}</span>
-        <span class="text-3xl md:text-4xl block mb-1">${destination.icon}</span>
-        <span class="game-font text-[9px] md:text-[10px] ${destination.textClass} leading-tight break-keep">${destination.name}</span>
-      </button>
+      <div id="destination-select-${id}" class="destination-card relative min-w-0 bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-2 transition-all transform hover:-translate-y-1 text-center min-h-[112px]">
+        <button type="button" data-destination-id="${id}" class="w-full min-h-[76px] flex flex-col justify-center">
+          <span class="absolute left-1.5 top-1.5 min-w-5 px-1 rounded-md bg-slate-950/80 text-[9px] font-bold text-slate-300 border border-slate-600">${destination.number}</span>
+          <span class="text-3xl md:text-4xl block mb-1">${destination.icon}</span>
+          <span class="game-font text-[9px] md:text-[10px] ${destination.textClass} leading-tight break-keep">${destination.name}</span>
+        </button>
+        <button type="button" data-favorite-destination-id="${id}" class="mt-1 w-full game-font text-[10px] px-2 py-1 rounded-lg bg-slate-950/80 border border-slate-600 ${favoriteDestinations.includes(id) ? 'text-yellow-300' : 'text-slate-500'}" aria-label="${destination.name} 즐겨찾기 토글">${favoriteDestinations.includes(id) ? '★ 즐겨찾기' : '☆ 즐겨찾기'}</button>
+      </div>
     `).join('');
   }
 
@@ -135,9 +182,9 @@
     renderCarSelectionGrid();
     if (!getFilteredEntries(data.CARS, state.selectedCarCategory).some(([id]) => id === state.chosenCar)) {
       const firstVisibleCar = getFilteredEntries(data.CARS, state.selectedCarCategory)[0];
-      if (firstVisibleCar) selectCar(firstVisibleCar[0]);
+      if (firstVisibleCar) selectCar(firstVisibleCar[0], true, false);
     } else {
-      selectCar(state.chosenCar, false);
+      selectCar(state.chosenCar, false, false);
     }
   }
 
@@ -148,13 +195,13 @@
     if (!getFilteredEntries(data.DESTINATIONS, state.selectedDestinationCategory)
       .some(([id]) => id === state.chosenDestination)) {
       const firstVisibleDestination = getFilteredEntries(data.DESTINATIONS, state.selectedDestinationCategory)[0];
-      if (firstVisibleDestination) selectDestination(firstVisibleDestination[0]);
+      if (firstVisibleDestination) selectDestination(firstVisibleDestination[0], true, false);
     } else {
-      selectDestination(state.chosenDestination, false);
+      selectDestination(state.chosenDestination, false, false);
     }
   }
 
-  function selectCar(color, shouldPrimeAudio = true) {
+  function selectCar(color, shouldPrimeAudio = true, shouldScroll = true) {
     if (shouldPrimeAudio) primeUserAudio();
     state.chosenCar = color;
 
@@ -167,7 +214,7 @@
     if (!targetCard || !data.CARS[color]) return;
     targetCard.classList.remove('border-transparent');
     targetCard.classList.add(data.CARS[color].borderClass);
-    scrollCardIntoSelectionView(targetCard, 'car-selection-grid');
+    if (shouldScroll) scrollCardIntoSelectionView(targetCard, 'car-selection-grid');
 
     const trackCar = dom.byId('track-car');
     trackCar.innerHTML = data.CARS[color].emoji;
@@ -177,7 +224,17 @@
     playClick();
   }
 
-  function selectDestination(destinationId, shouldPrimeAudio = true) {
+  function toggleFavoriteCar(id) {
+    primeUserAudio();
+    if (!data.CARS[id]) return;
+    preferences.toggleFavoriteCar(id);
+    renderFavoriteCars();
+    renderCarSelectionGrid();
+    selectCar(state.chosenCar, false, false);
+    playClick();
+  }
+
+  function selectDestination(destinationId, shouldPrimeAudio = true, shouldScroll = true) {
     if (shouldPrimeAudio) primeUserAudio();
     if (!data.DESTINATIONS[destinationId]) return;
     state.chosenDestination = destinationId;
@@ -192,10 +249,20 @@
     if (!targetCard) return;
     targetCard.classList.remove('border-transparent');
     targetCard.classList.add(destination.borderClass);
-    scrollCardIntoSelectionView(targetCard, 'destination-selection-grid');
+    if (shouldScroll) scrollCardIntoSelectionView(targetCard, 'destination-selection-grid');
     resetDestinationTarget();
     dom.byId('track-destination-target-icon').textContent = destination.icon;
     dom.byId('track-destination-name').textContent = `도착 (${destination.name})`;
+    playClick();
+  }
+
+  function toggleFavoriteDestination(id) {
+    primeUserAudio();
+    if (!data.DESTINATIONS[id]) return;
+    preferences.toggleFavoriteDestination(id);
+    renderFavoriteDestinations();
+    renderDestinationSelectionGrid();
+    selectDestination(state.chosenDestination, false, false);
     playClick();
   }
 
@@ -212,11 +279,14 @@
     renderDestinationCategoryTabs,
     renderCarSelectionGrid,
     renderDestinationSelectionGrid,
+    renderFavorites,
     randomizeMissionSelection,
     selectCarCategory,
     selectDestinationCategory,
     selectCar,
     selectDestination,
+    toggleFavoriteCar,
+    toggleFavoriteDestination,
     changeLaps,
     resetDestinationTarget
   };

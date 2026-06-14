@@ -93,6 +93,64 @@
       font-size: 1.8rem;
       line-height: 1.1;
     }
+    #mission-selection-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 1rem;
+      text-align: left;
+    }
+    #favorite-car-list,
+    #favorite-destination-list,
+    #car-category-tabs,
+    #destination-category-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.375rem;
+      min-width: 0;
+    }
+    #favorite-car-list,
+    #favorite-destination-list {
+      padding-bottom: 0.5rem;
+    }
+    #car-category-tabs,
+    #destination-category-tabs {
+      padding-bottom: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    #car-selection-grid,
+    #destination-selection-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.5rem;
+      max-height: 236px;
+      overflow-y: auto;
+      padding-right: 0.25rem;
+      min-width: 0;
+    }
+    .car-card,
+    .destination-card {
+      min-width: 0;
+    }
+
+    @media (min-width: 768px) {
+      #mission-selection-layout {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.25rem;
+      }
+      #car-selection-grid,
+      #destination-selection-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0.75rem;
+        max-height: 250px;
+      }
+    }
+
+    @media (min-width: 1536px) {
+      #car-selection-grid,
+      #destination-selection-grid {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+      }
+    }
 
     @media (max-height: 900px) {
       #main-container {

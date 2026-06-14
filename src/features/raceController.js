@@ -159,14 +159,17 @@
   }
 
   function restartApp() {
+    if (state.timerInterval) clearInterval(state.timerInterval);
     state.appState = 'SETUP';
+    state.currentLapElapsed = 0;
     raceView.updateMockControls();
+    speech.stopRealSpeechEngine();
 
     if (speech.isSpeechRecognitionActive()) {
       speech.setSpeechRecognitionWaitingStatus();
     }
 
-    resultView.showSetupScreen();
+    raceView.showSetupScreen();
     effects.stopConfetti();
   }
 

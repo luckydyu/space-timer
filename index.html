@@ -14,16 +14,16 @@
   <script src="./src/services/audio.js"></script>
   <script src="./src/services/speech.js"></script>
   <script src="./src/services/effects.js"></script>
+  <script src="./src/services/preferences.js"></script>
 
   <!-- ==================== 헤더 영역 ==================== -->
   <header class="bg-slate-900/90 border-b-2 border-indigo-500 px-3 py-1.5 shadow-lg flex justify-between items-center z-10">
-    <div class="flex items-center gap-2.5">
+    <button type="button" data-action="go-home" class="flex items-center gap-2.5 text-left rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-400">
       <div class="text-3xl animate-bounce">🚀</div>
       <div>
         <h1 class="game-font text-xl md:text-2xl tracking-wider text-indigo-300">우주 초스피드 레이서</h1>
-        <p class="game-font text-[11px] md:text-xs text-yellow-300 leading-tight">오늘의 미션 세팅</p>
       </div>
-    </div>
+    </button>
     <!-- 상태 표시기 -->
     <div class="flex items-center gap-2 bg-slate-800 px-2.5 py-1 rounded-full border border-slate-700 text-xs">
       <div class="w-2.5 h-2.5 rounded-full bg-red-500 transition-all duration-300" id="status-dot"></div>
@@ -65,19 +65,21 @@
         <span>랜덤 미션 뽑기</span>
       </button>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 text-left">
+      <div id="mission-selection-layout" class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 text-left">
         <!-- 로켓 선택 -->
-        <div>
+        <div class="min-w-0">
           <h3 class="game-font text-lg text-indigo-300 mb-2">로켓 선택</h3>
+          <div id="favorite-car-list" class="flex flex-wrap gap-1.5 pb-2 min-w-0"></div>
           <div id="car-category-tabs" class="flex flex-wrap gap-1.5 pb-2 mb-2"></div>
-          <div id="car-selection-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-2 md:gap-3 max-h-[236px] md:max-h-[250px] overflow-y-auto pr-1 rounded-2xl"></div>
+          <div id="car-selection-grid" class="grid min-w-0 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-2 md:gap-3 max-h-[236px] md:max-h-[250px] overflow-y-auto pr-1 rounded-2xl"></div>
         </div>
 
         <!-- 도착지 선택 -->
-        <div>
+        <div class="min-w-0">
           <h3 class="game-font text-lg text-indigo-300 mb-2">도착지 선택</h3>
+          <div id="favorite-destination-list" class="flex flex-wrap gap-1.5 pb-2 min-w-0"></div>
           <div id="destination-category-tabs" class="flex flex-wrap gap-1.5 pb-2 mb-2"></div>
-          <div id="destination-selection-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-2 md:gap-3 max-h-[236px] md:max-h-[250px] overflow-y-auto pr-1 rounded-2xl"></div>
+          <div id="destination-selection-grid" class="grid min-w-0 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-2 md:gap-3 max-h-[236px] md:max-h-[250px] overflow-y-auto pr-1 rounded-2xl"></div>
         </div>
       </div>
 

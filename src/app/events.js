@@ -7,7 +7,7 @@
     document.addEventListener('click', event => {
       const target = dom.closest(
         event.target,
-        '[data-action], [data-lap-diff], [data-car-id], [data-destination-id], [data-delete-lap-index]'
+        '[data-action], [data-lap-diff], [data-car-id], [data-destination-id], [data-favorite-car-id], [data-favorite-destination-id], [data-delete-lap-index]'
       );
       if (!target) return;
 
@@ -26,6 +26,16 @@
         return;
       }
 
+      if (target.dataset.favoriteCarId) {
+        handlers.toggleFavoriteCar(target.dataset.favoriteCarId);
+        return;
+      }
+
+      if (target.dataset.favoriteDestinationId) {
+        handlers.toggleFavoriteDestination(target.dataset.favoriteDestinationId);
+        return;
+      }
+
       if (target.dataset.deleteLapIndex !== undefined) {
         handlers.deleteRecordedLap(Number(target.dataset.deleteLapIndex));
         return;
@@ -39,6 +49,7 @@
         'enter-mission-ready': handlers.enterMissionReady,
         'main-action': handlers.handleMainAction,
         'undo-last-lap': handlers.undoLastLap,
+        'go-home': handlers.restartApp,
         'restart-app': handlers.restartApp,
         selectCarCategory: () => handlers.selectCarCategory(category),
         selectDestinationCategory: () => handlers.selectDestinationCategory(category)
