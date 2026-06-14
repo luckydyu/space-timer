@@ -267,6 +267,8 @@
   <script src="./src/utils/raceStats.js"></script>
   <script src="./src/dom/elements.js"></script>
   <script src="./src/features/setupView.js"></script>
+  <script src="./src/views/raceView.js"></script>
+  <script src="./src/views/resultView.js"></script>
   <script src="./src/features/raceController.js"></script>
   <script src="./src/app/events.js"></script>
 
@@ -322,12 +324,26 @@
     const selectDestination = (destinationId, shouldPrimeAudio) => setupView.selectDestination(destinationId, shouldPrimeAudio);
     const changeLaps = diff => setupView.changeLaps(diff);
 
-    const raceController = window.SpaceTimerRaceController;
-    raceController.init({
+    const raceView = window.SpaceTimerRaceView;
+    raceView.init({
       state,
       dom,
       raceStats,
-      setupView,
+      setupView
+    });
+    const resultView = window.SpaceTimerResultView;
+    resultView.init({
+      state,
+      dom,
+      raceStats
+    });
+
+    const raceController = window.SpaceTimerRaceController;
+    raceController.init({
+      state,
+      raceStats,
+      raceView,
+      resultView,
       audio: {
         click: sndClick,
         beepLow: sndBeepLow,
