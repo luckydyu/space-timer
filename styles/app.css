@@ -1,6 +1,9 @@
 ﻿    body { 
       font-family: 'Nanum Gothic', sans-serif; 
     }
+    .hidden {
+      display: none !important;
+    }
     .game-font { 
       font-family: 'Jua', sans-serif; 
     }
@@ -92,6 +95,79 @@
     #screen-setup > h2 {
       font-size: 1.8rem;
       line-height: 1.1;
+    }
+    .setup-small-button,
+    .setup-mini-button,
+    .setup-value-label {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Jua', sans-serif;
+      border: 1px solid #475569;
+      background: #0f172a;
+    }
+    .setup-small-button {
+      width: 2.45rem;
+      height: 2.45rem;
+      border-radius: 0.7rem;
+      border-bottom-width: 4px;
+      border-bottom-color: #020617;
+      font-weight: 800;
+    }
+    .setup-mini-button {
+      min-width: 2rem;
+      height: 2.1rem;
+      padding: 0 0.35rem;
+      border-radius: 0.55rem;
+      color: #cbd5e1;
+    }
+    .setup-value-label {
+      height: 2.1rem;
+      border-radius: 0.55rem;
+      color: white;
+      background: #111827;
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+    .setup-small-button:hover,
+    .setup-mini-button:hover {
+      background: #1e293b;
+    }
+    #setup-controls {
+      padding: 0.5rem;
+    }
+    .setup-controls-row,
+    .lap-controls {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .setup-controls-row {
+      flex-direction: column;
+    }
+    .lap-controls {
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .kitan-controls {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.5rem;
+      align-items: center;
+      min-width: 0;
+    }
+    @media (min-width: 1024px) {
+      .setup-controls-row {
+        flex-direction: row;
+        align-items: center;
+      }
+      .lap-controls {
+        flex-wrap: nowrap;
+        flex-shrink: 0;
+      }
+      .kitan-controls {
+        grid-template-columns: minmax(140px, 1fr) 112px 124px minmax(210px, 250px) auto;
+      }
     }
     #mission-selection-layout {
       display: grid;

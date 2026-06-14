@@ -44,10 +44,12 @@ test('shows Kitan start range and calendar plan by series color', async ({ page 
   await page.locator('#kitan-page-input').blur();
   await expect(page.locator('#kitan-current-range')).toHaveText('F-1 11~20장');
 
-  await page.locator('#kitan-series-select').selectOption('G');
-  await page.locator('#kitan-book-select').selectOption('2');
+  await page.locator('button[data-kitan-step-diff="series:1"]').click();
+  await page.locator('button[data-kitan-step-diff="book:1"]').click();
   await page.locator('#kitan-page-input').fill('5');
   await page.locator('#kitan-page-input').blur();
+  await expect(page.locator('#kitan-series-label')).toHaveText('G');
+  await expect(page.locator('#kitan-book-label')).toHaveText('2권');
   await expect(page.locator('#kitan-current-range')).toHaveText('G-2 5~14장');
 
   await page.locator('button[data-action="open-kitan-calendar"]').click();

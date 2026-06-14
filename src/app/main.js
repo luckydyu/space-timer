@@ -61,6 +61,7 @@ const renderKitanStartOptions = () => setupView.renderKitanStartOptions();
 const renderKitanPlan = () => setupView.renderKitanPlan();
 const updateKitanStart = (field, value) => setupView.updateKitanStart(field, value);
 const changeKitanPage = diff => setupView.changeKitanPage(diff);
+const changeKitanStep = (field, diff) => setupView.changeKitanStep(field, diff);
 const openKitanCalendar = () => setupView.openKitanCalendar();
 const closeKitanCalendar = () => setupView.closeKitanCalendar();
 
@@ -177,6 +178,7 @@ function bindEventHandlers() {
       closeVoiceCommandHelp,
       updateKitanStart,
       changeKitanPage,
+      changeKitanStep,
       openKitanCalendar,
       closeKitanCalendar,
       randomizeMissionSelection,

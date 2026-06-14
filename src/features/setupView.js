@@ -126,27 +126,18 @@
   }
 
   function renderKitanStartOptions() {
-    const seriesSelect = dom.byId('kitan-series-select');
-    const bookSelect = dom.byId('kitan-book-select');
-    if (!seriesSelect || !bookSelect) return;
-
-    seriesSelect.innerHTML = kitanPlan.SERIES.map(series => `
-      <option value="${series}">${series}</option>
-    `).join('');
-    bookSelect.innerHTML = Array.from({ length: kitanPlan.BOOKS_PER_SERIES }, (_, index) => `
-      <option value="${index + 1}">${index + 1}권</option>
-    `).join('');
+    renderKitanPlan();
   }
 
   function renderKitanPlan() {
     const position = kitanPlan.fromIndex(kitanPlan.getNextStartIndex());
-    const seriesSelect = dom.byId('kitan-series-select');
-    const bookSelect = dom.byId('kitan-book-select');
+    const seriesLabel = dom.byId('kitan-series-label');
+    const bookLabel = dom.byId('kitan-book-label');
     const pageInput = dom.byId('kitan-page-input');
     const rangeLabel = dom.byId('kitan-current-range');
 
-    if (seriesSelect) seriesSelect.value = position.series;
-    if (bookSelect) bookSelect.value = String(position.book);
+    if (seriesLabel) seriesLabel.textContent = position.series;
+    if (bookLabel) bookLabel.textContent = `${position.book}권`;
     if (pageInput) pageInput.value = String(position.page);
     if (rangeLabel) rangeLabel.textContent = kitanPlan.formatRange(position.index, state.targetLaps);
     renderKitanCalendar();
@@ -211,6 +202,23 @@
   function changeKitanPage(diff) {
     primeUserAudio();
     kitanPlan.setNextStartIndex(kitanPlan.getNextStartIndex() + diff);
+    renderKitanPlan();
+    playClick();
+  }
+
+  function changeKitanStep(field, diff) {
+    primeUserAudio();
+    const current = kitanPlan.fromIndex(kitanPlan.getNextStartIndex());
+    const seriesIndex = kitanPlan.SERIES.indexOf(current.series);
+    const nextSeriesIndex = Math.max(0, Math.min(kitanPlan.SERIES.length - 1, seriesIndex + diff));
+    const nextBook = Math.max(1, Math.min(kitanPlan.BOOKS_PER_SERIES, current.book + diff));
+
+    if (field === 'series') {
+      kitanPlan.setNextStart(kitanPlan.SERIES[nextSeriesIndex], current.book, current.page);
+    } else if (field === 'book') {
+      kitanPlan.setNextStart(current.series, nextBook, current.page);
+    }
+
     renderKitanPlan();
     playClick();
   }
@@ -426,6 +434,7 @@
     renderKitanPlan,
     updateKitanStart,
     changeKitanPage,
+    changeKitanStep,
     openKitanCalendar,
     closeKitanCalendar,
     randomizeMissionSelection,

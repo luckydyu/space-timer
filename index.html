@@ -47,51 +47,48 @@
 
     <!-- [1] 준비 & 세팅 화면 -->
     <div id="screen-setup" class="w-full max-w-6xl bg-slate-800/90 border-4 border-slate-700 rounded-3xl p-4 shadow-2xl text-center space-y-3 md:space-y-4">
-      <!-- Laps 설정 (10단위 증감 추가) -->
-      <div class="flex items-center justify-center gap-2 md:gap-3 py-2 md:py-3 bg-slate-950/50 rounded-2xl border border-slate-700 shadow-inner px-2">
-        <button type="button" data-lap-diff="-100" class="w-12 h-12 bg-slate-900 hover:bg-slate-800 rounded-xl flex items-center justify-center text-[11px] md:text-xs font-extrabold shadow-md border-b-4 border-slate-950 active:transform active:translate-y-0.5 text-slate-500">-100</button>
-        <button type="button" data-lap-diff="-10" class="w-12 h-12 bg-slate-800 hover:bg-slate-700 rounded-xl flex items-center justify-center text-sm md:text-base font-extrabold shadow-md border-b-4 border-slate-900 active:transform active:translate-y-0.5 text-slate-400">-10</button>
-        <button type="button" data-lap-diff="-1" class="w-12 h-12 bg-slate-700 hover:bg-slate-600 rounded-xl flex items-center justify-center text-xl md:text-2xl font-extrabold shadow-md border-b-4 border-slate-900 active:transform active:translate-y-0.5">-1</button>
-        <div class="min-w-[90px] md:min-w-[120px]">
-          <span id="setup-lap-count" class="game-font text-4xl md:text-6xl text-white">10</span>
-          <span class="game-font text-lg md:text-xl text-yellow-400 ml-0.5">장</span>
-        </div>
-        <button type="button" data-lap-diff="1" class="w-12 h-12 bg-slate-700 hover:bg-slate-600 rounded-xl flex items-center justify-center text-xl md:text-2xl font-extrabold shadow-md border-b-4 border-slate-900 active:transform active:translate-y-0.5">+1</button>
-        <button type="button" data-lap-diff="10" class="w-12 h-12 bg-slate-800 hover:bg-slate-700 rounded-xl flex items-center justify-center text-sm md:text-base font-extrabold shadow-md border-b-4 border-slate-900 active:transform active:translate-y-0.5 text-slate-400">+10</button>
-        <button type="button" data-lap-diff="100" class="w-12 h-12 bg-slate-900 hover:bg-slate-800 rounded-xl flex items-center justify-center text-[11px] md:text-xs font-extrabold shadow-md border-b-4 border-slate-950 active:transform active:translate-y-0.5 text-slate-500">+100</button>
-      </div>
-
-      <div class="bg-slate-950/50 rounded-2xl border border-slate-700 p-3 text-left space-y-2">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
-          <div>
-            <h3 class="game-font text-base md:text-lg text-emerald-300">기탄수학 현재 단계</h3>
-            <p id="kitan-current-range" class="game-font text-xl md:text-2xl text-yellow-300">F-1 1~10장</p>
+      <div id="setup-controls" class="bg-slate-950/50 rounded-2xl border border-slate-700 shadow-inner px-2 py-2 text-left">
+        <div class="setup-controls-row flex flex-col xl:flex-row xl:items-center gap-2">
+          <div class="lap-controls flex items-center justify-center gap-1.5 md:gap-2 shrink-0">
+            <button type="button" data-lap-diff="-100" class="setup-small-button text-slate-500">-100</button>
+            <button type="button" data-lap-diff="-10" class="setup-small-button text-slate-400">-10</button>
+            <button type="button" data-lap-diff="-1" class="setup-small-button text-white text-lg">-1</button>
+            <div class="min-w-[74px] text-center">
+              <span id="setup-lap-count" class="game-font text-3xl md:text-4xl text-white">10</span>
+              <span class="game-font text-base text-yellow-400 ml-0.5">장</span>
+            </div>
+            <button type="button" data-lap-diff="1" class="setup-small-button text-white text-lg">+1</button>
+            <button type="button" data-lap-diff="10" class="setup-small-button text-slate-400">+10</button>
+            <button type="button" data-lap-diff="100" class="setup-small-button text-slate-500">+100</button>
           </div>
-          <button type="button" data-action="open-kitan-calendar" class="game-font text-sm px-3 py-2 rounded-xl bg-indigo-700 hover:bg-indigo-600 text-indigo-50 border border-indigo-400">
-            달력 보기
-          </button>
-        </div>
-        <div class="grid grid-cols-3 gap-2">
-          <label class="space-y-1">
-            <span class="game-font text-[10px] text-slate-400">시리즈</span>
-            <select id="kitan-series-select" data-kitan-field="series" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-2 py-2 game-font text-sm text-white"></select>
-          </label>
-          <label class="space-y-1">
-            <span class="game-font text-[10px] text-slate-400">권</span>
-            <select id="kitan-book-select" data-kitan-field="book" class="w-full bg-slate-900 border border-slate-600 rounded-xl px-2 py-2 game-font text-sm text-white"></select>
-          </label>
-          <label class="space-y-1">
-            <span class="game-font text-[10px] text-slate-400">시작 장</span>
-            <div class="grid grid-cols-[auto_1fr_auto] gap-1">
-              <button type="button" data-kitan-page-diff="-10" class="game-font px-2 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600">-10</button>
-              <input id="kitan-page-input" data-kitan-field="page" type="number" min="1" max="60" inputmode="numeric" class="w-full min-w-0 bg-slate-900 border border-slate-600 rounded-xl px-2 py-2 game-font text-sm text-white text-center">
-              <button type="button" data-kitan-page-diff="10" class="game-font px-2 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-600">+10</button>
+          <div class="kitan-controls flex-1 min-w-0 grid grid-cols-1 md:grid-cols-[minmax(140px,1fr)_112px_124px_minmax(210px,250px)_auto] gap-2 items-center">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <span class="game-font text-xs md:text-sm text-emerald-300 whitespace-nowrap">기탄수학</span>
+                <p id="kitan-current-range" class="game-font text-lg md:text-xl text-yellow-300 truncate">F-1 1~10장</p>
+              </div>
             </div>
-            <div class="grid grid-cols-2 gap-1">
-              <button type="button" data-kitan-page-diff="-1" class="game-font px-2 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 border border-slate-700">-1</button>
-              <button type="button" data-kitan-page-diff="1" class="game-font px-2 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 border border-slate-700">+1</button>
+            <div class="grid grid-cols-[auto_44px_auto] gap-1 items-center">
+              <button type="button" data-kitan-step-diff="series:-1" class="setup-mini-button">-</button>
+              <span id="kitan-series-label" class="setup-value-label">F</span>
+              <button type="button" data-kitan-step-diff="series:1" class="setup-mini-button">+</button>
             </div>
-          </label>
+            <div class="grid grid-cols-[auto_48px_auto] gap-1 items-center">
+              <button type="button" data-kitan-step-diff="book:-1" class="setup-mini-button">-</button>
+              <span id="kitan-book-label" class="setup-value-label">1권</span>
+              <button type="button" data-kitan-step-diff="book:1" class="setup-mini-button">+</button>
+            </div>
+            <div class="grid grid-cols-[auto_auto_minmax(48px,1fr)_auto_auto] gap-1 items-center">
+              <button type="button" data-kitan-page-diff="-10" class="setup-mini-button">-10</button>
+              <button type="button" data-kitan-page-diff="-1" class="setup-mini-button">-1</button>
+              <input id="kitan-page-input" data-kitan-field="page" type="number" min="1" max="60" inputmode="numeric" class="w-full min-w-0 bg-slate-900 border border-slate-600 rounded-lg px-1.5 py-1.5 game-font text-sm text-white text-center">
+              <button type="button" data-kitan-page-diff="1" class="setup-mini-button">+1</button>
+              <button type="button" data-kitan-page-diff="10" class="setup-mini-button">+10</button>
+            </div>
+            <button type="button" data-action="open-kitan-calendar" class="game-font text-xs px-2.5 py-2 rounded-xl bg-indigo-700 hover:bg-indigo-600 text-indigo-50 border border-indigo-400">
+              달력
+            </button>
+          </div>
         </div>
       </div>
 

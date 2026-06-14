@@ -12,7 +12,7 @@
     document.addEventListener('click', event => {
       const target = dom.closest(
         event.target,
-        '[data-action], [data-lap-diff], [data-kitan-page-diff], [data-car-id], [data-destination-id], [data-favorite-car-id], [data-favorite-destination-id], [data-remove-favorite-car-id], [data-remove-favorite-destination-id], [data-delete-lap-index]'
+        '[data-action], [data-lap-diff], [data-kitan-page-diff], [data-kitan-step-diff], [data-car-id], [data-destination-id], [data-favorite-car-id], [data-favorite-destination-id], [data-remove-favorite-car-id], [data-remove-favorite-destination-id], [data-delete-lap-index]'
       );
       if (!target) return;
 
@@ -23,6 +23,12 @@
 
       if (target.dataset.kitanPageDiff !== undefined) {
         handlers.changeKitanPage(Number(target.dataset.kitanPageDiff));
+        return;
+      }
+
+      if (target.dataset.kitanStepDiff) {
+        const [field, diff] = target.dataset.kitanStepDiff.split(':');
+        handlers.changeKitanStep(field, Number(diff));
         return;
       }
 
