@@ -948,6 +948,7 @@
         setSpeechRecognitionWaitingStatus();
         return;
       }
+      if (appState === "RESULT") return;
 
       initAudio();
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -1040,7 +1041,7 @@
       let resumeTimer = null;
       const resumeRecognition = function() {
         if (resumeTimer) clearTimeout(resumeTimer);
-        if (shouldResumeRecognition) {
+        if (shouldResumeRecognition && appState !== "RESULT") {
           isRecognitionPausedForSpeech = false;
           startRealSpeechEngine();
         }
