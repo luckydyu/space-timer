@@ -26,11 +26,11 @@
     <div class="flex items-center gap-2 bg-slate-800 px-2.5 py-1 rounded-full border border-slate-700 text-xs">
       <div class="w-2.5 h-2.5 rounded-full bg-red-500 transition-all duration-300" id="status-dot"></div>
       <span class="text-slate-300 game-font text-[10px] md:text-xs whitespace-nowrap" id="status-text">음성 인식 꺼짐</span>
-      <button type="button" onclick="openVoiceCommandHelp()" class="game-font text-[10px] md:text-xs px-2 py-1 rounded-lg bg-indigo-800 hover:bg-indigo-700 text-indigo-100 border border-indigo-500">
+      <button type="button" data-action="open-voice-help" class="game-font text-[10px] md:text-xs px-2 py-1 rounded-lg bg-indigo-800 hover:bg-indigo-700 text-indigo-100 border border-indigo-500">
         명령어
       </button>
       <label class="relative inline-flex items-center cursor-pointer">
-        <input type="checkbox" id="mic-toggle-input" class="sr-only peer" onchange="toggleSpeechRecognition()" checked>
+        <input type="checkbox" id="mic-toggle-input" class="sr-only peer" checked>
         <div class="w-10 h-5 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
       </label>
     </div>
@@ -46,19 +46,19 @@
     <div id="screen-setup" class="w-full max-w-6xl bg-slate-800/90 border-4 border-slate-700 rounded-3xl p-4 shadow-2xl text-center space-y-3 md:space-y-4">
       <!-- Laps 설정 (10단위 증감 추가) -->
       <div class="flex items-center justify-center gap-2 md:gap-3 py-2 md:py-3 bg-slate-950/50 rounded-2xl border border-slate-700 shadow-inner px-2">
-        <button onclick="changeLaps(-100)" class="w-12 h-12 bg-slate-900 hover:bg-slate-800 rounded-xl flex items-center justify-center text-[11px] md:text-xs font-extrabold shadow-md border-b-4 border-slate-950 active:transform active:translate-y-0.5 text-slate-500">-100</button>
-        <button onclick="changeLaps(-10)" class="w-12 h-12 bg-slate-800 hover:bg-slate-700 rounded-xl flex items-center justify-center text-sm md:text-base font-extrabold shadow-md border-b-4 border-slate-900 active:transform active:translate-y-0.5 text-slate-400">-10</button>
-        <button onclick="changeLaps(-1)" class="w-12 h-12 bg-slate-700 hover:bg-slate-600 rounded-xl flex items-center justify-center text-xl md:text-2xl font-extrabold shadow-md border-b-4 border-slate-900 active:transform active:translate-y-0.5">-1</button>
+        <button type="button" data-lap-diff="-100" class="w-12 h-12 bg-slate-900 hover:bg-slate-800 rounded-xl flex items-center justify-center text-[11px] md:text-xs font-extrabold shadow-md border-b-4 border-slate-950 active:transform active:translate-y-0.5 text-slate-500">-100</button>
+        <button type="button" data-lap-diff="-10" class="w-12 h-12 bg-slate-800 hover:bg-slate-700 rounded-xl flex items-center justify-center text-sm md:text-base font-extrabold shadow-md border-b-4 border-slate-900 active:transform active:translate-y-0.5 text-slate-400">-10</button>
+        <button type="button" data-lap-diff="-1" class="w-12 h-12 bg-slate-700 hover:bg-slate-600 rounded-xl flex items-center justify-center text-xl md:text-2xl font-extrabold shadow-md border-b-4 border-slate-900 active:transform active:translate-y-0.5">-1</button>
         <div class="min-w-[90px] md:min-w-[120px]">
           <span id="setup-lap-count" class="game-font text-4xl md:text-6xl text-white">10</span>
           <span class="game-font text-lg md:text-xl text-yellow-400 ml-0.5">장</span>
         </div>
-        <button onclick="changeLaps(1)" class="w-12 h-12 bg-slate-700 hover:bg-slate-600 rounded-xl flex items-center justify-center text-xl md:text-2xl font-extrabold shadow-md border-b-4 border-slate-900 active:transform active:translate-y-0.5">+1</button>
-        <button onclick="changeLaps(10)" class="w-12 h-12 bg-slate-800 hover:bg-slate-700 rounded-xl flex items-center justify-center text-sm md:text-base font-extrabold shadow-md border-b-4 border-slate-900 active:transform active:translate-y-0.5 text-slate-400">+10</button>
-        <button onclick="changeLaps(100)" class="w-12 h-12 bg-slate-900 hover:bg-slate-800 rounded-xl flex items-center justify-center text-[11px] md:text-xs font-extrabold shadow-md border-b-4 border-slate-950 active:transform active:translate-y-0.5 text-slate-500">+100</button>
+        <button type="button" data-lap-diff="1" class="w-12 h-12 bg-slate-700 hover:bg-slate-600 rounded-xl flex items-center justify-center text-xl md:text-2xl font-extrabold shadow-md border-b-4 border-slate-900 active:transform active:translate-y-0.5">+1</button>
+        <button type="button" data-lap-diff="10" class="w-12 h-12 bg-slate-800 hover:bg-slate-700 rounded-xl flex items-center justify-center text-sm md:text-base font-extrabold shadow-md border-b-4 border-slate-900 active:transform active:translate-y-0.5 text-slate-400">+10</button>
+        <button type="button" data-lap-diff="100" class="w-12 h-12 bg-slate-900 hover:bg-slate-800 rounded-xl flex items-center justify-center text-[11px] md:text-xs font-extrabold shadow-md border-b-4 border-slate-950 active:transform active:translate-y-0.5 text-slate-500">+100</button>
       </div>
 
-      <button type="button" onclick="randomizeMissionSelection()" class="w-full game-font text-base md:text-lg py-2 bg-slate-900 hover:bg-slate-800 text-yellow-200 rounded-2xl border-2 border-yellow-500/60 shadow-md transition-all active:transform active:translate-y-0.5 flex items-center justify-center gap-2">
+      <button type="button" data-action="randomize-mission" class="w-full game-font text-base md:text-lg py-2 bg-slate-900 hover:bg-slate-800 text-yellow-200 rounded-2xl border-2 border-yellow-500/60 shadow-md transition-all active:transform active:translate-y-0.5 flex items-center justify-center gap-2">
         <span class="text-xl leading-none">🎲</span>
         <span>랜덤 미션 뽑기</span>
       </button>
@@ -86,7 +86,7 @@
         <div class="w-full max-w-2xl bg-slate-900 border-4 border-indigo-500 rounded-2xl shadow-2xl p-4 md:p-5 text-left">
           <div class="flex items-center justify-between gap-3 border-b border-slate-700 pb-3 mb-3">
             <h3 class="game-font text-xl text-indigo-200">음성 명령어</h3>
-            <button type="button" onclick="closeVoiceCommandHelp()" class="game-font px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600">닫기</button>
+            <button type="button" data-action="close-voice-help" class="game-font px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600">닫기</button>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
@@ -102,7 +102,7 @@
       </div>
 
       <!-- 즉시 시작하기 큰 버튼 -->
-      <button onclick="enterMissionReady()" class="w-full game-font text-2xl md:text-3xl py-2.5 md:py-3 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-slate-950 rounded-2xl border-b-8 border-amber-700 shadow-xl transition-all active:transform active:translate-y-1 transform hover:scale-[1.01]">
+      <button type="button" data-action="enter-mission-ready" class="w-full game-font text-2xl md:text-3xl py-2.5 md:py-3 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-slate-950 rounded-2xl border-b-8 border-amber-700 shadow-xl transition-all active:transform active:translate-y-1 transform hover:scale-[1.01]">
         🏁 경기 시작하기 (터치!)
       </button>
     </div>
@@ -183,7 +183,7 @@
           </div>
 
           <!-- 터치용 거대 완료/시작 멀티 액션 버튼 (상태에 따라 가변 변경) -->
-          <button id="main-action-button" onclick="handleMainAction()" class="w-full game-font text-xl md:text-2xl py-5 md:py-6 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-3xl border-b-8 border-red-900 active:transform active:translate-y-2 shadow-2xl transition-all relative overflow-hidden group">
+          <button id="main-action-button" type="button" data-action="main-action" class="w-full game-font text-xl md:text-2xl py-5 md:py-6 bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white rounded-3xl border-b-8 border-red-900 active:transform active:translate-y-2 shadow-2xl transition-all relative overflow-hidden group">
             <div class="absolute inset-0 bg-white/10 transform -skew-x-12 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></div>
             ✏️ 끝/스탑/멈춰/완료/도착/풀었 또는 터치!
           </button>
@@ -245,7 +245,7 @@
           <div class="space-y-1 text-left bg-slate-950 p-3 md:p-4 rounded-xl border border-slate-800 text-xs md:text-sm max-h-[200px] overflow-y-auto" id="final-lap-details"></div>
         </div>
         
-        <button onclick="restartApp()" class="w-full max-w-sm mx-auto game-font text-xl md:text-2xl py-4 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-slate-950 rounded-2xl border-b-8 border-amber-700 shadow-xl transition-all active:transform active:translate-y-1">
+        <button type="button" data-action="restart-app" class="w-full max-w-sm mx-auto game-font text-xl md:text-2xl py-4 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-slate-950 rounded-2xl border-b-8 border-amber-700 shadow-xl transition-all active:transform active:translate-y-1">
           ⚙️ 새로운 행성 정복하러 가기
         </button>
       </div>
@@ -588,6 +588,65 @@
       }
     }
 
+    function bindEventHandlers() {
+      document.getElementById('mic-toggle-input')?.addEventListener('change', toggleSpeechRecognition);
+
+      document.addEventListener('click', event => {
+        const target = event.target.closest(
+          '[data-action], [data-lap-diff], [data-car-id], [data-destination-id], [data-delete-lap-index]'
+        );
+        if (!target) return;
+
+        if (target.dataset.lapDiff !== undefined) {
+          changeLaps(Number(target.dataset.lapDiff));
+          return;
+        }
+
+        if (target.dataset.carId) {
+          selectCar(target.dataset.carId);
+          return;
+        }
+
+        if (target.dataset.destinationId) {
+          selectDestination(target.dataset.destinationId);
+          return;
+        }
+
+        if (target.dataset.deleteLapIndex !== undefined) {
+          deleteRecordedLap(Number(target.dataset.deleteLapIndex));
+          return;
+        }
+
+        const category = target.dataset.category;
+        switch (target.dataset.action) {
+          case 'open-voice-help':
+            openVoiceCommandHelp();
+            break;
+          case 'close-voice-help':
+            closeVoiceCommandHelp();
+            break;
+          case 'randomize-mission':
+            randomizeMissionSelection();
+            break;
+          case 'enter-mission-ready':
+            enterMissionReady();
+            break;
+          case 'main-action':
+            handleMainAction();
+            break;
+          case 'restart-app':
+            restartApp();
+            break;
+          case 'selectCarCategory':
+            selectCarCategory(category);
+            break;
+          case 'selectDestinationCategory':
+            selectDestinationCategory(category);
+            break;
+        }
+      });
+    }
+
 
     // --- 3. 기본 UI 세팅 조작 ---
     function getFilteredEntries(collection, category) {
@@ -606,7 +665,7 @@
           ? "bg-yellow-400 text-slate-950 border-yellow-200"
           : "bg-slate-900 text-slate-300 border-slate-700 hover:bg-slate-800";
         return `
-          <button type="button" onclick="${onSelectName}('${category}')" class="shrink-0 game-font text-[10px] md:text-xs px-2 py-1.5 rounded-xl border ${selectedClass} transition-colors flex items-center gap-1">
+          <button type="button" data-action="${onSelectName}" data-category="${category}" class="shrink-0 game-font text-[10px] md:text-xs px-2 py-1.5 rounded-xl border ${selectedClass} transition-colors flex items-center gap-1">
             <span class="text-sm leading-none">${icon}</span>
             <span>${category}</span>
           </button>
@@ -680,7 +739,7 @@
       if (!grid) return;
       const visibleCars = getFilteredEntries(CARS, state.selectedCarCategory);
       grid.innerHTML = visibleCars.map(([id, car]) => `
-        <button type="button" onclick="selectCar('${id}')" id="car-select-${id}" class="car-card relative cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-2 transition-all transform hover:-translate-y-1 text-center min-h-[96px] flex flex-col justify-center">
+        <button type="button" data-car-id="${id}" id="car-select-${id}" class="car-card relative cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-2 transition-all transform hover:-translate-y-1 text-center min-h-[96px] flex flex-col justify-center">
           <span class="absolute left-1.5 top-1.5 min-w-5 px-1 rounded-md bg-slate-950/80 text-[9px] font-bold text-slate-300 border border-slate-600">${car.number}</span>
           <span class="${car.isSideways ? 'sideways-flight' : 'inline-block'} text-3xl md:text-4xl block mb-1">${car.emoji}</span>
           <span class="game-font text-[9px] md:text-[10px] ${car.textClass} leading-tight break-keep">${car.label}</span>
@@ -693,7 +752,7 @@
       if (!grid) return;
       const visibleDestinations = getFilteredEntries(DESTINATIONS, state.selectedDestinationCategory);
       grid.innerHTML = visibleDestinations.map(([id, destination]) => `
-        <button type="button" onclick="selectDestination('${id}')" id="destination-select-${id}" class="destination-card relative cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-2 transition-all transform hover:-translate-y-1 text-center min-h-[96px] flex flex-col justify-center">
+        <button type="button" data-destination-id="${id}" id="destination-select-${id}" class="destination-card relative cursor-pointer bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-2 transition-all transform hover:-translate-y-1 text-center min-h-[96px] flex flex-col justify-center">
           <span class="absolute left-1.5 top-1.5 min-w-5 px-1 rounded-md bg-slate-950/80 text-[9px] font-bold text-slate-300 border border-slate-600">${destination.number}</span>
           <span class="text-3xl md:text-4xl block mb-1">${destination.icon}</span>
           <span class="game-font text-[9px] md:text-[10px] ${destination.textClass} leading-tight break-keep">${destination.name}</span>
@@ -1088,7 +1147,7 @@
             <div class="flex items-center gap-2">
               ${isRecorded ? `<span class="game-font text-[10px] md:text-xs px-2 py-1 rounded-lg bg-indigo-900/80 text-indigo-100 border border-indigo-500">${rank}등</span>` : ''}
               <span class="game-font font-bold ${isRecorded ? 'text-white' : 'text-slate-500'}">${isRecorded ? formatTime(state.lapRecords[i]) : isCurrent ? (state.appState === "LAP_WAITING" ? "출발 대기 중" : "비행 중...") : '대기 중'}🏁</span>
-              ${isRecorded ? `<button type="button" onclick="deleteRecordedLap(${i})" class="game-font text-[10px] md:text-xs px-2 py-1 rounded-lg bg-slate-800 hover:bg-rose-700 text-slate-300 hover:text-white border border-slate-600 hover:border-rose-400 transition-colors" aria-label="${i + 1}번째 기록 삭제">삭제</button>` : ''}
+              ${isRecorded ? `<button type="button" data-delete-lap-index="${i}" class="game-font text-[10px] md:text-xs px-2 py-1 rounded-lg bg-slate-800 hover:bg-rose-700 text-slate-300 hover:text-white border border-slate-600 hover:border-rose-400 transition-colors" aria-label="${i + 1}번째 기록 삭제">삭제</button>` : ''}
             </div>
           </div>
         `);
@@ -1171,6 +1230,7 @@
     }
 
     // 초기 로드 시 그림 선택지와 기본값 바인딩
+    bindEventHandlers();
     renderCarCategoryTabs();
     renderDestinationCategoryTabs();
     renderCarSelectionGrid();

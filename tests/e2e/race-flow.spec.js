@@ -41,7 +41,7 @@ test('returns to setup screen after restart', async ({ page }) => {
   await page.locator('#main-action-button').click();
   await expect(page.locator('#screen-result')).not.toHaveClass(hiddenClass, { timeout: 3000 });
 
-  await page.locator('button[onclick="restartApp()"]').click();
+  await page.locator('button[data-action="restart-app"]').click();
 
   await expect(page.locator('#screen-setup')).not.toHaveClass(hiddenClass);
   await expect(page.locator('#screen-result')).toHaveClass(hiddenClass);
