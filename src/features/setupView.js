@@ -87,11 +87,14 @@
     container.innerHTML = favorites.length ? favorites.map(id => {
       const car = data.CARS[id];
       return `
-        <button type="button" data-car-id="${id}" class="game-font text-[10px] md:text-xs px-2 py-1 rounded-lg bg-yellow-400 text-slate-950 border border-yellow-200 flex items-center gap-1 max-w-full">
-          <span>${car.number}</span>
-          <span>${car.emoji}</span>
-          <span class="truncate">${car.label}</span>
-        </button>
+        <span class="favorite-chip inline-flex items-center max-w-full rounded-lg bg-yellow-400 text-slate-950 border border-yellow-200 overflow-hidden">
+          <button type="button" data-car-id="${id}" class="game-font text-[10px] md:text-xs px-2 py-1 flex items-center gap-1 min-w-0">
+            <span>${car.number}</span>
+            <span>${car.emoji}</span>
+            <span class="truncate">${car.label}</span>
+          </button>
+          <button type="button" data-remove-favorite-car-id="${id}" class="game-font px-1.5 py-1 text-[10px] bg-yellow-300/70 hover:bg-yellow-200 border-l border-yellow-600/30" aria-label="${car.label} 즐겨찾기 삭제">x</button>
+        </span>
       `;
     }).join('') : '<span class="game-font text-[10px] text-slate-500">즐겨찾기 3개까지 저장 가능</span>';
   }
@@ -103,11 +106,14 @@
     container.innerHTML = favorites.length ? favorites.map(id => {
       const destination = data.DESTINATIONS[id];
       return `
-        <button type="button" data-destination-id="${id}" class="game-font text-[10px] md:text-xs px-2 py-1 rounded-lg bg-yellow-400 text-slate-950 border border-yellow-200 flex items-center gap-1 max-w-full">
-          <span>${destination.number}</span>
-          <span>${destination.icon}</span>
-          <span class="truncate">${destination.name}</span>
-        </button>
+        <span class="favorite-chip inline-flex items-center max-w-full rounded-lg bg-yellow-400 text-slate-950 border border-yellow-200 overflow-hidden">
+          <button type="button" data-destination-id="${id}" class="game-font text-[10px] md:text-xs px-2 py-1 flex items-center gap-1 min-w-0">
+            <span>${destination.number}</span>
+            <span>${destination.icon}</span>
+            <span class="truncate">${destination.name}</span>
+          </button>
+          <button type="button" data-remove-favorite-destination-id="${id}" class="game-font px-1.5 py-1 text-[10px] bg-yellow-300/70 hover:bg-yellow-200 border-l border-yellow-600/30" aria-label="${destination.name} 즐겨찾기 삭제">x</button>
+        </span>
       `;
     }).join('') : '<span class="game-font text-[10px] text-slate-500">즐겨찾기 3개까지 저장 가능</span>';
   }
@@ -203,6 +209,15 @@
 
   function selectCar(color, shouldPrimeAudio = true, shouldScroll = true) {
     if (shouldPrimeAudio) primeUserAudio();
+    const car = data.CARS[color];
+    if (!car) return;
+
+    if (!dom.byId(`car-select-${color}`)) {
+      state.selectedCarCategory = car.category;
+      renderCarCategoryTabs();
+      renderCarSelectionGrid();
+    }
+
     state.chosenCar = color;
 
     dom.all('.car-card').forEach(card => {
@@ -211,16 +226,16 @@
     });
 
     const targetCard = dom.byId(`car-select-${color}`);
-    if (!targetCard || !data.CARS[color]) return;
+    if (!targetCard) return;
     targetCard.classList.remove('border-transparent');
-    targetCard.classList.add(data.CARS[color].borderClass);
+    targetCard.classList.add(car.borderClass);
     if (shouldScroll) scrollCardIntoSelectionView(targetCard, 'car-selection-grid');
 
     const trackCar = dom.byId('track-car');
-    trackCar.innerHTML = data.CARS[color].emoji;
-    trackCar.classList.toggle('sideways-flight', data.CARS[color].isSideways);
-    dom.byId('track-start-label').textContent = `출발 (${data.CARS[color].label})`;
-    dom.byId('result-car-emoji').innerHTML = data.CARS[color].emoji;
+    trackCar.innerHTML = car.emoji;
+    trackCar.classList.toggle('sideways-flight', car.isSideways);
+    dom.byId('track-start-label').textContent = `출발 (${car.label})`;
+    dom.byId('result-car-emoji').innerHTML = car.emoji;
     playClick();
   }
 
@@ -234,9 +249,26 @@
     playClick();
   }
 
+  function removeFavoriteCar(id) {
+    primeUserAudio();
+    preferences.removeFavoriteCar(id);
+    renderFavoriteCars();
+    renderCarSelectionGrid();
+    selectCar(state.chosenCar, false, false);
+    playClick();
+  }
+
   function selectDestination(destinationId, shouldPrimeAudio = true, shouldScroll = true) {
     if (shouldPrimeAudio) primeUserAudio();
-    if (!data.DESTINATIONS[destinationId]) return;
+    const destination = data.DESTINATIONS[destinationId];
+    if (!destination) return;
+
+    if (!dom.byId(`destination-select-${destinationId}`)) {
+      state.selectedDestinationCategory = destination.category;
+      renderDestinationCategoryTabs();
+      renderDestinationSelectionGrid();
+    }
+
     state.chosenDestination = destinationId;
 
     dom.all('.destination-card').forEach(card => {
@@ -244,7 +276,6 @@
       card.classList.add('border-transparent');
     });
 
-    const destination = data.DESTINATIONS[destinationId];
     const targetCard = dom.byId(`destination-select-${destinationId}`);
     if (!targetCard) return;
     targetCard.classList.remove('border-transparent');
@@ -260,6 +291,15 @@
     primeUserAudio();
     if (!data.DESTINATIONS[id]) return;
     preferences.toggleFavoriteDestination(id);
+    renderFavoriteDestinations();
+    renderDestinationSelectionGrid();
+    selectDestination(state.chosenDestination, false, false);
+    playClick();
+  }
+
+  function removeFavoriteDestination(id) {
+    primeUserAudio();
+    preferences.removeFavoriteDestination(id);
     renderFavoriteDestinations();
     renderDestinationSelectionGrid();
     selectDestination(state.chosenDestination, false, false);
@@ -287,6 +327,8 @@
     selectDestination,
     toggleFavoriteCar,
     toggleFavoriteDestination,
+    removeFavoriteCar,
+    removeFavoriteDestination,
     changeLaps,
     resetDestinationTarget
   };

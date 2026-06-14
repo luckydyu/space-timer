@@ -65,11 +65,28 @@
     return toggleFavorite('favoriteDestinations', id);
   }
 
+  function removeFavorite(key, id) {
+    const preferences = readPreferences();
+    preferences[key] = preferences[key].filter(favoriteId => favoriteId !== id);
+    writePreferences(preferences);
+    return preferences[key];
+  }
+
+  function removeFavoriteCar(id) {
+    return removeFavorite('favoriteCars', id);
+  }
+
+  function removeFavoriteDestination(id) {
+    return removeFavorite('favoriteDestinations', id);
+  }
+
   window.SpaceTimerPreferences = {
     MAX_FAVORITES,
     getFavoriteCars,
     getFavoriteDestinations,
     toggleFavoriteCar,
-    toggleFavoriteDestination
+    toggleFavoriteDestination,
+    removeFavoriteCar,
+    removeFavoriteDestination
   };
 })();

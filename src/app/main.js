@@ -52,6 +52,8 @@ const selectCar = (color, shouldPrimeAudio) => setupView.selectCar(color, should
 const selectDestination = (destinationId, shouldPrimeAudio) => setupView.selectDestination(destinationId, shouldPrimeAudio);
 const toggleFavoriteCar = id => setupView.toggleFavoriteCar(id);
 const toggleFavoriteDestination = id => setupView.toggleFavoriteDestination(id);
+const removeFavoriteCar = id => setupView.removeFavoriteCar(id);
+const removeFavoriteDestination = id => setupView.removeFavoriteDestination(id);
 const changeLaps = diff => setupView.changeLaps(diff);
 
 const raceView = window.SpaceTimerRaceView;
@@ -156,6 +158,8 @@ function bindEventHandlers() {
       selectDestination,
       toggleFavoriteCar,
       toggleFavoriteDestination,
+      removeFavoriteCar,
+      removeFavoriteDestination,
       deleteRecordedLap,
       openVoiceCommandHelp,
       closeVoiceCommandHelp,

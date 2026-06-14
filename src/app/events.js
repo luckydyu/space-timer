@@ -7,7 +7,7 @@
     document.addEventListener('click', event => {
       const target = dom.closest(
         event.target,
-        '[data-action], [data-lap-diff], [data-car-id], [data-destination-id], [data-favorite-car-id], [data-favorite-destination-id], [data-delete-lap-index]'
+        '[data-action], [data-lap-diff], [data-car-id], [data-destination-id], [data-favorite-car-id], [data-favorite-destination-id], [data-remove-favorite-car-id], [data-remove-favorite-destination-id], [data-delete-lap-index]'
       );
       if (!target) return;
 
@@ -33,6 +33,16 @@
 
       if (target.dataset.favoriteDestinationId) {
         handlers.toggleFavoriteDestination(target.dataset.favoriteDestinationId);
+        return;
+      }
+
+      if (target.dataset.removeFavoriteCarId) {
+        handlers.removeFavoriteCar(target.dataset.removeFavoriteCarId);
+        return;
+      }
+
+      if (target.dataset.removeFavoriteDestinationId) {
+        handlers.removeFavoriteDestination(target.dataset.removeFavoriteDestinationId);
         return;
       }
 
