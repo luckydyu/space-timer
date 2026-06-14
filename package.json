@@ -4,11 +4,17 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "lint": "npm run lint:js && npm run lint:inline-scripts",
+    "lint:inline-scripts": "node tests/helpers/check-inline-scripts.mjs",
+    "lint:js": "eslint .",
     "test": "node tests/helpers/run-playwright.mjs",
     "test:headed": "node tests/helpers/run-playwright.mjs --headed",
     "test:ui": "node tests/helpers/run-playwright.mjs --ui"
   },
   "devDependencies": {
-    "@playwright/test": "^1.54.0"
+    "@eslint/js": "^9.39.4",
+    "@playwright/test": "^1.54.0",
+    "eslint": "^9.39.4",
+    "globals": "^17.6.0"
   }
 }
