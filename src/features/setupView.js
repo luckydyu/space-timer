@@ -98,7 +98,7 @@
           <button type="button" data-remove-favorite-car-id="${id}" class="game-font px-1.5 py-1 text-[10px] bg-yellow-300/70 hover:bg-yellow-200 border-l border-yellow-600/30" aria-label="${car.label} 즐겨찾기 삭제">x</button>
         </span>
       `;
-    }).join('') : '<span class="game-font text-[10px] text-slate-500">즐겨찾기 3개까지 저장 가능</span>';
+    }).join('') : '<span class="game-font text-[10px] text-slate-500">자주 선택하면 여기에 표시됩니다</span>';
   }
 
   function renderFavoriteDestinations() {
@@ -117,7 +117,7 @@
           <button type="button" data-remove-favorite-destination-id="${id}" class="game-font px-1.5 py-1 text-[10px] bg-yellow-300/70 hover:bg-yellow-200 border-l border-yellow-600/30" aria-label="${destination.name} 즐겨찾기 삭제">x</button>
         </span>
       `;
-    }).join('') : '<span class="game-font text-[10px] text-slate-500">즐겨찾기 3개까지 저장 가능</span>';
+    }).join('') : '<span class="game-font text-[10px] text-slate-500">자주 선택하면 여기에 표시됩니다</span>';
   }
 
   function renderFavorites() {
@@ -139,6 +139,8 @@
     if (seriesLabel) seriesLabel.textContent = position.series;
     if (bookLabel) bookLabel.textContent = `${position.book}권`;
     if (pageInput) pageInput.value = String(position.page);
+    if (pageInput) pageInput.min = String(((position.book - 1) * kitanPlan.PAGES_PER_BOOK) + 1);
+    if (pageInput) pageInput.max = String(position.book * kitanPlan.PAGES_PER_BOOK);
     if (rangeLabel) rangeLabel.textContent = kitanPlan.formatRange(position.index, state.targetLaps);
     renderKitanCalendar();
   }
@@ -261,15 +263,13 @@
     const grid = dom.byId('car-selection-grid');
     if (!grid) return;
     const visibleCars = getFilteredEntries(data.CARS, state.selectedCarCategory);
-    const favoriteCars = preferences.getFavoriteCars();
     grid.innerHTML = visibleCars.map(([id, car]) => `
-      <div id="car-select-${id}" class="car-card relative min-w-0 bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-2 transition-all transform hover:-translate-y-1 text-center min-h-[112px]">
+      <div id="car-select-${id}" class="car-card relative min-w-0 bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-2 transition-all transform hover:-translate-y-1 text-center min-h-[96px]">
         <button type="button" data-car-id="${id}" class="w-full min-h-[76px] flex flex-col justify-center">
           <span class="absolute left-1.5 top-1.5 min-w-5 px-1 rounded-md bg-slate-950/80 text-[9px] font-bold text-slate-300 border border-slate-600">${car.number}</span>
           <span class="${car.isSideways ? 'sideways-flight' : 'inline-block'} text-3xl md:text-4xl block mb-1">${car.emoji}</span>
           <span class="game-font text-[9px] md:text-[10px] ${car.textClass} leading-tight break-keep">${car.label}</span>
         </button>
-        <button type="button" data-favorite-car-id="${id}" class="mt-1 w-full game-font text-[10px] px-2 py-1 rounded-lg bg-slate-950/80 border border-slate-600 ${favoriteCars.includes(id) ? 'text-yellow-300' : 'text-slate-500'}" aria-label="${car.label} 즐겨찾기 토글">${favoriteCars.includes(id) ? '★ 즐겨찾기' : '☆ 즐겨찾기'}</button>
       </div>
     `).join('');
   }
@@ -278,15 +278,13 @@
     const grid = dom.byId('destination-selection-grid');
     if (!grid) return;
     const visibleDestinations = getFilteredEntries(data.DESTINATIONS, state.selectedDestinationCategory);
-    const favoriteDestinations = preferences.getFavoriteDestinations();
     grid.innerHTML = visibleDestinations.map(([id, destination]) => `
-      <div id="destination-select-${id}" class="destination-card relative min-w-0 bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-2 transition-all transform hover:-translate-y-1 text-center min-h-[112px]">
+      <div id="destination-select-${id}" class="destination-card relative min-w-0 bg-slate-700/50 hover:bg-slate-700 border-4 border-transparent rounded-2xl p-2 transition-all transform hover:-translate-y-1 text-center min-h-[96px]">
         <button type="button" data-destination-id="${id}" class="w-full min-h-[76px] flex flex-col justify-center">
           <span class="absolute left-1.5 top-1.5 min-w-5 px-1 rounded-md bg-slate-950/80 text-[9px] font-bold text-slate-300 border border-slate-600">${destination.number}</span>
           <span class="text-3xl md:text-4xl block mb-1">${destination.icon}</span>
           <span class="game-font text-[9px] md:text-[10px] ${destination.textClass} leading-tight break-keep">${destination.name}</span>
         </button>
-        <button type="button" data-favorite-destination-id="${id}" class="mt-1 w-full game-font text-[10px] px-2 py-1 rounded-lg bg-slate-950/80 border border-slate-600 ${favoriteDestinations.includes(id) ? 'text-yellow-300' : 'text-slate-500'}" aria-label="${destination.name} 즐겨찾기 토글">${favoriteDestinations.includes(id) ? '★ 즐겨찾기' : '☆ 즐겨찾기'}</button>
       </div>
     `).join('');
   }
@@ -328,6 +326,10 @@
     }
 
     state.chosenCar = color;
+    if (shouldScroll) {
+      preferences.recordCarSelection(color);
+      renderFavoriteCars();
+    }
 
     dom.all('.car-card').forEach(card => {
       Object.values(data.CARS).forEach(car => card.classList.remove(car.borderClass));
@@ -379,6 +381,10 @@
     }
 
     state.chosenDestination = destinationId;
+    if (shouldScroll) {
+      preferences.recordDestinationSelection(destinationId);
+      renderFavoriteDestinations();
+    }
 
     dom.all('.destination-card').forEach(card => {
       Object.values(data.DESTINATIONS).forEach(destination => card.classList.remove(destination.borderClass));

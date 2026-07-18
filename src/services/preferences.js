@@ -1,11 +1,9 @@
 (() => {
   const STORAGE_KEY = 'spaceTimerPreferences';
   const MAX_FAVORITES = 3;
+
   function createDefaultPreferences() {
-    return {
-      favoriteCars: [],
-      favoriteDestinations: []
-    };
+    return { carSelections: {}, destinationSelections: {}, selectionSequence: 0 };
   }
 
   function readPreferences() {
@@ -13,12 +11,17 @@
       const rawValue = window.localStorage.getItem(STORAGE_KEY);
       if (!rawValue) return createDefaultPreferences();
       const parsedValue = JSON.parse(rawValue);
-
+      const migrate = (counts, favorites) => {
+        if (counts && typeof counts === 'object' && !Array.isArray(counts)) return counts;
+        return Object.fromEntries((Array.isArray(favorites) ? favorites : []).map((id, index) => [id, {
+          count: 1,
+          lastSelected: MAX_FAVORITES - index
+        }]));
+      };
       return {
-        favoriteCars: Array.isArray(parsedValue.favoriteCars) ? parsedValue.favoriteCars.slice(0, MAX_FAVORITES) : [],
-        favoriteDestinations: Array.isArray(parsedValue.favoriteDestinations)
-          ? parsedValue.favoriteDestinations.slice(0, MAX_FAVORITES)
-          : []
+        carSelections: migrate(parsedValue.carSelections, parsedValue.favoriteCars),
+        destinationSelections: migrate(parsedValue.destinationSelections, parsedValue.favoriteDestinations),
+        selectionSequence: Math.max(0, Number(parsedValue.selectionSequence) || MAX_FAVORITES)
       };
     } catch {
       return createDefaultPreferences();
@@ -33,60 +36,45 @@
     }
   }
 
+  function getMostSelected(key) {
+    return Object.entries(readPreferences()[key])
+      .filter(([, value]) => Number(value?.count) > 0)
+      .sort(([, a], [, b]) => (b.count - a.count) || (b.lastSelected - a.lastSelected))
+      .slice(0, MAX_FAVORITES)
+      .map(([id]) => id);
+  }
+
   function getFavoriteCars() {
-    return readPreferences().favoriteCars;
+    return getMostSelected('carSelections');
   }
 
   function getFavoriteDestinations() {
-    return readPreferences().favoriteDestinations;
+    return getMostSelected('destinationSelections');
   }
 
-  function toggleFavorite(key, id) {
+  function recordSelection(key, id) {
     const preferences = readPreferences();
-    const favorites = preferences[key];
-    const currentIndex = favorites.indexOf(id);
-
-    if (currentIndex >= 0) {
-      favorites.splice(currentIndex, 1);
-    } else {
-      favorites.unshift(id);
-      favorites.splice(MAX_FAVORITES);
-    }
-
+    const current = preferences[key][id] || { count: 0, lastSelected: 0 };
+    preferences.selectionSequence += 1;
+    preferences[key][id] = { count: current.count + 1, lastSelected: preferences.selectionSequence };
     writePreferences(preferences);
-    return favorites;
-  }
-
-  function toggleFavoriteCar(id) {
-    return toggleFavorite('favoriteCars', id);
-  }
-
-  function toggleFavoriteDestination(id) {
-    return toggleFavorite('favoriteDestinations', id);
+    return getMostSelected(key);
   }
 
   function removeFavorite(key, id) {
     const preferences = readPreferences();
-    preferences[key] = preferences[key].filter(favoriteId => favoriteId !== id);
+    delete preferences[key][id];
     writePreferences(preferences);
-    return preferences[key];
-  }
-
-  function removeFavoriteCar(id) {
-    return removeFavorite('favoriteCars', id);
-  }
-
-  function removeFavoriteDestination(id) {
-    return removeFavorite('favoriteDestinations', id);
+    return getMostSelected(key);
   }
 
   window.SpaceTimerPreferences = {
     MAX_FAVORITES,
     getFavoriteCars,
     getFavoriteDestinations,
-    toggleFavoriteCar,
-    toggleFavoriteDestination,
-    removeFavoriteCar,
-    removeFavoriteDestination
+    recordCarSelection: id => recordSelection('carSelections', id),
+    recordDestinationSelection: id => recordSelection('destinationSelections', id),
+    removeFavoriteCar: id => removeFavorite('carSelections', id),
+    removeFavoriteDestination: id => removeFavorite('destinationSelections', id)
   };
 })();

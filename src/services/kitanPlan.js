@@ -40,9 +40,10 @@
     const seriesIndex = SERIES.indexOf(series);
     const safeSeriesIndex = seriesIndex >= 0 ? seriesIndex : 0;
     const safeBook = clamp(Number(book) || 1, 1, BOOKS_PER_SERIES);
-    const safePage = clamp(Number(page) || 1, 1, PAGES_PER_BOOK);
+    const firstPage = ((safeBook - 1) * PAGES_PER_BOOK) + 1;
+    const lastPage = safeBook * PAGES_PER_BOOK;
+    const safePage = clamp(Number(page) || firstPage, firstPage, lastPage);
     return (safeSeriesIndex * BOOKS_PER_SERIES * PAGES_PER_BOOK)
-      + ((safeBook - 1) * PAGES_PER_BOOK)
       + (safePage - 1);
   }
 
@@ -52,7 +53,7 @@
     const seriesIndex = Math.floor(safeIndex / pagesPerSeries);
     const seriesPageIndex = safeIndex % pagesPerSeries;
     const book = Math.floor(seriesPageIndex / PAGES_PER_BOOK) + 1;
-    const page = (seriesPageIndex % PAGES_PER_BOOK) + 1;
+    const page = seriesPageIndex + 1;
     return {
       series: SERIES[seriesIndex],
       book,
