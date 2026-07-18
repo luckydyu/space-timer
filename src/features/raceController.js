@@ -28,6 +28,9 @@
     } else if (state.appState === 'LAP_WAITING') {
       audio.click();
       startNextLap();
+    } else if (state.appState === 'FINAL_REVIEW') {
+      audio.click();
+      finishRace();
     }
   }
 
@@ -145,7 +148,7 @@
         raceView.updateMockControls();
         prepareNextLap();
       } else {
-        finishRace();
+        enterFinalReview();
       }
     }, 1050);
   }
@@ -155,8 +158,15 @@
     raceView.prepareLap();
   }
 
+  function enterFinalReview() {
+    state.appState = 'FINAL_REVIEW';
+    raceView.updateMockControls();
+    raceView.updateMainActionButton();
+    raceView.updateLapDashboard();
+  }
   function finishRace() {
     state.appState = 'RESULT';
+    setupView.saveMissionHistory();
     kitanPlan.advanceNextStart(state.kitanMissionPageCount);
     setupView.renderKitanPlan();
     raceView.updateMockControls();
@@ -188,18 +198,26 @@
 
   function deleteRecordedLap(index) {
     if (index < 0 || index >= state.lapRecords.length || state.appState === 'ANIMATING') return;
+    const wasFinalReview = state.appState === 'FINAL_REVIEW';
     state.lapRecords.splice(index, 1);
     recalculateTotalElapsed();
     state.currentLap = Math.min(state.targetLaps, state.lapRecords.length + 1);
+    if (wasFinalReview) {
+      state.appState = 'LAP_WAITING';
+      state.currentLapElapsed = 0;
+      raceView.updateMainActionButton();
+      raceView.updateMockControls();
+    }
     raceView.updateTotalTimeDisplay();
     raceView.updateLapDashboard();
     audio.click();
   }
 
   function undoLastLap() {
-    if (state.appState !== 'LAP_WAITING' || state.lapRecords.length === 0) return;
+    if (!['LAP_WAITING', 'FINAL_REVIEW'].includes(state.appState) || state.lapRecords.length === 0) return;
 
     const restoredElapsed = state.lapRecords.pop();
+    state.appState = 'LAP_WAITING';
     recalculateTotalElapsed();
     state.currentLap = state.lapRecords.length + 1;
     state.currentLapElapsed = restoredElapsed;

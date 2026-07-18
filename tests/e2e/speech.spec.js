@@ -37,6 +37,8 @@ test('uses speech commands during mission flow', async ({ page }) => {
   await page.waitForTimeout(150);
   await emitSpeechResult(page, '끝');
 
+  await expect(page.locator('#main-action-button')).toContainText('완주 확정', { timeout: 3000 });
+  await page.locator('#main-action-button').click();
   await expect(page.locator('#screen-result')).not.toHaveClass(hiddenClass, { timeout: 3000 });
   await expect.poll(async () => getSpeechMockState(page)).toMatchObject({
     stopCount: 2,

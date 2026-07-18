@@ -29,6 +29,20 @@ test('starts a one-lap race, records the lap, and shows results', async ({ page 
   await page.waitForTimeout(150);
   await page.locator('#main-action-button').click();
 
+  await expect(page.locator('#screen-running')).not.toHaveClass(hiddenClass, { timeout: 3000 });
+  await expect(page.locator('#main-action-button')).toContainText('완주 확정');
+  await expect(page.locator('#undo-last-lap-button')).not.toHaveClass(hiddenClass);
+  await expect(page.locator('#screen-result')).toHaveClass(hiddenClass);
+
+  await page.locator('#undo-last-lap-button').click();
+  await expect(page.locator('#main-action-button')).toContainText('시작');
+  await expect(page.locator('#lap-records-list')).toContainText('출발 대기 중');
+  await page.locator('#main-action-button').click();
+  await page.waitForTimeout(50);
+  await page.locator('#main-action-button').click();
+  await expect(page.locator('#main-action-button')).toContainText('완주 확정', { timeout: 3000 });
+
+  await page.locator('#main-action-button').click();
   await expect(page.locator('#screen-result')).not.toHaveClass(hiddenClass, { timeout: 3000 });
   await expect(page.locator('#result-total-time')).not.toHaveText('00:00.00');
   await expect(page.locator('#final-lap-details')).toContainText('F-1 1장 완주');
@@ -36,6 +50,9 @@ test('starts a one-lap race, records the lap, and shows results', async ({ page 
     const plan = JSON.parse(localStorage.getItem('spaceTimerKitanPlan'));
     return plan.nextStartIndex;
   })).toBe(1);
+  await page.locator('button[data-action="restart-app"]').click();
+  await page.locator('summary').filter({ hasText: '지난 미션 히스토리' }).click();
+  await expect(page.locator('#mission-history-list')).toContainText('F-1 1장');
 });
 
 test('returns to setup screen after restart', async ({ page }) => {
@@ -43,6 +60,8 @@ test('returns to setup screen after restart', async ({ page }) => {
   await page.getByRole('button', { name: '🏁 경기 시작하기 (터치!)' }).click();
   await page.locator('#main-action-button').click();
   await page.waitForTimeout(150);
+  await page.locator('#main-action-button').click();
+  await expect(page.locator('#main-action-button')).toContainText('완주 확정', { timeout: 3000 });
   await page.locator('#main-action-button').click();
   await expect(page.locator('#screen-result')).not.toHaveClass(hiddenClass, { timeout: 3000 });
 

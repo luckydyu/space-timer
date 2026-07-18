@@ -414,6 +414,59 @@
     playClick();
   }
 
+  function formatHistoryTime(ms) {
+    const totalSeconds = Math.floor(Math.max(0, ms) / 1000);
+    const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+    const seconds = String(totalSeconds % 60).padStart(2, '0');
+    const hundredths = String(Math.floor((Math.max(0, ms) % 1000) / 10)).padStart(2, '0');
+    return `${minutes}:${seconds}.${hundredths}`;
+  }
+
+  function renderMissionHistory() {
+    const container = dom.byId('mission-history-list');
+    if (!container) return;
+    const history = preferences.getMissionHistory();
+    container.innerHTML = history.length ? history.map(mission => `
+      <details class="rounded-xl bg-slate-950/70 border border-slate-700 p-3">
+        <summary class="cursor-pointer game-font text-sm md:text-base text-slate-100 flex flex-wrap justify-between gap-2">
+          <span>${mission.carEmoji} ${mission.carLabel} → ${mission.destinationIcon} ${mission.destinationName}</span>
+          <span class="text-yellow-300">${mission.rangeLabel} · ${formatHistoryTime(mission.totalTime)}</span>
+        </summary>
+        <div class="mt-2 pt-2 border-t border-slate-700 text-xs md:text-sm text-slate-300">
+          <p class="mb-2">${new Date(mission.completedAt).toLocaleString('ko-KR')}</p>
+          <div class="space-y-1">
+            ${mission.laps.map((lap, index) => `
+              <div class="flex justify-between gap-3">
+                <span>${index + 1}. ${lap.rangeLabel}</span>
+                <span class="game-font text-slate-100">${formatHistoryTime(lap.time)}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      </details>
+    `).join('') : '<p class="game-font text-sm text-slate-500">완주한 미션이 아직 없습니다.</p>';
+  }
+
+  function saveMissionHistory() {
+    const car = data.CARS[state.chosenCar];
+    const destination = data.DESTINATIONS[state.chosenDestination];
+    const lapRecords = [...state.lapRecords];
+    preferences.addMissionHistory({
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      completedAt: new Date().toISOString(),
+      carLabel: car?.label || state.chosenCar,
+      carEmoji: car?.emoji || '🚀',
+      destinationName: destination?.name || state.chosenDestination,
+      destinationIcon: destination?.icon || '🪐',
+      rangeLabel: kitanPlan.formatRange(state.kitanMissionStartIndex, lapRecords.length),
+      totalTime: lapRecords.reduce((sum, time) => sum + time, 0),
+      laps: lapRecords.map((time, index) => ({
+        time,
+        rangeLabel: kitanPlan.formatRange(state.kitanMissionStartIndex + index, 1)
+      }))
+    });
+    renderMissionHistory();
+  }
   function recordMissionSelection() {
     if (data.CARS[state.chosenCar]) preferences.recordCarSelection(state.chosenCar);
     if (data.DESTINATIONS[state.chosenDestination]) preferences.recordDestinationSelection(state.chosenDestination);
@@ -435,6 +488,8 @@
     renderCarSelectionGrid,
     renderDestinationSelectionGrid,
     renderFavorites,
+    renderMissionHistory,
+    saveMissionHistory,
     renderKitanStartOptions,
     renderKitanPlan,
     updateKitanStart,

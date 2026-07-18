@@ -47,6 +47,7 @@ const renderDestinationCategoryTabs = () => setupView.renderDestinationCategoryT
 const renderCarSelectionGrid = () => setupView.renderCarSelectionGrid();
 const renderDestinationSelectionGrid = () => setupView.renderDestinationSelectionGrid();
 const renderFavorites = () => setupView.renderFavorites();
+setupView.renderMissionHistory();
 const randomizeMissionSelection = shouldPrimeAudio => setupView.randomizeMissionSelection(shouldPrimeAudio);
 const selectCarCategory = category => setupView.selectCarCategory(category);
 const selectDestinationCategory = category => setupView.selectDestinationCategory(category);
@@ -197,6 +198,7 @@ bindEventHandlers();
 renderCarCategoryTabs();
 renderDestinationCategoryTabs();
 renderFavorites();
+setupView.renderMissionHistory();
 renderKitanStartOptions();
 renderKitanPlan();
 renderCarSelectionGrid();
