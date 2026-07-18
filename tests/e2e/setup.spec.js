@@ -44,12 +44,20 @@ test('shows Kitan start range and calendar plan by series color', async ({ page 
   await page.locator('#kitan-page-input').blur();
   await expect(page.locator('#kitan-current-range')).toHaveText('F-1 11~20장');
 
+  await page.locator('button[data-kitan-step-diff="book:1"]').click();
+  await expect(page.locator('#kitan-current-range')).toHaveText('F-2 61~70장');
+  await page.locator('button[data-kitan-step-diff="book:1"]').click({ clickCount: 3 });
+  await expect(page.locator('#kitan-book-label')).toHaveText('5권');
+  await expect(page.locator('#kitan-current-range')).toHaveText('F-5 241~250장');
+
   await page.locator('button[data-kitan-step-diff="series:1"]').click();
+  await expect(page.locator('#kitan-series-label')).toHaveText('G');
+  await expect(page.locator('#kitan-book-label')).toHaveText('1권');
+  await expect(page.locator('#kitan-current-range')).toHaveText('G-1 1~10장');
+
   await page.locator('button[data-kitan-step-diff="book:1"]').click();
   await page.locator('#kitan-page-input').fill('65');
   await page.locator('#kitan-page-input').blur();
-  await expect(page.locator('#kitan-series-label')).toHaveText('G');
-  await expect(page.locator('#kitan-book-label')).toHaveText('2권');
   await expect(page.locator('#kitan-current-range')).toHaveText('G-2 65~74장');
 
   await page.locator('button[data-action="open-kitan-calendar"]').click();

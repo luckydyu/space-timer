@@ -11,16 +11,9 @@
       const rawValue = window.localStorage.getItem(STORAGE_KEY);
       if (!rawValue) return createDefaultPreferences();
       const parsedValue = JSON.parse(rawValue);
-      const migrate = (counts, favorites) => {
-        if (counts && typeof counts === 'object' && !Array.isArray(counts)) return counts;
-        return Object.fromEntries((Array.isArray(favorites) ? favorites : []).map((id, index) => [id, {
-          count: 1,
-          lastSelected: MAX_FAVORITES - index
-        }]));
-      };
       return {
-        carSelections: migrate(parsedValue.carSelections, parsedValue.favoriteCars),
-        destinationSelections: migrate(parsedValue.destinationSelections, parsedValue.favoriteDestinations),
+        carSelections: parsedValue.carSelections && typeof parsedValue.carSelections === 'object' ? parsedValue.carSelections : {},
+        destinationSelections: parsedValue.destinationSelections && typeof parsedValue.destinationSelections === 'object' ? parsedValue.destinationSelections : {},
         selectionSequence: Math.max(0, Number(parsedValue.selectionSequence) || MAX_FAVORITES)
       };
     } catch {

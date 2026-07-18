@@ -89,13 +89,13 @@
     container.innerHTML = favorites.length ? favorites.map(id => {
       const car = data.CARS[id];
       return `
-        <span class="favorite-chip inline-flex items-center max-w-full rounded-lg bg-yellow-400 text-slate-950 border border-yellow-200 overflow-hidden">
+        <span class="favorite-chip inline-flex items-center max-w-full rounded-lg bg-indigo-700 text-indigo-50 border border-indigo-400 overflow-hidden">
           <button type="button" data-car-id="${id}" class="game-font text-[10px] md:text-xs px-2 py-1 flex items-center gap-1 min-w-0">
             <span>${car.number}</span>
             <span>${car.emoji}</span>
             <span class="truncate">${car.label}</span>
           </button>
-          <button type="button" data-remove-favorite-car-id="${id}" class="game-font px-1.5 py-1 text-[10px] bg-yellow-300/70 hover:bg-yellow-200 border-l border-yellow-600/30" aria-label="${car.label} 즐겨찾기 삭제">x</button>
+          <button type="button" data-remove-favorite-car-id="${id}" class="game-font px-1.5 py-1 text-[10px] bg-indigo-800/70 hover:bg-indigo-600 border-l border-indigo-300/30" aria-label="${car.label} 자주 선택 목록에서 제외">x</button>
         </span>
       `;
     }).join('') : '<span class="game-font text-[10px] text-slate-500">자주 선택하면 여기에 표시됩니다</span>';
@@ -108,13 +108,13 @@
     container.innerHTML = favorites.length ? favorites.map(id => {
       const destination = data.DESTINATIONS[id];
       return `
-        <span class="favorite-chip inline-flex items-center max-w-full rounded-lg bg-yellow-400 text-slate-950 border border-yellow-200 overflow-hidden">
+        <span class="favorite-chip inline-flex items-center max-w-full rounded-lg bg-indigo-700 text-indigo-50 border border-indigo-400 overflow-hidden">
           <button type="button" data-destination-id="${id}" class="game-font text-[10px] md:text-xs px-2 py-1 flex items-center gap-1 min-w-0">
             <span>${destination.number}</span>
             <span>${destination.icon}</span>
             <span class="truncate">${destination.name}</span>
           </button>
-          <button type="button" data-remove-favorite-destination-id="${id}" class="game-font px-1.5 py-1 text-[10px] bg-yellow-300/70 hover:bg-yellow-200 border-l border-yellow-600/30" aria-label="${destination.name} 즐겨찾기 삭제">x</button>
+          <button type="button" data-remove-favorite-destination-id="${id}" class="game-font px-1.5 py-1 text-[10px] bg-indigo-800/70 hover:bg-indigo-600 border-l border-indigo-300/30" aria-label="${destination.name} 자주 선택 목록에서 제외">x</button>
         </span>
       `;
     }).join('') : '<span class="game-font text-[10px] text-slate-500">자주 선택하면 여기에 표시됩니다</span>';
@@ -216,9 +216,10 @@
     const nextBook = Math.max(1, Math.min(kitanPlan.BOOKS_PER_SERIES, current.book + diff));
 
     if (field === 'series') {
-      kitanPlan.setNextStart(kitanPlan.SERIES[nextSeriesIndex], current.book, current.page);
+      kitanPlan.setNextStart(kitanPlan.SERIES[nextSeriesIndex], 1, 1);
     } else if (field === 'book') {
-      kitanPlan.setNextStart(current.series, nextBook, current.page);
+      const firstPage = ((nextBook - 1) * kitanPlan.PAGES_PER_BOOK) + 1;
+      kitanPlan.setNextStart(current.series, nextBook, firstPage);
     }
 
     renderKitanPlan();
