@@ -47,7 +47,6 @@ const renderDestinationCategoryTabs = () => setupView.renderDestinationCategoryT
 const renderCarSelectionGrid = () => setupView.renderCarSelectionGrid();
 const renderDestinationSelectionGrid = () => setupView.renderDestinationSelectionGrid();
 const renderFavorites = () => setupView.renderFavorites();
-setupView.renderMissionHistory();
 const randomizeMissionSelection = shouldPrimeAudio => setupView.randomizeMissionSelection(shouldPrimeAudio);
 const selectCarCategory = category => setupView.selectCarCategory(category);
 const selectDestinationCategory = category => setupView.selectDestinationCategory(category);
@@ -65,6 +64,8 @@ const changeKitanPage = diff => setupView.changeKitanPage(diff);
 const changeKitanStep = (field, diff) => setupView.changeKitanStep(field, diff);
 const openKitanCalendar = () => setupView.openKitanCalendar();
 const closeKitanCalendar = () => setupView.closeKitanCalendar();
+const openMissionHistory = () => setupView.openMissionHistory();
+const closeMissionHistory = () => setupView.closeMissionHistory();
 
 const raceView = window.SpaceTimerRaceView;
 raceView.init({
@@ -115,6 +116,8 @@ const completeLap = () => raceController.completeLap();
 const restartApp = () => raceController.restartApp();
 const deleteRecordedLap = index => raceController.deleteRecordedLap(index);
 const undoLastLap = () => raceController.undoLastLap();
+const retryFinalLap = () => raceController.retryFinalLap();
+const confirmFinishRace = () => raceController.confirmFinishRace();
 
 // --- 2. 가상 음성 명령 시뮬레이션 시스템 ---
 function simulateVoiceCommand(word) {
@@ -182,10 +185,14 @@ function bindEventHandlers() {
       changeKitanStep,
       openKitanCalendar,
       closeKitanCalendar,
+      openMissionHistory,
+      closeMissionHistory,
       randomizeMissionSelection,
       enterMissionReady,
       handleMainAction,
       undoLastLap,
+      retryFinalLap,
+      confirmFinishRace,
       restartApp,
       selectCarCategory,
       selectDestinationCategory
@@ -198,7 +205,6 @@ bindEventHandlers();
 renderCarCategoryTabs();
 renderDestinationCategoryTabs();
 renderFavorites();
-setupView.renderMissionHistory();
 renderKitanStartOptions();
 renderKitanPlan();
 renderCarSelectionGrid();

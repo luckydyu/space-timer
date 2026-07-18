@@ -91,6 +91,19 @@
     button.classList.toggle('hidden', !canUndo);
   }
 
+  function showFinalReview() {
+    const modal = byId('final-review-modal');
+    const summary = byId('final-review-summary');
+    const lastIndex = state.lapRecords.length - 1;
+    if (summary && lastIndex >= 0) {
+      summary.textContent = `${getKitanLapLabel(lastIndex)} · ${formatTime(state.lapRecords[lastIndex])}`;
+    }
+    modal?.classList.remove('hidden');
+  }
+
+  function hideFinalReview() {
+    byId('final-review-modal')?.classList.add('hidden');
+  }
   function showMissionReadyScreen() {
     byId('screen-setup').classList.add('hidden');
     byId('screen-countdown').classList.add('hidden');
@@ -235,6 +248,8 @@
     init,
     updateMockControls,
     updateMainActionButton,
+    showFinalReview,
+    hideFinalReview,
     updateUndoButton,
     showMissionReadyScreen,
     showSetupScreen,

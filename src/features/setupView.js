@@ -447,6 +447,14 @@
     `).join('') : '<p class="game-font text-sm text-slate-500">완주한 미션이 아직 없습니다.</p>';
   }
 
+  function openMissionHistory() {
+    renderMissionHistory();
+    dom.byId('mission-history-modal')?.classList.remove('hidden');
+  }
+
+  function closeMissionHistory() {
+    dom.byId('mission-history-modal')?.classList.add('hidden');
+  }
   function saveMissionHistory() {
     const car = data.CARS[state.chosenCar];
     const destination = data.DESTINATIONS[state.chosenDestination];
@@ -489,6 +497,8 @@
     renderDestinationSelectionGrid,
     renderFavorites,
     renderMissionHistory,
+    openMissionHistory,
+    closeMissionHistory,
     saveMissionHistory,
     renderKitanStartOptions,
     renderKitanPlan,

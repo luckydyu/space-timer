@@ -28,9 +28,6 @@
     } else if (state.appState === 'LAP_WAITING') {
       audio.click();
       startNextLap();
-    } else if (state.appState === 'FINAL_REVIEW') {
-      audio.click();
-      finishRace();
     }
   }
 
@@ -47,6 +44,7 @@
     state.kitanMissionStartIndex = kitanPlan.getNextStartIndex();
     state.kitanMissionPageCount = state.targetLaps;
     if (state.timerInterval) clearInterval(state.timerInterval);
+    raceView.hideFinalReview();
 
     raceView.showMissionReadyScreen();
     effects.createParticles();
@@ -109,6 +107,7 @@
     raceView.updateLapTimer();
 
     if (state.timerInterval) clearInterval(state.timerInterval);
+    raceView.hideFinalReview();
     state.timerInterval = setInterval(() => {
       state.currentLapElapsed = Date.now() - state.lapStartTime;
       raceView.updateLapTimer();
@@ -163,6 +162,7 @@
     raceView.updateMockControls();
     raceView.updateMainActionButton();
     raceView.updateLapDashboard();
+    raceView.showFinalReview();
   }
   function finishRace() {
     state.appState = 'RESULT';
@@ -177,8 +177,20 @@
     effects.startConfetti();
   }
 
+  function retryFinalLap() {
+    if (state.appState !== 'FINAL_REVIEW') return;
+    raceView.hideFinalReview();
+    undoLastLap();
+  }
+
+  function confirmFinishRace() {
+    if (state.appState !== 'FINAL_REVIEW') return;
+    raceView.hideFinalReview();
+    finishRace();
+  }
   function restartApp() {
     if (state.timerInterval) clearInterval(state.timerInterval);
+    raceView.hideFinalReview();
     state.appState = 'SETUP';
     state.currentLapElapsed = 0;
     raceView.updateMockControls();
@@ -203,6 +215,7 @@
     recalculateTotalElapsed();
     state.currentLap = Math.min(state.targetLaps, state.lapRecords.length + 1);
     if (wasFinalReview) {
+      raceView.hideFinalReview();
       state.appState = 'LAP_WAITING';
       state.currentLapElapsed = 0;
       raceView.updateMainActionButton();
@@ -239,6 +252,8 @@
     completeLap,
     restartApp,
     deleteRecordedLap,
-    undoLastLap
+    undoLastLap,
+    retryFinalLap,
+    confirmFinishRace
   };
 })();

@@ -150,12 +150,7 @@
       <!-- 즉시 시작하기 큰 버튼 -->
       <button type="button" data-action="enter-mission-ready" class="w-full game-font text-2xl md:text-3xl py-2.5 md:py-3 bg-gradient-to-r from-yellow-500 to-amber-500 hover:from-yellow-400 hover:to-amber-400 text-slate-950 rounded-2xl border-b-8 border-amber-700 shadow-xl transition-all active:transform active:translate-y-1 transform hover:scale-[1.01]">
         🏁 경기 시작하기 (터치!)
-      </button>
-      <details class="w-full text-left bg-slate-900/80 border border-slate-700 rounded-2xl p-3">
-        <summary class="cursor-pointer game-font text-lg md:text-xl text-indigo-200">📚 지난 미션 히스토리</summary>
-        <div id="mission-history-list" class="mt-3 space-y-2 max-h-[360px] overflow-y-auto pr-1"></div>
-      </details>
-    </div>
+      </button>    </div>
 
     <!-- [2] 신호등 카운트다운 -->
     <div id="screen-countdown" class="hidden w-full max-w-md bg-slate-800 border-4 border-slate-700 rounded-3xl p-8 md:p-10 text-center space-y-8 md:space-y-10 shadow-2xl">
@@ -242,9 +237,10 @@
         <!-- 오른쪽: 실시간 랩타임 대시보드 (1/3 너비, 스크롤 추가) -->
         <div class="bg-slate-800/90 border-4 border-slate-700 rounded-3xl p-5 md:p-6 shadow-xl space-y-4 flex flex-col justify-between">
           <div>
-            <h3 class="game-font text-2xl md:text-3xl text-indigo-300 border-b border-slate-700 pb-2 mb-3 flex items-center gap-2">
-              📋 오늘의 비행 일지
-            </h3>
+            <div class="border-b border-slate-700 pb-2 mb-3 flex items-center justify-between gap-2">
+              <h3 class="game-font text-2xl md:text-3xl text-indigo-300">📋 오늘의 비행 일지</h3>
+              <button type="button" data-action="open-mission-history" class="shrink-0 game-font text-sm md:text-base px-3 py-2 rounded-xl bg-indigo-700 hover:bg-indigo-600 text-indigo-50 border border-indigo-400">지난 기록</button>
+            </div>
             <button id="undo-last-lap-button" type="button" data-action="undo-last-lap" class="hidden w-full mb-3 game-font text-xs md:text-sm px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 border-b-4 border-amber-800 active:translate-y-1 transition-all">
               ↩️ 방금 기록 되돌리기
             </button>
@@ -259,6 +255,27 @@
       </div>
     </div>
 
+    <div id="final-review-modal" class="hidden fixed inset-0 z-50 bg-slate-950/85 flex items-center justify-center p-4">
+      <div class="w-full max-w-xl bg-slate-900 border-4 border-yellow-400 rounded-3xl shadow-2xl p-5 md:p-7 text-center">
+        <h3 class="game-font text-3xl md:text-4xl text-yellow-300">마지막 기록을 확인해 주세요</h3>
+        <p class="mt-3 text-base md:text-lg text-slate-200">잘못 눌렀다면 마지막 기록을 다시 하고, 맞다면 완주를 확정하세요.</p>
+        <div id="final-review-summary" class="mt-4 rounded-xl bg-slate-950 border border-slate-700 p-4 game-font text-xl text-white"></div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5">
+          <button type="button" data-action="retry-final-lap" class="game-font text-lg px-4 py-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-slate-950 border-b-4 border-amber-900">↩️ 마지막 기록 다시 하기</button>
+          <button type="button" data-action="confirm-finish-race" class="game-font text-lg px-4 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white border-b-4 border-emerald-900">🏆 이 기록으로 완주 확정</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="mission-history-modal" class="hidden fixed inset-0 z-50 bg-slate-950/85 flex items-center justify-center p-4">
+      <div class="w-full max-w-3xl bg-slate-900 border-4 border-indigo-500 rounded-3xl shadow-2xl p-4 md:p-6 text-left">
+        <div class="flex items-center justify-between gap-3 border-b border-slate-700 pb-3 mb-3">
+          <h3 class="game-font text-2xl md:text-3xl text-indigo-200">📚 지난 미션 히스토리</h3>
+          <button type="button" data-action="close-mission-history" class="game-font px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600">닫기</button>
+        </div>
+        <div id="mission-history-list" class="space-y-2 max-h-[70vh] overflow-y-auto pr-1"></div>
+      </div>
+    </div>
     <!-- [4] 최종 완료 및 시상대 화면 -->
     <div id="screen-result" class="hidden w-full max-w-3xl bg-slate-800 border-4 border-yellow-400 rounded-3xl p-6 md:p-10 text-center space-y-8 md:space-y-10 shadow-2xl relative overflow-hidden">
       <canvas id="confetti-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-0"></canvas>
