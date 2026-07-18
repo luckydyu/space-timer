@@ -327,10 +327,6 @@
     }
 
     state.chosenCar = color;
-    if (shouldScroll) {
-      preferences.recordCarSelection(color);
-      renderFavoriteCars();
-    }
 
     dom.all('.car-card').forEach(card => {
       Object.values(data.CARS).forEach(car => card.classList.remove(car.borderClass));
@@ -382,10 +378,6 @@
     }
 
     state.chosenDestination = destinationId;
-    if (shouldScroll) {
-      preferences.recordDestinationSelection(destinationId);
-      renderFavoriteDestinations();
-    }
 
     dom.all('.destination-card').forEach(card => {
       Object.values(data.DESTINATIONS).forEach(destination => card.classList.remove(destination.borderClass));
@@ -422,6 +414,12 @@
     playClick();
   }
 
+  function recordMissionSelection() {
+    if (data.CARS[state.chosenCar]) preferences.recordCarSelection(state.chosenCar);
+    if (data.DESTINATIONS[state.chosenDestination]) preferences.recordDestinationSelection(state.chosenDestination);
+    renderFavorites();
+  }
+
   function changeLaps(diff) {
     primeUserAudio();
     state.targetLaps = Math.max(1, Math.min(1000, state.targetLaps + diff));
@@ -453,6 +451,7 @@
     toggleFavoriteDestination,
     removeFavoriteCar,
     removeFavoriteDestination,
+    recordMissionSelection,
     changeLaps,
     resetDestinationTarget
   };

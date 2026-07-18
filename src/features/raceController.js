@@ -33,6 +33,7 @@
 
   function enterMissionReady() {
     speech.primeUserAudio();
+    setupView.recordMissionSelection();
     state.appState = 'LAP_WAITING';
     raceView.updateMockControls();
 

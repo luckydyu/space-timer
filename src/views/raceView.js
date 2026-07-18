@@ -206,12 +206,12 @@
       const isCurrent = i === (state.currentLap - 1);
       const rank = isRecorded ? getLapRank(state.lapRecords[i]) : null;
       list.insertAdjacentHTML('beforeend', `
-        <div class="flex items-center justify-between p-3 rounded-xl border-2 ${isRecorded ? 'border-emerald-500 bg-emerald-950/30' : isCurrent ? 'border-indigo-500 bg-indigo-500/10 animate-pulse' : 'border-slate-700 bg-slate-900/40'} transition-all text-xs md:text-sm">
+        <div class="flex items-center justify-between p-3 rounded-xl border-2 ${isRecorded ? 'border-emerald-500 bg-emerald-950/30' : isCurrent ? 'border-indigo-500 bg-indigo-500/10 animate-pulse' : 'border-slate-700 bg-slate-900/40'} transition-all text-sm md:text-base">
           <span class="game-font ${isRecorded ? 'text-emerald-300' : isCurrent ? 'text-indigo-300' : 'text-slate-400'}">#${i + 1} ${getKitanLapLabel(i)}</span>
           <div class="flex items-center gap-2">
-            ${isRecorded ? `<span class="game-font text-[10px] md:text-xs px-2 py-1 rounded-lg bg-indigo-900/80 text-indigo-100 border border-indigo-500">${rank}등</span>` : ''}
+            ${isRecorded ? `<span class="game-font text-xs md:text-sm px-2 py-1 rounded-lg bg-indigo-900/80 text-indigo-100 border border-indigo-500">${rank}등</span>` : ''}
             <span class="game-font font-bold ${isRecorded ? 'text-white' : 'text-slate-500'}">${isRecorded ? formatTime(state.lapRecords[i]) : isCurrent ? (state.appState === 'LAP_WAITING' ? '출발 대기 중' : '비행 중...') : '대기 중'}🏁</span>
-            ${isRecorded ? `<button type="button" data-delete-lap-index="${i}" class="game-font text-[10px] md:text-xs px-2 py-1 rounded-lg bg-slate-800 hover:bg-rose-700 text-slate-300 hover:text-white border border-slate-600 hover:border-rose-400 transition-colors" aria-label="${i + 1}번째 기록 삭제">삭제</button>` : ''}
+            ${isRecorded ? `<button type="button" data-delete-lap-index="${i}" class="game-font text-xs md:text-sm px-2 py-1 rounded-lg bg-slate-800 hover:bg-rose-700 text-slate-300 hover:text-white border border-slate-600 hover:border-rose-400 transition-colors" aria-label="${i + 1}번째 기록 삭제">삭제</button>` : ''}
           </div>
         </div>
       `);

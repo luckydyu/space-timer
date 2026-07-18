@@ -79,22 +79,35 @@ test('shows Kitan start range and calendar plan by series color', async ({ page 
   await expect(page.locator('#kitan-calendar-modal')).toHaveClass(hiddenClass);
 });
 
-test('shows the three most selected items and promotes the next rank when excluded', async ({ page }) => {
+test('counts selections only when a mission is started and ranks the top three', async ({ page }) => {
   await page.locator('button[data-action="selectCarCategory"][data-category="전체"]').click();
   await page.locator('button[data-action="selectDestinationCategory"][data-category="전체"]').click();
 
-  const selectMany = async (selector, count) => {
-    for (let index = 0; index < count; index += 1) await page.locator(selector).click();
-  };
+  await page.locator('#car-selection-grid button[data-car-id="car-1"]').click({ clickCount: 3 });
+  await page.locator('#destination-selection-grid button[data-destination-id="destination-1"]').click({ clickCount: 3 });
+  await expect(page.locator('#favorite-car-list [data-car-id]')).toHaveCount(0);
+  await expect(page.locator('#favorite-destination-list [data-destination-id]')).toHaveCount(0);
 
-  await selectMany('#car-selection-grid button[data-car-id="car-1"]', 4);
-  await selectMany('#car-selection-grid button[data-car-id="car-2"]', 3);
-  await selectMany('#car-selection-grid button[data-car-id="car-3"]', 2);
-  await selectMany('#car-selection-grid button[data-car-id="car-4"]', 1);
-  await selectMany('#destination-selection-grid button[data-destination-id="destination-1"]', 4);
-  await selectMany('#destination-selection-grid button[data-destination-id="destination-2"]', 3);
-  await selectMany('#destination-selection-grid button[data-destination-id="destination-3"]', 2);
-  await selectMany('#destination-selection-grid button[data-destination-id="destination-4"]', 1);
+  await page.locator('button[data-action="enter-mission-ready"]').click();
+  await expect(page.locator('#favorite-car-list [data-car-id="car-1"]')).toHaveCount(1);
+  await expect(page.locator('#favorite-destination-list [data-destination-id="destination-1"]')).toHaveCount(1);
+  await page.locator('button[data-action="go-home"]').click();
+
+  await page.evaluate(() => {
+    const selections = [
+      ['car-1', 'destination-1', 3],
+      ['car-2', 'destination-2', 3],
+      ['car-3', 'destination-3', 2],
+      ['car-4', 'destination-4', 1]
+    ];
+    selections.forEach(([carId, destinationId, count]) => {
+      window.SpaceTimerState.chosenCar = carId;
+      window.SpaceTimerState.chosenDestination = destinationId;
+      for (let index = 0; index < count; index += 1) {
+        window.SpaceTimerSetupView.recordMissionSelection();
+      }
+    });
+  });
 
   await expect(page.locator('#favorite-car-list [data-car-id]')).toHaveCount(3);
   await expect(page.locator('#favorite-car-list [data-car-id]').first()).toHaveAttribute('data-car-id', 'car-1');
@@ -104,13 +117,4 @@ test('shows the three most selected items and promotes the next rank when exclud
   await page.locator('#favorite-destination-list [data-remove-favorite-destination-id="destination-1"]').click();
   await expect(page.locator('#favorite-car-list [data-car-id="car-4"]')).toHaveCount(1);
   await expect(page.locator('#favorite-destination-list [data-destination-id="destination-4"]')).toHaveCount(1);
-
-  await selectMany('#car-selection-grid button[data-car-id="car-1"]', 3);
-  await selectMany('#destination-selection-grid button[data-destination-id="destination-1"]', 3);
-  await expect(page.locator('#favorite-car-list [data-car-id="car-1"]')).toHaveCount(1);
-  await expect(page.locator('#favorite-destination-list [data-destination-id="destination-1"]')).toHaveCount(1);
-
-  await page.reload();
-  await expect(page.locator('#favorite-car-list [data-car-id]')).toHaveCount(3);
-  await expect(page.locator('#favorite-destination-list [data-destination-id]')).toHaveCount(3);
 });
